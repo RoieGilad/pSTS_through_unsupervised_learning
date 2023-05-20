@@ -2,45 +2,52 @@ import glob
 from os import path
 from os import makedirs
 import shutil
+import openpyxl
 
 
 audio_source_dir = "path/voxceleb2_audio"
 video_source_dir = "path/voxceleb2_video"
 destination_dir = "path/voxceleb2"
+labels_file = "path/labels.xlsx"
+
+
+wb = openpyxl.Workbook()
+sheet = wb.active
+sheet['A1'] = 'Sample_index'
+sheet['B1'] = 'Speaker_id'
 
 #TODO understand the speceific audio/video_source_dir
 
-def data_flattening(source_dir, destination_dir, file_extension, type):
+def data_flattening(source_dir, destination_dir, file_extension, type, write_labels):
     """ This function iterate source dir of voxceleb2 dataset
-    and reorder id's and scenes of the speaker, in order to merge
-    audio and video data corresponding same speaker and scenes"""
+    and create samples directory with audio and video subdirectories.
+    the function create xl file saving the sample label - speaker id."""
     id_directories = glob.glob(path.join(source_dir, 'id*'))
-    speaker_id = 0
+    sample_num = 0
+    row = 2
     # Iterate over id directories of audio/video data
     for id_directory in id_directories:
-        destination_speaker_path = path.join(destination_dir, f'id_{speaker_id}')
-        makedirs(destination_speaker_path, exist_ok=True)
+        speaker_id = path.basename(id_directory)
 
-        # Gets scenes directories corresponding id_directory
-        scene_directories = glob.glob(path.join(id_directory, '*'))
-        # Iterate over scenes
-        scene_num = 0
-        for scene_directory in scene_directories:
-            destination_scene_path = path.join(destination_speaker_path, f'scene_{scene_num}')
-            makedirs(destination_scene_path, exist_ok=True)
-
-            # Iterate all audio/video (=type) files in scene directory
-            file_num = 0
-            files = glob.glob(path.join(scene_directory, f'*{file_extension}'))
-            for file in files:
-                shutil.copy(file, path.join(destination_scene_path, f'{type}_{file_num}{file_extension}'))
-                file_num += 1
-            scene_num += 1
-        speaker_id += 1
+        # Gets all audio/video sample corresponding speaker_id
+        id_samples = glob.glob(path.join(id_directory, '*', f'*{file_extension}'))
+        # Iterate over samples
+        for id_sample in id_samples:
+            # Creating the sample directories
+            destination_sample_path = path.join(destination_dir, f'sample_{sample_num}')
+            makedirs(path.join(destination_sample_path, f'{type}'), exist_ok=True)
+            # Copy samples file from source
+            shutil.copy(id_sample, path.join(destination_sample_path, f'sample_{sample_num}{file_extension}'))
+            # Writing label for corresponding sample into xl file
+            if write_labels:
+                sheet[f'A{row}'] = sample_num
+                sheet[f'B{row}'] = speaker_id
+                row += 1
+            sample_num += 1
 
 
-data_flattening(audio_source_dir, destination_dir, '.m4a', 'audio')
-data_flattening(video_source_dir, destination_dir, '.mp4', 'video')
+data_flattening(audio_source_dir, destination_dir, '.m4a', 'audio', True)
+data_flattening(video_source_dir, destination_dir, '.mp4', 'video', False)
 
 
 
