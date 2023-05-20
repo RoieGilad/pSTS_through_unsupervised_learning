@@ -39,14 +39,14 @@ def folder_iterator_by_path(root_dir: str):
 
 
 def audio_folder_iterator(root_dir: str):
-    """return all the file paths mathing the following pattern
+    """return all the file paths matching the following pattern
     samples_root_dir/*/audio, in-order"""
     for p in folder_iterator_by_path(path.join(root_dir, "*", "audio")):
         yield p
 
 
 def video_folder_iterator(root_dir: str):
-    """return all the file paths mathing the following pattern
+    """return all the file paths matching the following pattern
     samples_root_dir/*/video, in-order"""
     for p in folder_iterator_by_path(path.join(root_dir, "*", "video")):
         yield p
