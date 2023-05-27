@@ -13,8 +13,6 @@ labels_file = "labels.xlsx"
 
 wb = openpyxl.Workbook()
 sheet = wb.active
-sheet['A1'] = 'Sample_index'
-sheet['B1'] = 'Speaker_id'
 
 #TODO understand the speceific audio/video_source_dir
 
@@ -24,7 +22,7 @@ def data_flattening(source_dir, destination_dir, file_extension, type, write_lab
     the function create xl file saving the sample label - speaker id."""
     id_directories = glob.glob(path.join(source_dir, "id*"))
     sample_num = 0
-    row = 2
+    row = 1
     # Iterate over id directories of audio/video data
     for id_directory in id_directories:
         speaker_id = path.basename(id_directory)
