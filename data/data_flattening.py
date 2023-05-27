@@ -8,7 +8,7 @@ import openpyxl
 audio_source_dir = "audio_dir_sample_17_before_flattening"
 video_source_dir = "video_dir_sample_17_before_flattening"
 destination_dir = "sample_17_after_flattening"
-labels_file = "labels.xlsx"
+labels_file = "../demo_data/labels.xlsx"
 
 
 wb = openpyxl.Workbook()
