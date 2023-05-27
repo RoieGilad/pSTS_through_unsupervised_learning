@@ -32,9 +32,15 @@ def add_addition_to_path(path, addition):
 
 
 def folder_iterator_by_path(root_dir: str):
-    """yield the file path of the next sample, in order"""
+    """yield the folder path of the next sample, in order"""
     for p in sorted(glob.glob(root_dir, recursive=False)):
         if not path.isfile(p):
+            yield p
+
+def file_iterator_by_path(root_dir: str):
+    """yield the file path of the next sample, in order"""
+    for p in sorted(glob.glob(root_dir, recursive=False)):
+        if path.isfile(p):
             yield p
 
 
@@ -57,3 +63,19 @@ def file_iterator_by_type(root_dir: str, type: str):
      as input, in-order"""
     for p in sorted(glob.glob(path.join(root_dir, "*." + type))):
         yield p
+
+def get_sample_id(path: str):
+    for dir_name in path.split("/"):
+        if dir_name.startswith("sample"):
+            return dir_name
+    return ""
+
+
+def get_video_frame_rate(data_md, sample_id: str):
+    """return the frame rate of sample_id from the given DF"""
+    if not sample_id.startswith("sample"):
+        return 0
+    id = int(sample_id.split("_")[-1])
+    return int(data_md.iloc[id, 2])
+
+

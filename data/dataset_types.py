@@ -51,7 +51,8 @@ class VideoDataset(Dataset):
         return int(self.labels_map.iloc[idx, 1])
 
     def is_available(self, idx):
-        return is_available_by_folder(self.ids[idx], "video", self.num_frames)
+        return is_available_by_folder(self.ids[idx], "video",
+                                      self.step_size * self.num_frames)
 
     def __getitem__(self, idx):
         """assume is_available(self, idx) == True when called"""
@@ -88,7 +89,8 @@ class AudioDataset(Dataset):
         return int(self.labels_map.iloc[idx, 1])
 
     def is_available(self, idx):
-        return is_available_by_folder(self.ids[idx], "video", self.num_frames)
+        return is_available_by_folder(self.ids[idx], "video",
+                                      self.step_size * self.num_frames)
 
     def __getitem__(self, idx):
         """assume is_available(self, idx) == True when called"""
