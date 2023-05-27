@@ -38,26 +38,26 @@ class VideoDataset(Dataset):
         self.frame_transform = frame_transform
         self.video_transform = video_transform
         self.ds_path = ds_root_dir
-        self.ids = glob(path.join(self.ds_path, '*'))
+        self.samples = sorted(glob(path.join(self.ds_path, '*')))
         self.labels_map = pd.read_csv(path_to_labels)
         self.num_frames = num_frames
         self.step_size = step_size
         self.tmp_rand = -1
 
     def __len__(self):
-        return len(self.ids)
+        return len(self.samples)
 
     def get_label(self, idx):
         return int(self.labels_map.iloc[idx, 1])
 
     def is_available(self, idx):
-        return is_available_by_folder(self.ids[idx], "video",
+        return is_available_by_folder(self.samples[idx], "video",
                                       self.step_size * self.num_frames)
 
     def __getitem__(self, idx):
         """assume is_available(self, idx) == True when called"""
         path_to_frames = sorted(
-            glob(path.join(self.ids[idx], "video", "*.jpg")))
+            glob(path.join(self.samples[idx], "video", "*.jpg")))
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
         processed_frames = get_samples(path_to_frames, self.num_frames,
                                        self.step_size, tmp_rand,
@@ -76,26 +76,26 @@ class AudioDataset(Dataset):
         self.frame_transform = frame_transform
         self.audio_transform = audio_transform
         self.ds_path = ds_root_dir
-        self.ids = glob(path.join(self.ds_path, '*'))
+        self.samples = sorted(glob(path.join(self.ds_path, '*')))
         self.labels_map = pd.read_csv(path_to_labels)
         self.num_frames = num_frames
         self.step_size = step_size
         self.tmp_rand = -1
 
     def __len__(self):
-        return len(self.ids)
+        return len(self.samples)
 
     def get_label(self, idx):
         return int(self.labels_map.iloc[idx, 1])
 
     def is_available(self, idx):
-        return is_available_by_folder(self.ids[idx], "video",
+        return is_available_by_folder(self.samples[idx], "audio",
                                       self.step_size * self.num_frames)
 
     def __getitem__(self, idx):
         """assume is_available(self, idx) == True when called"""
         path_to_frames = sorted(
-            glob(path.join(self.ids[idx], "video", "*.jpg")))
+            glob(path.join(self.samples[idx], "video", "*.jpg")))
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
         processed_frames = get_samples(path_to_frames, self.num_frames,
                                        self.step_size, tmp_rand,
@@ -112,21 +112,21 @@ class CombinedDataset(Dataset):
         self.test = test
         self.audio_ds = AudioDataset(ds_root_dir, path_to_labels,
                                      transforms['a_frame_transform'],
-                                     transforms['a_video_transform'],
+                                     transforms['a_batch _transform'],
                                      num_frames, test, step_size)
         self.video_ds = VideoDataset(ds_root_dir, path_to_labels,
                                      transforms['v_frame_transform'],
-                                     transforms['v_video_transform'],
+                                     transforms['v_batch_transform'],
                                      num_frames, test, step_size)
         self.ds_path = ds_root_dir
         self.labels_map = pd.read_csv(path_to_labels)
-        self.ids = glob(path.join(self.ds_path, '*'))
+        self.samples = sorted(glob(path.join(self.ds_path, '*')))
         self.transforms = transforms
         self.num_frames = num_frames
         self.step_size = step_size
 
     def __len__(self):
-        return len(self.ids)
+        return len(self.samples)
 
     def get_label(self, idx):
         return int(self.labels_map.iloc[idx, 1])
