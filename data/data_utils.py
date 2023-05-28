@@ -76,6 +76,7 @@ def get_video_frame_rate(data_md, sample_id: str):
     if not sample_id.startswith("sample"):
         return 0
     id = int(sample_id.split("_")[-1])
+    # TODO not sure if to write 2 is equal to write 'frame_rate'
     return int(data_md.iloc[id, 2])
 
 

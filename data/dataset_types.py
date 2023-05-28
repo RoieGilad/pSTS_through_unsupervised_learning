@@ -14,15 +14,15 @@ def is_available_by_folder(path, folder, lower_limit):
 
 
 def get_sample_frames_interval(paths_to_sample_frames: list[str], num_frames: int, step_size: int,
-                rand: float, sample_transform, batch_transform,
-                end_char: bool = True):
+                               rand: float, sample_transform, batch_transform,
+                               end_char: bool = True):
     """ The function return an interval of frames from the sample's frames
     after making some process on it"""
     start_idx = int((len(paths_to_sample_frames) - num_frames * step_size) * rand)
     path_to_sample_frames_interval = paths_to_sample_frames[
-                      start_idx: start_idx + num_frames * step_size: step_size]
+                                     start_idx: start_idx + num_frames * step_size: step_size]
     frames = [Image.open(p) for p in path_to_sample_frames_interval]
-    if end_char:    # if True: add a black image at the end of every sequence
+    if end_char:  # if True: add a black image at the end of every sequence
         frames.append(Image.new(mode="RGB", size=frames[0].size))
     processed_frames = [sample_transform(f) for f in frames]
 
@@ -61,10 +61,10 @@ class VideoDataset(Dataset):
         path_to_frames = sorted(
             glob(path.join(self.samples[idx], "video", "*.jpg")))
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
-        processed_frames = get_samples(path_to_frames, self.num_frames,
-                                       self.step_size, tmp_rand,
-                                       self.frame_transform,
-                                       self.video_transform)
+        processed_frames = get_sample_frames_interval(path_to_frames, self.num_frames,
+                                                      self.step_size, tmp_rand,
+                                                      self.frame_transform,
+                                                      self.video_transform)
         self.tmp_rand = -1
         label = self.get_label(idx)
         return processed_frames, label
@@ -99,10 +99,10 @@ class AudioDataset(Dataset):
         path_to_frames = sorted(
             glob(path.join(self.samples[idx], "video", "*.jpg")))
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
-        processed_frames = get_samples(path_to_frames, self.num_frames,
-                                       self.step_size, tmp_rand,
-                                       self.frame_transform,
-                                       self.audio_transform)
+        processed_frames = get_sample_frames_interval(path_to_frames, self.num_frames,
+                                                      self.step_size, tmp_rand,
+                                                      self.frame_transform,
+                                                      self.audio_transform)
         self.tmp_rand = -1
         label = self.get_label(idx)
         return processed_frames, label
