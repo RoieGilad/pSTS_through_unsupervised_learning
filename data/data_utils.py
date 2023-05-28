@@ -64,7 +64,7 @@ def file_iterator_by_type(root_dir: str, type: str):
     for p in sorted(glob.glob(path.join(root_dir, "*." + type))):
         yield p
 
-def get_sample_id(path: str):
+def get_sample_index(path: str):
     for dir_name in path.split("/"):
         if dir_name.startswith("sample"):
             return dir_name

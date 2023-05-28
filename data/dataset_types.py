@@ -13,13 +13,15 @@ def is_available_by_folder(path, folder, lower_limit):
     return len(glob(path_to_check)) >= lower_limit
 
 
-def get_samples(paths_to_samples: list[str], num_frames: int, step_size: int,
+def get_sample_frames_interval(paths_to_sample_frames: list[str], num_frames: int, step_size: int,
                 rand: float, sample_transform, batch_transform,
                 end_char: bool = True):
-    start_idx = int((len(paths_to_samples) - num_frames * step_size) * rand)
-    path_to_samples = paths_to_samples[
+    """ The function return an interval of frames from the sample's frames
+    after making some process on it"""
+    start_idx = int((len(paths_to_sample_frames) - num_frames * step_size) * rand)
+    path_to_sample_frames_interval = paths_to_sample_frames[
                       start_idx: start_idx + num_frames * step_size: step_size]
-    frames = [Image.open(p) for p in path_to_samples]
+    frames = [Image.open(p) for p in path_to_sample_frames_interval]
     if end_char:    # if True: add a black image at the end of every sequence
         frames.append(Image.new(mode="RGB", size=frames[0].size))
     processed_frames = [sample_transform(f) for f in frames]
