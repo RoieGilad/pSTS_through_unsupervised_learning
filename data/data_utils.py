@@ -1,4 +1,5 @@
 import glob
+import os
 from os import path
 
 import torchvision.transforms as transforms
@@ -12,7 +13,8 @@ train_video_transformer = transforms.Compose([
     transforms.ColorJitter(),
     transforms.RandomCrop([224, 224])])
 
-train_a_frame_transformer = transforms.Compose([   # TODO think about what we do here, which size, how to normalize, add noise and how toTensor
+train_a_frame_transformer = transforms.Compose([
+    # TODO think about what we do here, which size, how to normalize, add noise and how toTensor
     transforms.Resize((256, 256)), transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
@@ -22,10 +24,10 @@ train_audio_transformer = transforms.Compose([  # TODO same
     transforms.RandomCrop([224, 224])])
 
 
-def add_addition_to_path(path, addition):
+def add_addition_to_path(input_path, addition):
     """ for a given path = dirname/base_name.type
     will return the new path: dirname/base_name_addition.type"""
-    dirname, base_name = path.split(path)
+    dirname, base_name = path.split(input_path)
     file_name, file_ext = path.splitext(base_name)
     base_name = "".join([file_name, "_", addition, file_ext])
     return path.join(dirname, base_name)
@@ -36,6 +38,7 @@ def folder_iterator_by_path(root_dir: str):
     for p in sorted(glob.glob(root_dir, recursive=False)):
         if not path.isfile(p):
             yield p
+
 
 def file_iterator_by_path(root_dir: str):
     """yield the file path of the next sample, in order"""
@@ -64,19 +67,40 @@ def file_iterator_by_type(root_dir: str, type: str):
     for p in sorted(glob.glob(path.join(root_dir, "*." + type))):
         yield p
 
-def get_sample_index(path: str):
-    for dir_name in path.split("/"):
+
+def get_sample_index(p: str):
+    p = os.path.normpath(p)
+    for dir_name in p.split(os.sep):
         if dir_name.startswith("sample"):
             return dir_name
     return ""
 
 
-def get_video_frame_rate(data_md, sample_id: str):
+def get_num_sample_index(p: str):
+    sample_index = get_sample_index(p)
+    if sample_index:
+        _, index = get_sample_index(p).split("_")
+        return int(index)
+    return -1
+
+
+def is_mp4a(path_to_audio_file):
+    return path_to_audio_file[-3:] == "m4a"
+
+
+def get_video_frame_rate(data_md, sample_id: int):
     """return the frame rate of sample_id from the given DF"""
-    if not sample_id.startswith("sample"):
-        return 0
-    id = int(sample_id.split("_")[-1])
-    # TODO not sure if to write 2 is equal to write 'frame_rate'
-    return int(data_md.iloc[id, 2])
+    if sample_id > -1:
+        return int(data_md.iloc[sample_id, 2])
+    return 0
 
 
+def get_label_path(data_root_dir: str):
+    dir = path.join(os.getcwd(), data_root_dir)
+    os.makedirs(dir, exist_ok=True)
+    return path.join(dir, "data_md.xlsx")
+
+
+def get_num_frame(path):
+    path = path[::-1]
+    return int(path[path.find(".") + 1: path.find("_")][::-1])
