@@ -1,5 +1,6 @@
 from PIL import Image
 from mtcnn_pytorch.src import detect_faces
+import torchvision.transforms as T
 import os
 import glob
 from os import path
@@ -41,58 +42,84 @@ def file_iterator_by_type(root_dir: str, type: str):
 
 def center_face_by_path(path_to_image, override=True):
     errors = []
-    # try:
+    transform = T.RandomCrop((222, 222))
     img = Image.open(path_to_image)
-    errors.append(1)
-    bounding_boxes, _ = detect_faces(img)
-    errors.append(2)
-    if len(bounding_boxes) > 0:
-        cropped_img = img.crop(bounding_boxes[0][:4])
-        errors.append(3)
-        if not override:
-            path_to_image = add_addition_to_path(path_to_image, "centered")
-        cropped_img.save(path_to_image)
-        errors.append(4)
-    # except:
-    #     print(errors)
+    num_tries = 50
+    img_to_run = img
+    for i in range(num_tries):
+        try:
+            errors.append(1)
+            bounding_boxes, _ = detect_faces(img_to_run)
+            errors.append(2)
+            if len(bounding_boxes) > 0:
+                cropped_img = img_to_run.crop(bounding_boxes[0][:4])
+                errors.append(3)
+                if not override:
+                    path_to_image = add_addition_to_path(path_to_image,
+                                                         "centered")
+                cropped_img.save(path_to_image)
+                return 1
+        except:
+            if i != num_tries - 1:
+                print(i, path_to_image, errors)
+                errors = []
+                img_to_run = transform(img)
+            else:
+                print("Failed!", path_to_image)
+                return 0
+
+
+def center_faces_by_folder(vf, override=True):
+    cnt_all, cnt_success = 0, 0
+    for jpeg_path in file_iterator_by_type(vf, "jpg"):
+        if "centered" not in jpeg_path:
+            cnt_all += 1
+            cnt_success += center_face_by_path(jpeg_path, override)
+    if cnt_all / cnt_success > 0.15:
+        return [du.get_sample_index(vf)]
+    return []
+
+
+def delete_samples(root_dir:str, to_delete: list[str]):
+    to_delete = set(to_delete)
+    for sample_dir in folder_iterator_by_path(root_dir):
+        if du.get_sample_index(sample_dir) in to_delete:
+            remove(sample_dir)
+    md_path = du.get_label_path(root_dir)
+    data_md = pd.read_excel(md_path)
+    to_drop = []
+    for i, row in data_md.iterrows():
+        if 'sample_' + row['sample_index'] in to_delete:
+            to_drop.append(i)
+    data_md.drop(to_drop.index[to_drop])
 
 
 def center_all_faces(root_dir: str, override=True):
     """given root dir, center all the images in the sub video folders
     when override is True and the output is saved under a new name"""
+    samples_to_delete = []
     for vf in tqdm(video_folder_iterator(root_dir), desc="Center Videos:"):
-        for jpeg_path in file_iterator_by_type(vf, "jpg"):
-            if "centered" not in jpeg_path:
-                center_face_by_path(jpeg_path, override)
+        samples_to_delete.extend(center_faces_by_folder(vf, override))
+    print("done centering, the following samples should be deleted:")
+    print(samples_to_delete)
+    delete_samples(root_dir, samples_to_delete)
+
+
 
 
 file_path = r'pSTS_through_unsupervised_learning\MTCNN\text'
 
-def count_occurrences(text, substring):
-    count = 0
-    start = 0
-    while True:
-        start = text.find(substring, start) + 1
-        if start > 0:
-            count += 1
-        else:
-            break
-    return count
-
 if __name__ == '__main__':
-    before = len(glob.glob(path.join(destination_dir, "**", "*." + "jpg"), recursive=True))
+    # center_faces_by_folder(
+    #     r'C:\Users\AVIV\Roie\Galit_Project\pSTS_through_unsupervised_learning\demo_data\demo_after_flattening\sample_21\video',
+    #     False)
+    #
+
+    before = len(glob.glob(path.join(destination_dir, "**", "*." + "jpg"),
+                           recursive=True))
     print("before " + str(before))
     center_all_faces(destination_dir, False)
-    after = len(glob.glob(path.join(destination_dir, "**", "*." + "jpg"), recursive=True))
+    after = len(glob.glob(path.join(destination_dir, "**", "*." + "jpg"),
+                          recursive=True))
     print("after " + str(after))
-    print("diff " + str(2*before - after))
-
-    # try:
-    #     with open(file_path, 'r') as file:
-    #         text = file.read()
-    #         substring = "[1]"
-    #         occurrences = count_occurrences(text, substring)
-    #         print(f"Number of occurrences of '{substring}': {occurrences}")
-    # except FileNotFoundError:
-    #     print("File not found. Please check the file path and try again.")
-
+    print("diff " + str(2 * before - after))

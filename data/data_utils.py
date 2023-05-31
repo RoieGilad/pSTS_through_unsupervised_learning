@@ -1,7 +1,7 @@
 import glob
 import os
-from os import path
-
+import shutil
+from os import path, remove
 import torchvision.transforms as transforms
 
 train_v_frame_transformer = transforms.Compose([
@@ -104,3 +104,53 @@ def get_label_path(data_root_dir: str):
 def get_num_frame(path):
     path = path[::-1]
     return int(path[path.find(".") + 1: path.find("_")][::-1])
+
+
+def checks_same_videos_audios_data(video_data, audio_data):
+    """checks if the video and audio data matches.
+    the function checks for one sample if it appears in both video
+    & audio directories - by id/sample basenames"""
+    video_dir = path.basename(video_data)
+    audio_dir = path.basename(audio_data)
+    video_dir = video_dir[:video_dir.find(".")]
+    audio_dir = audio_dir[:audio_dir.find(".")]
+    if audio_dir != video_dir:
+        print(f'Video data and audio data doesnt match.\n' f'{video_dir}' '!=' f'{audio_dir}')
+        return 0
+    return 1
+
+
+def checks_same_videos_audios_id_samples(video_id_directory, audio_id_directory):
+    video_speaker_id = path.basename(video_id_directory)
+    audio_speaker_id = path.basename(audio_id_directory)
+    if audio_speaker_id != video_speaker_id:
+        print("Video data and audio data doesnt match")
+        return 0
+    return 1
+
+
+def create_sample_video_audio_dirs(destination_dir, video_id_sample,
+                                   audio_id_sample, sample_num, delete_origin):
+    """create the video and audio directories for one sample
+    and copy the corresponding files from source directory"""
+    # Create dirs
+    destination_sample_path = path.join(destination_dir, f'sample_{sample_num}')
+    destination_video_sample_path = path.join(destination_sample_path, 'video')
+    destination_audio_sample_path = path.join(destination_sample_path, 'audio')
+    os.makedirs(destination_video_sample_path, exist_ok=True)
+    os.makedirs(destination_audio_sample_path, exist_ok=True)
+
+    os.chmod(destination_video_sample_path, 0o0777)
+    os.chmod(destination_audio_sample_path, 0o0777)
+    os.chmod(destination_sample_path, 0o0777)
+
+    # Copy files
+    shutil.copy(video_id_sample, path.join(destination_video_sample_path, f'sample_{sample_num}.mp4'))
+    shutil.copy(audio_id_sample, path.join(destination_audio_sample_path, f'sample_{sample_num}.m4a'))
+    os.chmod(destination_video_sample_path, 0o0777)
+    os.chmod(destination_audio_sample_path, 0o0777)
+    if delete_origin:
+        remove(video_id_sample)
+        remove(audio_id_sample)
+
+
