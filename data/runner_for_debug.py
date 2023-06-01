@@ -23,8 +23,9 @@ if __name__ == '__main__':
     # dp.split_all_audio(destination_dir, 0, True)
     # dp.concatenate_all_audio(destination_dir)
 
-    dp.data_flattening(video_source_dir_mini, audio_source_dir_mini, destination_dir_mini,
-                       False)
+    # dp.data_flattening(video_source_dir_mini, audio_source_dir_mini, destination_dir_mini,
+    #                    False)
     # dp.split_all_videos(destination_dir_mini, True)
-    dp.delete_samples(destination_dir_mini, ['sample_20'])
     # dp.center_all_faces(destination_dir_mini, True)
+    dp.split_all_audio(destination_dir_mini, 0, True)
+

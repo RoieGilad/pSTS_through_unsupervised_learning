@@ -88,10 +88,19 @@ def is_mp4a(path_to_audio_file):
     return path_to_audio_file[-3:] == "m4a"
 
 
+def get_md_by_sample_id_and_column(data_md, s_id, column):
+    """return the frame rate of sample_id from the given DF"""
+    if s_id > -1:
+        row = data_md[data_md["sample_index"] == s_id]
+        return row[column].values[0]
+    return ""
+
+
 def get_video_frame_rate(data_md, sample_id: int):
     """return the frame rate of sample_id from the given DF"""
     if sample_id > -1:
-        return int(data_md.iloc[sample_id, 2])
+        return int(get_md_by_sample_id_and_column(data_md, sample_id,
+                                                  "frame_rate"))
     return 0
 
 
@@ -115,12 +124,14 @@ def checks_same_videos_audios_data(video_data, audio_data):
     video_dir = video_dir[:video_dir.find(".")]
     audio_dir = audio_dir[:audio_dir.find(".")]
     if audio_dir != video_dir:
-        print(f'Video data and audio data doesnt match.\n' f'{video_dir}' '!=' f'{audio_dir}')
+        print(
+            f'Video data and audio data doesnt match.\n' f'{video_dir}' '!=' f'{audio_dir}')
         return 0
     return 1
 
 
-def checks_same_videos_audios_id_samples(video_id_directory, audio_id_directory):
+def checks_same_videos_audios_id_samples(video_id_directory,
+                                         audio_id_directory):
     video_speaker_id = path.basename(video_id_directory)
     audio_speaker_id = path.basename(audio_id_directory)
     if audio_speaker_id != video_speaker_id:
@@ -145,12 +156,12 @@ def create_sample_video_audio_dirs(destination_dir, video_id_sample,
     os.chmod(destination_sample_path, 0o0777)
 
     # Copy files
-    shutil.copy(video_id_sample, path.join(destination_video_sample_path, f'sample_{sample_num}.mp4'))
-    shutil.copy(audio_id_sample, path.join(destination_audio_sample_path, f'sample_{sample_num}.m4a'))
+    shutil.copy(video_id_sample, path.join(destination_video_sample_path,
+                                           f'sample_{sample_num}.mp4'))
+    shutil.copy(audio_id_sample, path.join(destination_audio_sample_path,
+                                           f'sample_{sample_num}.m4a'))
     os.chmod(destination_video_sample_path, 0o0777)
     os.chmod(destination_audio_sample_path, 0o0777)
     if delete_origin:
         remove(video_id_sample)
         remove(audio_id_sample)
-
-

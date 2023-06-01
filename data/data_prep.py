@@ -108,10 +108,12 @@ def delete_samples(root_dir:str, to_delete: list[str]):
             shutil.rmtree(sample_dir)
     md_path = du.get_label_path(root_dir)
     data_md = pd.read_excel(md_path)
+    index_to_delete = []
     for i, row in data_md.iterrows():
         if 'sample_' + str(row['sample_index']) in to_delete:
-            data_md.drop(data_md.index[i])
-            data_md.reset_index(drop=True, inplace=True)
+            index_to_delete.append(i)
+    data_md.drop(index_to_delete, inplace=True)
+    data_md.reset_index(drop=True, inplace=True)
     data_md.to_excel(md_path, index=False)
     os.chmod(md_path, 0o0777)
 
