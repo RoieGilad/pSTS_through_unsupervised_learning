@@ -1,3 +1,4 @@
+import torch
 
 def init_positional_Encoding_params(d_model, dropout, max_len=100):
     return {'d_model': d_model, 'dropout': dropout, 'max_len': max_len}
@@ -53,17 +54,28 @@ def init_psts_decoder_params(num_frames, video_params, audio_params):
               'audio_params': audio_params}
     return params
 
+
 """
-example_audio = init_audio_decoder_params(num_frames=, dim_resnet_to_transformer=,
-                              num_heads=, dim_feedforward=, batch_first=,
-                              num_layers=, num_output_features=, mask=,
-                              dropout=, max_len=100)
+************************ EXAMPLES ************************:
 
-example_video = init_Video_decoder_params(num_frames=, dim_resnet_to_transformer=,
-                              num_heads=, dim_feedforward=, batch_first=,
-                              num_layers=, num_output_features=, mask=,
-                              dropout=, max_len=100)
+example_num_frames = 
+mask = torch.triu(torch.ones(example_num_frames,example_num_frames), 1).bool()
 
-example_psts = init_psts_decoder_params(num_frames=, example_video, example_audio)
+example_audio = init_audio_decoder_params(num_frames=example_num_frames, 
+                                          dim_resnet_to_transformer=,
+                                          num_heads=, dim_feedforward=, 
+                                          batch_first=, num_layers=,
+                                          num_output_features=, mask=mask, 
+                                          dropout=, max_len=100) 
+
+example_video = init_Video_decoder_params(num_frames=example_num_frames,
+                                          dim_resnet_to_transformer=,
+                                          num_heads=, dim_feedforward=, 
+                                          batch_first=, num_layers=, 
+                                          num_output_features=, mask=mask,
+                                          dropout=, max_len=100)
+
+example_psts = init_psts_decoder_params(num_frames=example_num_frames,
+                                        example_video, example_audio)
 
 """
