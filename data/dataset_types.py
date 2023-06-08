@@ -24,6 +24,7 @@ def get_sample_frames_interval(paths_to_sample_frames: list[str], num_frames: in
     frames = [Image.open(p) for p in path_to_sample_frames_interval]
     if end_char:  # if True: add a black image at the end of every sequence
         frames.append(Image.new(mode="RGB", size=frames[0].size))
+
     processed_frames = [sample_transform(f) for f in frames]
 
     if processed_frames:
