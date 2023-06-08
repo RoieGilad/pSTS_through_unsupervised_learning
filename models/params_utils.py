@@ -53,7 +53,7 @@ def init_psts_decoder_params(num_frames, video_params, audio_params):
               'audio_params': audio_params}
     return params
 
-
+"""
 example_audio = init_audio_decoder_params(num_frames=, dim_resnet_to_transformer=,
                               num_heads=, dim_feedforward=, batch_first=,
                               num_layers=, num_output_features=, mask=,
@@ -65,3 +65,5 @@ example_video = init_Video_decoder_params(num_frames=, dim_resnet_to_transformer
                               dropout=, max_len=100)
 
 example_psts = init_psts_decoder_params(num_frames=, example_video, example_audio)
+
+"""
