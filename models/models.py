@@ -1,8 +1,9 @@
-import torch
-from torch import nn, Tensor
-import torchvision.models as models
 import math
 from os import path
+
+import torch
+import torchvision.models as models
+from torch import nn, Tensor
 
 
 class PositionalEncoding(nn.Module):
