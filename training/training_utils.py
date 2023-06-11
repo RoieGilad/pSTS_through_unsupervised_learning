@@ -2,7 +2,7 @@ import os
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 import torch
-
+import neptune
 
 def run_one_batch(model, batch, loss_function, device):
     videos, audios, _ = batch
@@ -13,7 +13,7 @@ def run_one_batch(model, batch, loss_function, device):
 
 
 def train_one_epoch(model, epoch_index, training_loader, loss_function,
-                    optimizer, tb_writer, device):
+                    optimizer, tb_writer, device, neptune_run):
     model.train(True)  # Make sure gradient tracking is on
     running_loss = 0.
     last_loss = 0.
@@ -27,15 +27,19 @@ def train_one_epoch(model, epoch_index, training_loader, loss_function,
         if i % 1000 == 999:
             last_loss = running_loss / 1000 # loss per batch
             print('  batch {} loss: {}'.format(i + 1, last_loss))
+
             tb_x = epoch_index * len(training_loader) + i + 1
-            tb_writer.add_scalar('Loss/train', last_loss, tb_x)
+            neptune_run['loss avg in last 1000 batches'].append(last_loss)
+            neptune_run['tb_x'].append(tb_x)
+            tb_writer.add_scalar('Loss/train', last_loss, tb_x)  # TODO
             running_loss = 0.
 
     return last_loss
 
 
 def run_validation(model, loss_fn, validation_loader, avg_loss, best_vloss,
-                   epoch_number, timestamp, tb_writer, path_to_save, device):
+                   epoch_number, timestamp, tb_writer, path_to_save, device,
+                   neptune_run):
     model.eval()  # Set the model to evaluation mode
     running_vloss = 0.0
     with torch.no_grad():  # Disable gradient computation
@@ -44,13 +48,16 @@ def run_validation(model, loss_fn, validation_loader, avg_loss, best_vloss,
             running_vloss += vloss
 
     avg_vloss = running_vloss / (i + 1)
+    neptune_run['avg trainning loss per epoch'].append(avg_loss)
+    neptune_run['avg validation loss per epoch'].append(avg_vloss)
+    neptune_run['epoch records'].append(epoch_number)
     print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
     # Log the running loss averaged per batch, for both training and validation
     tb_writer.add_scalars('Training vs. Validation Loss',
                           {'Training': avg_loss, 'Validation': avg_vloss},
-                          epoch_number + 1)
-    tb_writer.flush()
+                          epoch_number + 1)  # TODO
+    tb_writer.flush()  # TODO
 
     # Track the best performance, and save the model's state
     if avg_vloss < best_vloss:
@@ -63,7 +70,7 @@ def run_validation(model, loss_fn, validation_loader, avg_loss, best_vloss,
     return best_vloss
 
 
-def train(model, params, total_epochs):
+def train(model, params, total_epochs, neptune_run):
     epoch_number = params['epoch_number'] if 'epoch_number' in params else 0
     best_v_loss = params['best_v_loss'] if 'best_v_loss' in params else 1000000
     training_loader = params['training_loader']
@@ -80,14 +87,17 @@ def train(model, params, total_epochs):
     for epoch in range(epoch_number, total_epochs):
         print('EPOCH {}:'.format(epoch + 1))
         avg_loss = train_one_epoch(model, epoch+1, training_loader,
-                                   loss_function, optimizer, tb_writer, device)
+                                   loss_function, optimizer, tb_writer, device,
+                                   neptune_run)
         best_v_loss = run_validation(model, loss_function, validation_loader,
                                      avg_loss, best_v_loss, epoch + 1,
-                                     timestamp, tb_writer, path_to_save, device)
+                                     timestamp, tb_writer, path_to_save, device,
+                                     neptune_run)
 
-        params['best_v_loss'] = best_v_loss
-        params['epoch_number'] = epoch + 1
+        neptune_run['best_v_loss'] = params['best_v_loss'] = best_v_loss
+        neptune_run['epoch_number'] = params['epoch_number'] = epoch + 1
 
+    neptune_run.stop()
     return model, params
 
 
