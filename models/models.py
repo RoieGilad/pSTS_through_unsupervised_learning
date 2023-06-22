@@ -88,12 +88,12 @@ class VideoDecoder(nn.Module):
         nn.init.normal_(self.resnet.fc.weight, mean=0.0, std=0.01)
         nn.init.constant_(self.resnet.fc.bias, 0.0)
 
-    def save_model(self, audio_dir, device):
+    def save_model(self, audio_dir, device, distributed):
         self.eval()
         resnet_path = path.join(audio_dir, "v_resnet.pt")
         transformer_path = path.join(audio_dir, "v_transformer.pt")
         hyperparams_path = path.join(audio_dir, "v_hyperparams.pt")
-        if device.type == 'cuda':
+        if not distributed and device.type == 'cuda':
             torch.save(self.resnet.state_dict().cpu(), resnet_path)
             torch.save(self.decoder.state_dict().cpu(), transformer_path)
         else:
@@ -139,12 +139,13 @@ class AudioDecoder(nn.Module):
         nn.init.normal_(self.resnet.fc.weight, mean=0.0, std=0.01)
         nn.init.constant_(self.resnet.fc.bias, 0.0)
 
-    def save_model(self, audio_dir, device):
+    def save_model(self, audio_dir, device, distributed=False):
         self.eval()
         resnet_path = path.join(audio_dir, "a_resnet.pt")
         transformer_path = path.join(audio_dir, "a_transformer.pt")
         hyperparams_path = path.join(audio_dir, "a_hyperparams.pt")
-        if device.type == 'cuda':
+
+        if not distributed and device.type == 'cuda':
             torch.save(self.resnet.state_dict().cpu(), resnet_path)
             torch.save(self.decoder.state_dict().cpu(), transformer_path)
         else:
@@ -187,14 +188,14 @@ class PstsDecoder(nn.Module):
     def forward(self, video, audio):
         return self.forward_video(video), self.forward_audio(audio)
 
-    def save_model(self, path_to_save, device):
+    def save_model(self, path_to_save, device, distributed=False):
         self.eval()
         hyperparams_path = path.join(path_to_save, "hyperparams.pt")
         audio_path = path.join(path_to_save, "audio")
         video_path = path.join(path_to_save, "video")
         torch.save(self.model_params, hyperparams_path)
-        self.audio_decoder.save_model(audio_path, device)
-        self.video_decoder.save_model(video_path, device)
+        self.audio_decoder.save_model(audio_path, device, distributed)
+        self.video_decoder.save_model(video_path, device, distributed)
 
     @classmethod
     def load_model(cls, path_to_load):
