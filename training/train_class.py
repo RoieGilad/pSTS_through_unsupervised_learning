@@ -80,7 +80,6 @@ class Trainer:
                 self.val_batch_size, shuffle=True)
 
     def save_trainer(self):
-
         """save the train object in path_to_save_trainer
         the model itself saved separetly in model_path
         datasets and trainloaders (train \validation) won't be saved"""
