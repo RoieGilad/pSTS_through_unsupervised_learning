@@ -5,7 +5,7 @@ from torch import nn, Tensor
 
 class pstsLoss(nn.Module):
 
-    def __init__(self, batch_size, num_frames, encoded_vector_size):
+    def __init__(self):
         super().__init__()
 
     def forward(self, encode_videos, encode_audios):
