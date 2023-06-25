@@ -24,7 +24,7 @@ if __name__ == '__main__':
     print()
     print(encode_audios)
     print()
-    loss = pstsLoss(batch_size, num_frames, encoded_vector_size)
+    loss = pstsLoss()
     # pairwise_similarity_gpt = loss.create_all_c_j_gpt(encode_videos, encode_audios)
     pairwise_similarity = loss(encode_videos, encode_videos)
     print("Ours:")
