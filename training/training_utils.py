@@ -35,6 +35,16 @@ def run_one_batch_psts(loss, model, batch, distributed, gpu_id, device):
     return loss(encode_videos, encode_audios)
 
 
+def run_simple_batch(loss, model, batch, distributed, gpu_id, device):
+    inputs, labels = batch
+    if distributed:
+        inputs = inputs.to(gpu_id)
+    else:
+        inputs = inputs.to(device)
+    inputs = model(inputs)
+    return loss(inputs, labels)
+
+
 def train_distributed(train_params, model, save_every, snapshot_path,
                       dir_best_model, run_docu,
                       total_epochs, train_ds=None, validation_ds=None,
