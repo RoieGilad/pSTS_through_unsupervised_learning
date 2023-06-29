@@ -1,17 +1,50 @@
 import os
 from datetime import datetime
-import torch
-from torch.distributed import init_process_group
-from torch.nn.parallel import DistributedDataParallel as DDP
-import neptune
 from os import path
 
-def ddp_setup():
-    init_process_group(backend="nccl")
-    torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
-
+import neptune
+import torch
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data.distributed import DistributedSampler
 
 class Trainer:
+    """
+    Trainer class for training a PyTorch model.
+    *This implementation handles runs on both CPU and GPU.
+    *To run this class on multiple GPUs or to ensure crash consistency, use
+    torchrun.
+    *Monitoring is done via neptune.ai.
+
+    The model should have the following functions:
+    1) save_model(self, dir_to_save, device, distributed) - to save the model
+       in dir_to_save. The function should handle the device and distributed
+       manner (only the master will save the model).
+    2) load_model(self, dir_to_load) - function to load the model from the
+    given directory.
+
+    * the Trainer should be given run_one_batch function with the following
+    signature: run_batch(loss, model, batch, distributed:bool , gpu_id:int,
+     device:bool)
+
+    Args:
+        model (torch.nn.Module): The PyTorch model to be trained.
+        train_params (dict): A dictionary containing the training parameters:
+            {"batch_size": batch_size,
+            "train_dataset": dataset object,
+            "validation_dataset": dataset object,
+            "optimizer": optimizer object,
+            "loss": callable loss function,
+            "docu_per_batch": (optional) the batch interval to add monitoring}
+
+        save_every (int): The interval at which to save model snapshots.
+        snapshot_path (str): The directory path to save model snapshots.
+        dir_best_model (str): The directory path to save the best model.
+        distributed (bool): Flag indicating distributed training or GPU training.
+        run_one_batch (callable): Callback function to run a single batch of the
+        model.
+        device (str): The device to run the training on.
+        run_docu: neptune.ai monitoring object.
+"""
     def __init__(
             self,
             model: torch.nn.Module,
@@ -31,12 +64,14 @@ class Trainer:
         self.model = model.to(self.gpu_id if self.distributed else self.device)
         self.run_docu = run_docu
         self.dir_best_model = dir_best_model
-        self.train_dataloader = train_params["train_dataloader"]
-        self.validation_dataloader = train_params["validation_dataloader"]
+        self.batch_size = train_params["batch_size"]
+        self.train_dataloader = self.set_dataloader(train_params["train_dataset"])
+        self.validation_dataloader = self.set_dataloader(
+            train_params["validation_dataset"])
         self.optimizer = train_params["optimizer"]
         self.loss = train_params["loss"]
         self.best_vloss = train_params[
-            'best_vloss'] if 'best_v_loss' in train_params else 1000000
+            'best_vloss'] if 'best_vloss' in train_params else 1000000
         self.docu_per_batch = train_params['docu_per_batch'] \
             if 'docu_per_batch' in train_params else 1000
         self.save_every = save_every
@@ -50,6 +85,16 @@ class Trainer:
         if self.distributed:
             self.model = DDP(self.model, device_ids=[self.gpu_id])
 
+    def set_dataloader(self, dataset):
+        if self.distributed:
+            return torch.utils.data.DataLoader(dataset, self.batch_size,
+                                               shuffle=False,
+                                               sampler=DistributedSampler(
+                                                   dataset))
+        else:
+            return torch.utils.data.DataLoader(dataset, self.batch_size,
+                                               shuffle=True)
+
     def _load_snapshot(self, snapshot_path):
         path_to_trainer = os.path.join(snapshot_path, "trainer")
         if self.distributed:
@@ -57,7 +102,6 @@ class Trainer:
             snapshot = torch.load(path_to_trainer, map_location=loc)
         else:
             snapshot = torch.load(path_to_trainer)
-        print(snapshot)
         self.model.load_model(snapshot["MODEL_STATE_PATH"])
         self.epochs_run = snapshot["EPOCHS_RUN"]
         print(f"Resuming training from snapshot at Epoch {self.epochs_run}")
@@ -106,9 +150,9 @@ class Trainer:
                 print('batch {} loss: {}'.format(i + 1, last_loss))
 
                 tb_x = epoch * len(self.train_dataloader) + i + 1
-                self.run_docu['train/loss avg in last 1000 batches'].append(
+                self.run_docu[f'training/loss avg sample every ' \
+                              f'{self.docu_per_batch} batches'].append(
                     last_loss)
-                self.run_docu['train/loss avg indexes'].append(tb_x)
                 running_loss = 0.
 
         return last_loss
@@ -125,7 +169,6 @@ class Trainer:
         self.run_docu['training/avg trainning loss per epoch'].append(avg_loss)
         self.run_docu['validation/avg validation loss per epoch'].append(
             avg_vloss)
-        self.run_docu['validation/epoch records'].append(epoch_number)
         print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
         # Track the best performance, and save the model's state
@@ -136,10 +179,10 @@ class Trainer:
                 path_to_save = os.path.join(self.dir_best_model, base_name)
                 if self.distributed:
                     self.model.module.save_model(path_to_save, self.device,
-                                                self.distributed)
+                                                 self.distributed)
                 else:
                     self.model.save_model(path_to_save, self.device,
-                                                self.distributed)
+                                          self.distributed)
 
         return self.best_vloss
 
@@ -149,19 +192,17 @@ class Trainer:
         for epoch in range(self.epochs_run, max_epochs):
             print('EPOCH {}:'.format(epoch + 1))
             avg_loss = self._run_epoch(epoch + 1)
-            self.best_v_loss = self._run_validation(avg_loss, epoch + 1)
+            self.best_vloss = self._run_validation(avg_loss, epoch + 1)
             self.model.train()
-            self.run_docu['validation/best_v_loss'] = self.best_v_loss
+            self.run_docu['validation/best_vloss'] = self.best_vloss
             self.run_docu['run_params/epoch_number'] = self.epochs_run = \
                 epoch + 1
             if self.gpu_id == 0 and epoch % self.save_every == 0:
                 self._save_snapshot(epoch + 1)
                 self.model.train()
 
-        for name, param in self.model.named_parameters():
-            if param.requires_grad:
-                print(name, param.data)
         self.run_docu.stop()
-        if save_at_end and self.gpu_id == 0:
+        if save_at_end and ((self.distributed and self.gpu_id == 0) or
+                            (not self.distributed)):
             self._save_snapshot(self.epochs_run)
         return self.model

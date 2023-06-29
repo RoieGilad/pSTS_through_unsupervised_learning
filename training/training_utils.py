@@ -14,15 +14,6 @@ def ddp_setup():
     torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
 
 
-def set_dataloader(dataset, batch_size, distributed):
-    if distributed:
-        return torch.utils.data.DataLoader(dataset, batch_size,
-                                           shuffle=False,
-                                           sampler=DistributedSampler(dataset))
-    else:
-        return torch.utils.data.DataLoader(dataset, batch_size, shuffle=True)
-
-
 def run_one_batch_psts(loss, model, batch, distributed, gpu_id, device):
     videos, audios, _ = batch
     if distributed:
@@ -63,15 +54,9 @@ def train(train_params, model, save_every, snapshot_path, dir_best_model,
           total_epochs, train_ds, validation_ds, save_at_end, distributed):
     run_one_batch = partial(run_one_batch_psts, loss=pstsLoss())
 
-    train_dataloader = set_dataloader(train_ds,
-                                      train_params['train_batch_size'],
-                                      distributed)
-    validation_dataloader = set_dataloader(validation_ds,
-                                           train_params[
-                                               'validation_batch_size'],
-                                           distributed)
-    train_params['train_dataloader'] = train_dataloader
-    train_params['validation_dataloader'] = validation_dataloader
+
+    train_params['train_dataset'] = train_ds
+    train_params['validation_dataset'] = validation_ds
     trainer = Trainer(model, train_params, save_every, snapshot_path,
                       dir_best_model, distributed, run_one_batch, run_docu)
     trainer.train(total_epochs, save_at_end)
