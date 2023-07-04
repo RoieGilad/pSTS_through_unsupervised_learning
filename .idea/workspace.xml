@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/AVIV.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/pSTS_through_unsupervised_learning.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pSTS_through_unsupervised_learning.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_pre_processing_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_pre_processing_script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_prep.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_prep.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/dataset_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/dataset_types.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/runner_for_debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/runner_for_debug.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/M6PYYNz3pac/00032.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/M6PYYNz3pac/00033.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/MuKhvYeekXU/00034.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/MuKhvYeekXU/00035.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/Nd3m-TBtp6A/00036.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/Nd3m-TBtp6A/00037.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/Nd3m-TBtp6A/00038.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00039.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00040.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00041.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00042.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00043.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00044.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00045.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00046.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00047.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00048.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00049.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00050.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/OLguY5ofUrY/00051.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/QLKR38WeXB0/00052.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/SFR_KWObD3o/00053.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/SFR_KWObD3o/00054.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/SFR_KWObD3o/00055.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00056.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00057.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00058.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00059.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00060.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00061.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00062.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00063.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00064.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00065.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00066.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00067.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/U7PMtQkYWo8/00068.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/UGu7qDKCDd8/00069.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/UGu7qDKCDd8/00070.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/UGu7qDKCDd8/00071.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/UGu7qDKCDd8/00072.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/UGu7qDKCDd8/00073.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/X9M79aB1RS4/00091.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/X9M79aB1RS4/00092.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/X9M79aB1RS4/00093.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/X9M79aB1RS4/00094.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00139.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00140.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00141.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00142.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00143.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00144.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00145.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00146.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00147.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00148.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00149.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00150.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00151.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00152.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00153.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00154.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00155.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00156.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00157.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00158.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00159.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00160.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00161.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00162.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00163.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00164.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/lZf1RB6l5Gs/00165.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/tIpW24N_Ysk/00194.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/tIpW24N_Ysk/00195.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/tIpW24N_Ysk/00196.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/tIpW24N_Ysk/00197.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/utfjXffHDgg/00198.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/wrB-yyERH2s/00199.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/wrB-yyERH2s/00200.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/wrB-yyERH2s/00201.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/wrB-yyERH2s/00202.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/wrB-yyERH2s/00203.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/audio_before_flattening_mini/id00017/yEXiX8Y2qoQ/00204.m4a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/M6PYYNz3pac/00032.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/M6PYYNz3pac/00033.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/MuKhvYeekXU/00034.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/MuKhvYeekXU/00035.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/Nd3m-TBtp6A/00036.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/Nd3m-TBtp6A/00037.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/Nd3m-TBtp6A/00038.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00039.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00040.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00041.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00042.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00043.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00044.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00045.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00046.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00047.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00048.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00049.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00050.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/OLguY5ofUrY/00051.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/QLKR38WeXB0/00052.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/SFR_KWObD3o/00053.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/SFR_KWObD3o/00054.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/SFR_KWObD3o/00055.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00056.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00057.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00058.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00059.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00060.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00061.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00062.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00063.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00064.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00065.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00066.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00067.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/U7PMtQkYWo8/00068.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/UGu7qDKCDd8/00069.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/UGu7qDKCDd8/00070.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/UGu7qDKCDd8/00071.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/UGu7qDKCDd8/00072.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/UGu7qDKCDd8/00073.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/X9M79aB1RS4/00091.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/X9M79aB1RS4/00092.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/X9M79aB1RS4/00093.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/X9M79aB1RS4/00094.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00139.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00140.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00141.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00142.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00143.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00144.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00145.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00146.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00147.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00148.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00149.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00150.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00151.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00152.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00153.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00154.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00155.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00156.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00157.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00158.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00159.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00160.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00161.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00162.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00163.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00164.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/lZf1RB6l5Gs/00165.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/tIpW24N_Ysk/00194.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/tIpW24N_Ysk/00195.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/tIpW24N_Ysk/00196.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/tIpW24N_Ysk/00197.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/utfjXffHDgg/00198.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/wrB-yyERH2s/00199.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/wrB-yyERH2s/00200.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/wrB-yyERH2s/00201.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/wrB-yyERH2s/00202.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/wrB-yyERH2s/00203.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_data/video_before_flattening_mini/id00017/yEXiX8Y2qoQ/00204.mp4" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2QhuX7GVCkkcpbrcO8B7QAKeWoe" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;advanced.settings&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Python.data_pre_processing_script">
+    <configuration name="data_pre_processing_script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="pSTS_through_unsupervised_learning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/data_pre_processing_script.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="dataset_types" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="pSTS_through_unsupervised_learning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/dataset_types.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="runner_for_debug" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="pSTS_through_unsupervised_learning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/runner_for_debug.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.runner_for_debug" />
+      <item itemvalue="Python.data_pre_processing_script" />
+      <item itemvalue="Python.dataset_types" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.data_pre_processing_script" />
+        <item itemvalue="Python.runner_for_debug" />
+        <item itemvalue="Python.dataset_types" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="" />
+      <created>1685818172415</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1685818172415</updated>
+      <workItem from="1687001840442" duration="2945000" />
+      <workItem from="1687005533611" duration="5979000" />
+      <workItem from="1687015538959" duration="5660000" />
+      <workItem from="1687352955382" duration="3003000" />
+      <workItem from="1687509194778" duration="4350000" />
+      <workItem from="1687706991699" duration="29000" />
+      <workItem from="1688041565184" duration="16285000" />
+      <workItem from="1688243875630" duration="9251000" />
+      <workItem from="1688308492662" duration="160000" />
+      <workItem from="1688484934561" duration="4130000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="requirements.txt" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/dataset_types_py$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1687355680262" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+    <SUITE FILE_PATH="coverage/dataset_types_py$dataset_types.coverage" NAME="dataset_types Coverage Results" MODIFIED="1687032235349" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+    <SUITE FILE_PATH="coverage/dataset_types_py$data_pre_processing_script.coverage" NAME="data_pre_processing_script Coverage Results" MODIFIED="1688488430624" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
