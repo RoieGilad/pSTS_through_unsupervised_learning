@@ -6,6 +6,11 @@ import torchvision.transforms as v_transforms
 from torchvision.transforms import functional as F
 import torchaudio.transforms as a_transforms
 from natsort import natsorted
+import torch
+import numpy as np
+from PIL import Image
+
+
 
 train_v_frame_transformer = v_transforms.Compose([
     v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
@@ -22,9 +27,10 @@ train_video_transformer = v_transforms.Compose([
 
 train_a_frame_transformer = v_transforms.Compose([
     # TODO think about what we do here, which size, how to normalize, add noise and how toTensor
-    a_transforms.Spectrogram(),
-    v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
-    v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+    a_transforms.Spectrogram(), lambda x: torch.squeeze(x, dim=0)])#lambda x: F.to_pil_image(x),
+    #lambda x: F.resize(x, [256, 256]),
+    #lambda x: F.to_tensor(x), lambda x: x.expand(3, -1, -1),
+    #lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_end_a_frame_transformer = v_transforms.Compose([ # TODO same, end_frame already tensor
     v_transforms.Resize((256, 256)), v_transforms.ToTensor(),

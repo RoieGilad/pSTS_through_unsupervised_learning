@@ -157,7 +157,7 @@ def iterate_over_frames(video, path_to_video_dir, frame_interval):
         frame_count += 1
         ret, frame = video.read()
     frame_rate = 1000 / frame_interval
-    return frame_rate, frame_count, interval_num
+    return frame_rate, frame_count, interval_num + 1
 
 
 def save_video_frame(frame, path_to_video_dir, sample_index, frame_count, interval_num):
