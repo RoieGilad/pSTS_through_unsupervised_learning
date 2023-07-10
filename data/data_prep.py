@@ -11,9 +11,11 @@ import torchvision.transforms as T
 from PIL import Image
 from pydub import AudioSegment
 from tqdm import tqdm
+from typing import List
+import math
 
 import data.data_utils as du
-from MTCNN.mtcnn_pytorch.src import detect_faces
+import MTCNN.mtcnn_pytorch.src
 
 windows = True  # TODO change for gpu
 
@@ -27,7 +29,7 @@ def create_metadata_file():
 
 
 def data_flattening(video_source_dir, audio_source_dir, destination_dir,
-                    delete_origin=True):
+                    delete_origin=False):
     """ iterate source dir of voxceleb2 dataset
     and create samples directory with audio and video subdirectories.
     the function create xl file saving the sample label - speaker id
@@ -76,7 +78,7 @@ def center_face_by_path(path_to_image, override=True):
     num_tries = 50
     for i in range(num_tries):
         try:
-            bounding_boxes, _ = detect_faces(img_to_run)
+            bounding_boxes, _ = MTCNN.mtcnn_pytorch.src.detect_faces(img_to_run)
             if len(bounding_boxes) > 0:
                 cropped_img = img_to_run.crop(bounding_boxes[0][:4])
                 if not override:
@@ -84,7 +86,8 @@ def center_face_by_path(path_to_image, override=True):
                                                             "centered")
                 cropped_img.save(path_to_image)
                 return 0
-        except:
+        except Exception as e:
+            # print("An exception occurred:", str(e))
             img_to_run = transform(img)
     # print("Failed!", path_to_image)
     return 1
@@ -101,7 +104,7 @@ def center_faces_by_folder(vf, override=True):
     return []
 
 
-def delete_samples(root_dir:str, to_delete: list[str]):
+def delete_samples(root_dir:str, to_delete: List[str]):
     to_delete = set(to_delete)
     for sample_dir in du.folder_iterator_by_path(path.join(root_dir, "sample_*")):
         if du.get_sample_index(sample_dir) in to_delete:
@@ -131,21 +134,37 @@ def center_all_faces(root_dir: str, override=True):
         delete_samples(root_dir, samples_to_delete)
 
 
-def iterate_over_frames(video, path_to_video_dir):
-    """Iterate over video's frames and save each frame
-    in the video root directory. the function return the frame rate of video"""
+def iterate_over_frames(video, path_to_video_dir, frame_interval):
+    """Iterate over video's/audio's frames and save each frame
+    in the video/audio root directory. the function return the frame rate of video and count"""
     sample_index = du.get_sample_index(path_to_video_dir)
+    frame_origin_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
+    frame_origin_rate = video.get(cv2.CAP_PROP_FPS)
+    duration_ms = (frame_origin_count / frame_origin_rate) * 1000
+    duration_desire = (duration_ms // 100) * 100
     frame_count = 0
+    interval = frame_interval
+    interval_num = 0
     ret, frame = video.read()
     while ret:
-        frame_path = path.join(path_to_video_dir,
-                               f"{sample_index}_v_{frame_count}.jpg")
-        cv2.imwrite(frame_path, frame)
-        os.chmod(frame_path, 0o0777)
+        frame_time_stamp = video.get(cv2.CAP_PROP_POS_MSEC)
+        if frame_time_stamp > duration_desire - 0.01:
+            break
+        if frame_time_stamp >= interval:
+            interval += frame_interval
+            interval_num += 1
+        save_video_frame(frame, path_to_video_dir, sample_index, frame_count, interval_num)
         frame_count += 1
         ret, frame = video.read()
-    frame_rate = video.get(cv2.CAP_PROP_FPS)
-    return frame_rate, frame_count
+    frame_rate = 1000 / frame_interval
+    return frame_rate, frame_count, interval_num + 1
+
+
+def save_video_frame(frame, path_to_video_dir, sample_index, frame_count, interval_num):
+    """Save a video frame to the specified directory"""
+    frame_path = path.join(path_to_video_dir, f"{sample_index}_v_{interval_num}_{frame_count}.jpg")
+    cv2.imwrite(frame_path, frame)
+    os.chmod(frame_path, 0o0777)
 
 
 def split_video_to_frames(path_to_video_dir: str, delete_video: bool = False):
@@ -159,11 +178,12 @@ def split_video_to_frames(path_to_video_dir: str, delete_video: bool = False):
     if not video.isOpened():
         print(f'Error in split the video file of sample_{sample_index}')
         return 0
-    frame_rate, num_frames = iterate_over_frames(video, path_to_video_dir)
+    frame_interval = 100
+    frame_rate, num_frames, num_intervals = iterate_over_frames(video, path_to_video_dir, frame_interval)
     video.release()
     if delete_video:
         remove(path_to_video_file)
-    return sample_index, frame_rate, num_frames
+    return sample_index, frame_rate, num_frames, num_intervals
 
 
 def split_all_videos(path_to_data: str, delete_video: bool = False):
@@ -173,18 +193,22 @@ def split_all_videos(path_to_data: str, delete_video: bool = False):
     video"""
     md_path = du.get_label_path(path_to_data)
     metadata_df = pd.read_excel(md_path)
-    index_to_fr, index_to_nf = dict(), dict()
+    index_to_fr, index_to_nf, index_to_ni = dict(), dict(), dict()
     for path_to_video_dir in tqdm(du.video_folder_iterator(path_to_data),
                                   desc="Split Videos:"):
-        index, fr, nf = split_video_to_frames(path_to_video_dir, delete_video)
+        index, fr, nf, ni = split_video_to_frames(path_to_video_dir, delete_video)
         index_to_fr[index] = fr
         index_to_nf[index] = nf
+        index_to_ni[index] = ni
     index_to_nf = np.asarray(
         [index_to_nf[i] for i in sorted(index_to_nf.keys())])
     index_to_fr = np.asarray(
         [index_to_fr[i] for i in sorted(index_to_fr.keys())])
+    index_to_ni = np.asarray(
+        [index_to_ni[i] for i in sorted(index_to_ni.keys())])
     metadata_df.insert(2, "frame_rate", index_to_fr, False)
     metadata_df.insert(3, "numer_of_frames", index_to_nf, False)
+    metadata_df.insert(4, "num_video_intervals", index_to_ni, False)
     metadata_df.to_excel(md_path, index=False)
     os.chmod(md_path, 0o0777)
 
@@ -218,32 +242,30 @@ def concatenate_all_audio(path_to_data):
                                  path.join(path_to_audio_folder,"cont.wav"))
 
 
-def split_audio_by_frame_rate(path_to_audio_file: str, frame_rate: int,
-                              window_size: int, delete_input: bool = False):
+def split_audio_by_frame_rate(path_to_audio_file: str,
+                              interval: int, delete_input: bool = False):
     """takes an audio file and split it a different audio files s.t. for each
-    video frame there is an "audio frame" in size window_size and the video frame
-    "taken" from the middle of the audio frame, if delete_input the input path
-    will be deleted"""
+        video frame there is an "audio frame" in size window_size and the video frame
+        "taken" from the middle of the audio frame, if delete_input the input path
+        will be deleted"""
     if du.is_mp4a(path_to_audio_file) and windows:
         path_to_audio_file = convert_mp4a_to_wav(path_to_audio_file)
 
-    waveform, sample_rate = torchaudio.load(path_to_audio_file)
-    gap_between_frames = int(sample_rate / frame_rate)
-    num_slices = int(waveform.size(1) * (frame_rate / sample_rate))
-    half_window_size = window_size // 2 if window_size else gap_between_frames // 2
-    for i in range(num_slices):
-        mid = gap_between_frames + gap_between_frames * i
-        start = max(0.0, mid - half_window_size)
-        end = min(waveform.size(1), mid + half_window_size)
-        slice = waveform[:, start: end]
-        output_path = du.add_addition_to_path(path_to_audio_file, f"a_{i}")
-        torchaudio.save(output_path, slice, sample_rate)
+    audio = AudioSegment.from_wav(path_to_audio_file)
+    duration_ms = len(audio)
+    duration_desire = (duration_ms // interval) * interval
+    num_slices = -1
+    for start in range(0, duration_desire, interval):
+        num_slices += 1
+        slice = audio[start:start + interval]
+        output_path = du.add_addition_to_path(path_to_audio_file, f"a_{num_slices}")
+        slice.export(output_path, format="wav")
     if delete_input:
         remove(path_to_audio_file)
-    return num_slices
+    return num_slices + 1
 
 
-def split_all_audio(path_to_data: str, window_size: int, delete_input=False):
+def split_all_audio(path_to_data: str, interval: int, delete_input=False):
     path_to_md = du.get_label_path(path_to_data)
     data_md = pd.read_excel(path_to_md)
     index_to_num = dict()
@@ -255,7 +277,7 @@ def split_all_audio(path_to_data: str, window_size: int, delete_input=False):
             for path_to_audio_file in du.file_iterator_by_type(
                     path_to_audio_folder, "m4a"):
                 index_to_num[sample_index] = split_audio_by_frame_rate(
-                    path_to_audio_file, video_frame_rate, window_size,
+                    path_to_audio_file, interval,
                     delete_input)
         else:
             index_to_num[sample_index] = 0
@@ -264,6 +286,21 @@ def split_all_audio(path_to_data: str, window_size: int, delete_input=False):
 
     index_to_num = np.asarray(
         [index_to_num[i] for i in sorted(index_to_num.keys())])
-    data_md.insert(4, "num_audio_slices", index_to_num, False)
+    data_md.insert(5, "num_audio_intervals", index_to_num, False)
     data_md.to_excel(path_to_md, index=False)
     os.chmod(path_to_md, 0o0777)
+
+
+def update_intervals_num(path_to_data):
+    """ The function checks if the video and the audio files are already had been processed.
+    Then, the function update the metadata file with the minimum intervals for each sample"""
+    path_to_md = du.get_label_path(path_to_data)
+    data_md = pd.read_excel(path_to_md)
+    if 'num_audio_intervals' in data_md and 'num_video_intervals' in data_md:
+        data_md['num_of_intervals'] = data_md[['num_audio_intervals', 'num_video_intervals']].min(axis=1)
+        data_md = data_md.drop(['num_audio_intervals', 'num_video_intervals'], axis=1)
+        data_md.to_excel(path_to_md, index=False)
+    os.chmod(path_to_md, 0o0777)
+
+
+
