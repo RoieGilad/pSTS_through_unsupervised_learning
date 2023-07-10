@@ -136,9 +136,9 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.runner_for_debug" />
       <item itemvalue="Python.data_pre_processing_script" />
       <item itemvalue="Python.dataset_types" />
+      <item itemvalue="Python.runner_for_debug" />
     </list>
     <recent_temporary>
       <list>
