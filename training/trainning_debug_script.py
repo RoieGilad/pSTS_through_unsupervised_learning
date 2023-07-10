@@ -57,7 +57,6 @@ class SimpleModel(nn.Module):
 if __name__ == '__main__':
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     # Hyperparameters
     input_size = 28 * 28  # MNIST image size
     hidden_size = 128
@@ -80,12 +79,12 @@ if __name__ == '__main__':
                                                        download=True)
 
     # Create data loaders for our datasets; shuffle for training, not for validation
-    training_loader = torch.utils.data.DataLoader(training_set,
-                                                  batch_size=batch_size,
-                                                  shuffle=True)
-    validation_loader = torch.utils.data.DataLoader(validation_set,
-                                                    batch_size=batch_size,
-                                                    shuffle=False)
+    # training_loader = torch.utils.data.DataLoader(training_set,
+    #                                               batch_size=batch_size,
+    #                                               shuffle=True)
+    # validation_loader = torch.utils.data.DataLoader(validation_set,
+    #                                                 batch_size=batch_size,
+    #                                                 shuffle=False)
     # Create model instance
     model = SimpleModel()
     loss_fn = nn.CrossEntropyLoss()
@@ -94,15 +93,16 @@ if __name__ == '__main__':
     dir_best_model = r'\training\best_debugging'
     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
                             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
-    train_params = {"train_dataloader": training_loader,
-                    "validation_dataloader": validation_loader,
+    train_params = {"train_dataset": training_set,
+                    "validation_dataset": validation_set,
                     "optimizer": optimizer,
                     "loss": loss_fn,
+                    "batch_size": batch_size,
                     "docu_per_batch": 100
                     }
 
     trainer = Trainer(model, train_params, 10, snapshot_path, dir_best_model,
                       False, training_utils.run_simple_batch, device, nept)
-    trainer.train(6, True)
+    trainer.train(9, True)
     print("done")
     # torchrun --standalone --nproc_per_node=1 training/trainning_debug_script.py
