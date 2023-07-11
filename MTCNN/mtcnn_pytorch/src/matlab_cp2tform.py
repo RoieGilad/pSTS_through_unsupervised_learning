@@ -127,7 +127,7 @@ def findSimilarity(uv, xy, options=None):
 
     # Solve for trans2
 
-    # manually reflect the xy data across the Y-axis
+    # manually reflect the xy data_processing across the Y-axis
     xyR = xy
     xyR[:, 0] = -1 * xyR[:, 0]
 

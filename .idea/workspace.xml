@@ -23,16 +23,35 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/pSTS_through_unsupervised_learning.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pSTS_through_unsupervised_learning.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/data_prep.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_prep.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/data_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/data_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dataset_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/dataset_types.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/runner_for_debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/runner_for_debug.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Loss/loss_debug_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/Loss/loss_debug_script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MTCNN/Learner.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTCNN/Learner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MTCNN/mtcnn_pytorch/src/matlab_cp2tform.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTCNN/mtcnn_pytorch/src/matlab_cp2tform.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MTCNN/prepare_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTCNN/prepare_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MTCNN/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTCNN/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_pre_processing_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_pre_processing_script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_prep.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_prep.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/data_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/dataset_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/dataset_types.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/runner_for_debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/runner_for_debug.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/training/Trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/training/Trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/training/training_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/training/training_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/training/trainning_debug_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainning_debug_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
     <envs>
@@ -48,27 +67,46 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/data_processing/__init__.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/data_processing/data_prep.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/data_processing/data_utils.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/data_processing/dataset_types.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/data_processing/runner_for_debug.py" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
+  </component>
   <component name="ProjectId" id="2QhuX7GVCkkcpbrcO8B7QAKeWoe" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;advanced.settings&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "C:/Users/AVIV/Roie/Galit_Project/pSTS_through_unsupervised_learning",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "run.code.analysis.last.selected.profile": "aDefault",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="Python.runner_for_debug">
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\AVIV\Roie\Galit_Project\pSTS_through_unsupervised_learning" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.trainning_debug_script">
     <configuration name="data_pre_processing_script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pSTS_through_unsupervised_learning" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -135,13 +173,37 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="trainning_debug_script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="pSTS_through_unsupervised_learning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\AVIV\Roie\Galit_Project\pSTS_through_unsupervised_learning\trainning_debug_script.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
+      <item itemvalue="Python.trainning_debug_script" />
+      <item itemvalue="Python.runner_for_debug" />
       <item itemvalue="Python.data_pre_processing_script" />
       <item itemvalue="Python.dataset_types" />
-      <item itemvalue="Python.runner_for_debug" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.trainning_debug_script" />
         <item itemvalue="Python.runner_for_debug" />
         <item itemvalue="Python.data_pre_processing_script" />
         <item itemvalue="Python.dataset_types" />
@@ -187,8 +249,14 @@
     </option>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$data_prep_debug.coverage" NAME="data_prep_debug Coverage Results" MODIFIED="1685610018946" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/dataset_types_py$data_pre_processing_script.coverage" NAME="data_pre_processing_script Coverage Results" MODIFIED="1688501545176" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$data_prep.coverage" NAME="data_prep Coverage Results" MODIFIED="1685312523794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$loss_debug_script.coverage" NAME="loss_debug_script Coverage Results" MODIFIED="1687684942746" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Loss" />
+    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$Center_Faces_runner.coverage" NAME="Center_Faces_runner Coverage Results" MODIFIED="1685535577202" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/MTCNN" />
+    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$trainning_debug_script.coverage" NAME="trainning_debug_script Coverage Results" MODIFIED="1689071043573" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1685312932975" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/dataset_types_py$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1688575662509" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/dataset_types_py$dataset_types.coverage" NAME="dataset_types Coverage Results" MODIFIED="1687032235349" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
-    <SUITE FILE_PATH="coverage/dataset_types_py$data_pre_processing_script.coverage" NAME="data_pre_processing_script Coverage Results" MODIFIED="1688501545176" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

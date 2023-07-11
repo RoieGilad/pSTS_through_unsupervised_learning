@@ -1,11 +1,12 @@
 import os
 from datetime import datetime
 from os import path
-
+from training.training_utils import run_simple_batch
 import neptune
 import torch
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import DistributedSampler
+
 
 class Trainer:
     """
@@ -53,9 +54,9 @@ class Trainer:
             snapshot_path: str,
             dir_best_model: str,
             distributed: bool,
-            run_one_batch,
             device,
-            run_docu
+            run_docu,
+            run_one_batch=run_simple_batch
     ) -> None:
         self.gpu_id = int(os.environ["LOCAL_RANK"] if "LOCAL_RANK" in os.environ
                           else 0)
@@ -144,7 +145,7 @@ class Trainer:
             loss.backward()  # backpropagation the loss
             self.optimizer.step()  # Adjust learning weights
 
-            running_loss += loss.item()  # Gather data and report
+            running_loss += loss.item()  # Gather data_processing and report
             if i % self.docu_per_batch == self.docu_per_batch - 1:
                 last_loss = running_loss / self.docu_per_batch  # loss per batch
                 print('batch {} loss: {}'.format(i + 1, last_loss))
