@@ -27,8 +27,11 @@ def run_simple_batch(loss, model, batch, distributed, gpu_id, device):
     inputs, labels = batch
     if distributed:
         inputs = inputs.to(gpu_id)
+        labels = labels.to(gpu_id)
+
     else:
         inputs = inputs.to(device)
+        labels = labels.to(device)
     inputs = model(inputs)
     return loss(inputs, labels)
 

@@ -56,8 +56,8 @@ class SimpleModel(nn.Module):
 
 def main():
     # Set device
-    training_utils.ddp_setup()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    training_utils.ddp_setup()
     # Hyperparameters
     input_size = 28 * 28  # MNIST image size
     hidden_size = 128
@@ -90,8 +90,8 @@ def main():
     model = SimpleModel()
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    snapshot_path = r'training\debugging'
-    dir_best_model = r'training\best_debugging'
+    snapshot_path = os.path.join("debugging", "snapshot")
+    dir_best_model = os.path.join("debugging", "best_model")
     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
                             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     train_params = {"train_dataset": training_set,
@@ -103,7 +103,7 @@ def main():
                     }
 
     trainer = Trainer(model, train_params, 10, snapshot_path, dir_best_model,
-                      False, device, nept)
+                      True, device, nept)
     trainer.train(3, True)
     print("done")
     # torchrun --standalone --nproc_per_node=1 training/trainning_debug_script.py

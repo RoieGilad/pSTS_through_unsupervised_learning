@@ -12,8 +12,10 @@ class Trainer:
     """
     Trainer class for training a PyTorch model.
     *This implementation handles runs on both CPU and GPU.
-    *To run this class on multiple GPUs or to ensure crash consistency, use
-    torchrun.
+    *To run this class on single\multiple GPUs or to ensure crash consistency,
+    use torchrun (from your cmd:
+    "torchrun --standalone --nproc_per_node=<num_GPUs> <your_script>").
+
     *Monitoring is done via neptune.ai.
 
     The model should have the following functions:
@@ -41,11 +43,14 @@ class Trainer:
         snapshot_path (str): The directory path to save model snapshots.
         dir_best_model (str): The directory path to save the best model.
         distributed (bool): Flag indicating distributed training or GPU training.
-        run_one_batch (callable): Callback function to run a single batch of the
         model.
         device (str): The device to run the training on.
         run_docu: neptune.ai monitoring object.
+        run_one_batch (callable): Callback function to run a single batch of the
+            default= simple batch function
+
 """
+
     def __init__(
             self,
             model: torch.nn.Module,
@@ -59,14 +64,15 @@ class Trainer:
             run_one_batch=run_simple_batch
     ) -> None:
         self.gpu_id = int(os.environ["LOCAL_RANK"] if "LOCAL_RANK" in os.environ
-                          else 0)
+                                                      and distributed else 0)
         self.distributed = distributed
         self.device = device
         self.model = model.to(self.gpu_id if self.distributed else self.device)
         self.run_docu = run_docu
         self.dir_best_model = dir_best_model
         self.batch_size = train_params["batch_size"]
-        self.train_dataloader = self.set_dataloader(train_params["train_dataset"])
+        self.train_dataloader = self.set_dataloader(
+            train_params["train_dataset"])
         self.validation_dataloader = self.set_dataloader(
             train_params["validation_dataset"])
         self.optimizer = train_params["optimizer"]
@@ -79,7 +85,6 @@ class Trainer:
         self.epochs_run = 0
         self._run_batch = run_one_batch
         self.snapshot_path = snapshot_path
-        self.timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         if os.path.exists(snapshot_path):
             print("Loading snapshot")
             self._load_snapshot(snapshot_path)
@@ -112,12 +117,7 @@ class Trainer:
             os.makedirs(self.snapshot_path, mode=0o777)
         path_to_model = os.path.join(self.snapshot_path, "model")
         path_to_trainer = os.path.join(self.snapshot_path, "trainer")
-        if self.distributed:
-            self.model.module.save_model(path_to_model, self.device,
-                                         self.distributed)
-        else:
-            self.model.save_model(path_to_model, self.device,
-                                  self.distributed)
+        self.model.module.save_model(path_to_model, self.device, self.distributed)
         snapshot = {
             "MODEL_STATE_PATH": path_to_model,
             "EPOCHS_RUN": epoch,
@@ -148,12 +148,12 @@ class Trainer:
             running_loss += loss.item()  # Gather data_processing and report
             if i % self.docu_per_batch == self.docu_per_batch - 1:
                 last_loss = running_loss / self.docu_per_batch  # loss per batch
-                print('batch {} loss: {}'.format(i + 1, last_loss))
+                if self.gpu_id == 0:
+                    print('batch {} loss: {}'.format(i + 1, last_loss))
 
-                tb_x = epoch * len(self.train_dataloader) + i + 1
-                self.run_docu[f'training/loss avg sample every ' \
-                              f'{self.docu_per_batch} batches'].append(
-                    last_loss)
+                    self.run_docu[f'training/loss avg sample every ' \
+                                  f'{self.docu_per_batch} batches'].append(
+                        last_loss)
                 running_loss = 0.
 
         return last_loss
@@ -167,24 +167,19 @@ class Trainer:
             for i, vdata in enumerate(self.validation_dataloader):
                 running_vloss += self.run_batch(vdata)
         avg_vloss = running_vloss / (i + 1)
-        self.run_docu['training/avg trainning loss per epoch'].append(avg_loss)
-        self.run_docu['validation/avg validation loss per epoch'].append(
-            avg_vloss)
-        print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
+        if self.gpu_id == 0:
+            self.run_docu['training/avg trainning loss per epoch'].append(
+                avg_loss)
+            self.run_docu['validation/avg validation loss per epoch'].append(
+                avg_vloss)
+            print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
         # Track the best performance, and save the model's state
         if avg_vloss < self.best_vloss:
             self.best_vloss = avg_vloss
             if self.dir_best_model and self.gpu_id == 0:
-                base_name = 'model_{}_{}'.format(self.timestamp, epoch_number)
-                path_to_save = os.path.join(self.dir_best_model, base_name)
-                if self.distributed:
-                    self.model.module.save_model(path_to_save, self.device,
-                                                 self.distributed)
-                else:
-                    self.model.save_model(path_to_save, self.device,
-                                          self.distributed)
-
+                self.model.module.save_model(self.dir_best_model, self.device,
+                                             self.distributed)
         return self.best_vloss
 
     def train(self, max_epochs: int, save_at_end: bool):
@@ -195,10 +190,12 @@ class Trainer:
             avg_loss = self._run_epoch(epoch + 1)
             self.best_vloss = self._run_validation(avg_loss, epoch + 1)
             self.model.train()
-            self.run_docu['validation/best_vloss'] = self.best_vloss
-            self.run_docu['run_params/epoch_number'] = self.epochs_run = \
-                epoch + 1
-            if self.gpu_id == 0 and epoch % self.save_every == 0:
+            if self.gpu_id == 0:
+                self.run_docu['validation/best_vloss'] = self.best_vloss
+                self.run_docu['run_params/epoch_number'] = self.epochs_run = \
+                    epoch + 1
+            if ((self.distributed and self.gpu_id == 0) or (not self.distributed)) \
+                    and epoch % self.save_every == 0:
                 self._save_snapshot(epoch + 1)
                 self.model.train()
 

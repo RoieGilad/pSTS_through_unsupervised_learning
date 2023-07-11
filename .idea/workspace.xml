@@ -23,23 +23,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pSTS_through_unsupervised_learning.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pSTS_through_unsupervised_learning.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Loss/loss_debug_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/Loss/loss_debug_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MTCNN/Learner.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTCNN/Learner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MTCNN/mtcnn_pytorch/src/matlab_cp2tform.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTCNN/mtcnn_pytorch/src/matlab_cp2tform.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MTCNN/prepare_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTCNN/prepare_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MTCNN/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/MTCNN/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/data_pre_processing_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_pre_processing_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/data_prep.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_prep.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/data_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dataset_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/dataset_types.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/runner_for_debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/runner_for_debug.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/training/Trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/training/Trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/training/training_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/training/training_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/training/trainning_debug_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainning_debug_script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trainning_debug_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainning_debug_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
