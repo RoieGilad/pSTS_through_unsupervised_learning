@@ -1,6 +1,6 @@
-from . import data_prep as dp
-from . import data_utils as du
-from . import dataset_types as dt
+from data_processing import data_prep as dp
+from data_processing import data_utils as du
+from data_processing import dataset_types as dt
 import os
 import warnings
 import cv2
@@ -37,8 +37,8 @@ def plot_spectrogram(spectrogram):
 
 def check_data_set(index, type):
     data_object = None
-    root_dir = r"../demo_data/after"
-    path_to_labels = r"../demo_data/after/data_md.xlsx"
+    root_dir = r"demo_data/demo_after_flattening_mini"
+    path_to_labels = r"demo_data/demo_after_flattening_mini/data_md.xlsx"
     if type == "video":
         data_object = dt.VideoDataset(root_dir, path_to_labels, du.train_v_frame_transformer,
                                       du.train_end_v_frame_transformer, du.train_video_transformer)
@@ -59,10 +59,9 @@ def check_data_set(index, type):
         print("Num of samples: ", len(data_object_combined))
         print(f"Label of sample {index} is: ", data_object_combined.get_label(index))
         processed_video_frames, processed_audio_frames, label = data_object_combined[index]
-        video_frame = processed_video_frames[5]
-        audio_frame = processed_audio_frames[5]
-        plot_processed_frame(video_frame)
-        plot_spectrogram(audio_frame)
+        for video_frame, audio_frame in zip(processed_video_frames, processed_audio_frames):
+            plot_processed_frame(video_frame)
+            plot_spectrogram(audio_frame)
         return
 
     print(f"{type} Object: ", data_object)
@@ -80,7 +79,7 @@ def check_data_set(index, type):
 
 
 if __name__ == '__main__':
-    # dp.windows = True
+    dp.windows = True
     # dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
     #                    False)
     # dp.split_all_videos(destination_dir, True)
@@ -92,5 +91,5 @@ if __name__ == '__main__':
     #                    False)
     # dp.split_all_videos(destination_dir_mini, True)
     # dp.center_all_faces(destination_dir_mini, True)
-    # dp.split_all_audio(destination_dir_mini, 0, True)
-    check_data_set(4, "combined")
+    # dp.split_all_audio(destination_dir_mini, 100, True)
+    check_data_set(17, "combined")

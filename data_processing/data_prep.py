@@ -20,7 +20,6 @@ import MTCNN.mtcnn_pytorch.src
 windows = True  # TODO change for gpu
 
 
-# TODO think if the file path is global
 def create_metadata_file():
     md = pd.DataFrame()
     md['sample_index'] = []
