@@ -23,11 +23,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_processing/data_prep.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_prep.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_processing/dataset_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/dataset_types.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_processing/runner_for_debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/runner_for_debug.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/training/Trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/training/Trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trainning_debug_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainning_debug_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,29 +92,7 @@
       <recent name="C:\Users\AVIV\Roie\Galit_Project\pSTS_through_unsupervised_learning" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.runner_for_debug (1)">
-    <configuration name="data_pre_processing_script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="pSTS_through_unsupervised_learning" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/data_pre_processing_script.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python.trainning_debug_script (1)">
     <configuration name="dataset_types" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pSTS_through_unsupervised_learning" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -205,6 +181,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="trainning_debug_script (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="pSTS_through_unsupervised_learning" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/trainning_debug_script.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="trainning_debug_script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pSTS_through_unsupervised_learning" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -230,17 +228,17 @@
     <list>
       <item itemvalue="Python.runner_for_debug (1)" />
       <item itemvalue="Python.trainning_debug_script" />
+      <item itemvalue="Python.trainning_debug_script (1)" />
       <item itemvalue="Python.runner_for_debug" />
-      <item itemvalue="Python.data_pre_processing_script" />
       <item itemvalue="Python.dataset_types" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.trainning_debug_script (1)" />
         <item itemvalue="Python.runner_for_debug (1)" />
         <item itemvalue="Python.runner_for_debug" />
         <item itemvalue="Python.runner_for_debug (1)" />
         <item itemvalue="Python.trainning_debug_script" />
-        <item itemvalue="Python.data_pre_processing_script" />
       </list>
     </recent_temporary>
   </component>
@@ -304,8 +302,9 @@
     <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$data_prep.coverage" NAME="data_prep Coverage Results" MODIFIED="1685312523794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$loss_debug_script.coverage" NAME="loss_debug_script Coverage Results" MODIFIED="1687684942746" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Loss" />
     <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$Center_Faces_runner.coverage" NAME="Center_Faces_runner Coverage Results" MODIFIED="1685535577202" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/MTCNN" />
-    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$runner_for_debug__1_.coverage" NAME="runner_for_debug (1) Coverage Results" MODIFIED="1689096402005" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$runner_for_debug__1_.coverage" NAME="runner_for_debug (1) Coverage Results" MODIFIED="1689098148642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$trainning_debug_script.coverage" NAME="trainning_debug_script Coverage Results" MODIFIED="1689071043573" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$trainning_debug_script__1_.coverage" NAME="trainning_debug_script (1) Coverage Results" MODIFIED="1689098897092" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/dataset_types_py$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1688575662509" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/dataset_types_py$dataset_types.coverage" NAME="dataset_types Coverage Results" MODIFIED="1687032235349" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1689088897930" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

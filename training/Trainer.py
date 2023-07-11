@@ -117,7 +117,12 @@ class Trainer:
             os.makedirs(self.snapshot_path, mode=0o777)
         path_to_model = os.path.join(self.snapshot_path, "model")
         path_to_trainer = os.path.join(self.snapshot_path, "trainer")
-        self.model.module.save_model(path_to_model, self.device, self.distributed)
+        if self.distributed:
+            self.model.module.save_model(path_to_model, self.device,
+                                         self.distributed)
+        else:
+            self.model.save_model(path_to_model, self.device,
+                                  self.distributed)
         snapshot = {
             "MODEL_STATE_PATH": path_to_model,
             "EPOCHS_RUN": epoch,
@@ -178,8 +183,12 @@ class Trainer:
         if avg_vloss < self.best_vloss:
             self.best_vloss = avg_vloss
             if self.dir_best_model and self.gpu_id == 0:
-                self.model.module.save_model(self.dir_best_model, self.device,
+                if self.distributed:
+                    self.model.module.save_model(self.dir_best_model, self.device,
                                              self.distributed)
+                else:
+                    self.model.save_model(self.dir_best_model, self.device,
+                                          self.distributed)
         return self.best_vloss
 
     def train(self, max_epochs: int, save_at_end: bool):

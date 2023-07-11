@@ -57,7 +57,7 @@ class SimpleModel(nn.Module):
 def main():
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    training_utils.ddp_setup()
+    # training_utils.ddp_setup()
     # Hyperparameters
     input_size = 28 * 28  # MNIST image size
     hidden_size = 128
@@ -103,8 +103,8 @@ def main():
                     }
 
     trainer = Trainer(model, train_params, 10, snapshot_path, dir_best_model,
-                      True, device, nept)
-    trainer.train(3, True)
+                      False, device, nept)
+    trainer.train(2, True)
     print("done")
     # torchrun --standalone --nproc_per_node=1 training/trainning_debug_script.py
 
