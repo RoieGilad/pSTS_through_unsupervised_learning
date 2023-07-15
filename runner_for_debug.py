@@ -73,9 +73,12 @@ def check_data_set(index, type):
     frame = processed_frames[5]
     if type == "video":
         plot_processed_frame(frame)
+        print(frame.size())
     # Spectrogram plot for debug
     else:
-        plot_spectrogram(frame)
+        print(frame.size())
+        plot_processed_frame(frame)
+        #plot_spectrogram(frame)
 
 
 if __name__ == '__main__':
@@ -92,4 +95,4 @@ if __name__ == '__main__':
     # dp.split_all_videos(destination_dir_mini, True)
     # dp.center_all_faces(destination_dir_mini, True)
     # dp.split_all_audio(destination_dir_mini, 100, True)
-    check_data_set(17, "combined")
+    check_data_set(4, "audio")

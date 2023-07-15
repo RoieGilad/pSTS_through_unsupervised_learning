@@ -40,15 +40,15 @@ def get_sample_audio_frames_interval(paths_to_audio_sample_frames: List[str], nu
     frames = [torchaudio.load(p)[0] for p in path_to_sample_frames_interval]
     processed_frames = [audio_frame_transform(f) for f in frames]
 
-    #if end_char:  # if True: add a black image at the end of every sequence
+    if end_char:  # if True: add a black image at the end of every sequence
         # Tensor silence that has the same number of channels and the same duration as the first frame
-        #silence = torch.zeros(frames[0].shape[0], frames[0].shape[1])
+        silence = torch.zeros(frames[0].shape[0], frames[0].shape[1])
         # Append silence to audio frames
-        #processed_frames.append(end_frame_transform(Image.new(mode="RGB", size=(frames[0].shape[0], frames[0].shape[1]))))
+        processed_frames.append(end_frame_transform(Image.new(mode="RGB", size=(frames[0].shape[0], frames[0].shape[1]))))
 
-    #if processed_frames:
-        #processed_frames = torch.stack(processed_frames)
-        #processed_frames = audio_batch_transform(processed_frames)
+    if processed_frames:
+        processed_frames = torch.stack(processed_frames)
+        processed_frames = audio_batch_transform(processed_frames)
     return processed_frames
 
 
@@ -76,10 +76,11 @@ class VideoDataset(Dataset):
     def is_available(self, idx):
         return self.labels_map.iloc[idx, 4] >= (self.step_size * self.num_frames)
 
-    def choose_frames_from_interval(self, idx, num_intervals):
+    def choose_frames_from_interval(self, idx, num_intervals, tmp_rand):
         paths_to_frames = []
         first_interval = int((num_intervals - self.num_frames * self.step_size)
-                             * self.tmp_rand)
+                             * tmp_rand)
+        print(first_interval)
         for i in range(self.num_frames):
             interval_frames = natsorted(glob(path.join(self.samples[idx], "video",
                                                        f"sample_{idx}_v_{first_interval + i}_*")))
@@ -90,7 +91,7 @@ class VideoDataset(Dataset):
         """assume is_available(self, idx) == True when called"""
         num_intervals = self.labels_map.iloc[idx, 4]
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
-        paths_to_frames = self.choose_frames_from_interval(idx, num_intervals)
+        paths_to_frames = self.choose_frames_from_interval(idx, num_intervals, tmp_rand)
         processed_frames = get_sample_video_frames_interval(paths_to_frames, self.num_frames,
                                                             self.step_size, tmp_rand,
                                                             self.frame_transform,

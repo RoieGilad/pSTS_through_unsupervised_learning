@@ -13,7 +13,9 @@ from PIL import Image
 
 
 train_v_frame_transformer = v_transforms.Compose([
+    lambda x: print(x),
     v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
+    #lambda x: print(x),
     v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_end_v_frame_transformer = v_transforms.Compose([
@@ -25,21 +27,30 @@ train_video_transformer = v_transforms.Compose([
     v_transforms.ColorJitter(),
     v_transforms.RandomCrop([224, 224])])
 
+def audio_frame_transforms(waveform):
+    transform = a_transforms.Spectrogram(n_fft=256, hop_length=16)
+    mel_specgram = transform(waveform)
+    return torch.squeeze(mel_specgram, dim=0)
+
 train_a_frame_transformer = v_transforms.Compose([
     # TODO think about what we do here, which size, how to normalize, add noise and how toTensor
-    a_transforms.Spectrogram(), lambda x: torch.squeeze(x, dim=0)])#lambda x: F.to_pil_image(x),
-    #lambda x: F.resize(x, [256, 256]),
-    #lambda x: F.to_tensor(x), lambda x: x.expand(3, -1, -1),
-    #lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+    a_transforms.Spectrogram(n_fft=256, hop_length=16), #lambda x: torch.squeeze(x, dim=0)])#
+    lambda x: F.to_pil_image(x),
+    lambda x: F.resize(x, [224, 224]),
+    v_transforms.ToTensor(),
+    # lambda x: print(x),
+    lambda x: x.expand(3, -1, -1),
+    lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_end_a_frame_transformer = v_transforms.Compose([ # TODO same, end_frame already tensor
-    v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
+    v_transforms.Resize((224, 224)), v_transforms.ToTensor(),
     v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_audio_transformer = v_transforms.Compose([  # TODO same
-    v_transforms.RandomHorizontalFlip(p=0.5),
-    v_transforms.ColorJitter(),
-    v_transforms.RandomCrop([224, 224])])
+    #v_transforms.RandomHorizontalFlip(p=0.5),
+    #v_transforms.ColorJitter(),
+    #v_transforms.RandomCrop([224, 224])
+    ])
 
 
 def add_addition_to_path(input_path, addition):
