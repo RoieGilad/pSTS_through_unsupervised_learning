@@ -11,11 +11,17 @@ from torch.utils.data import DataLoader
 import neptune
 import torchvision.transforms as transforms
 import torch.nn.functional as F
-
+from data_processing.dataset_types import VideoDataset
+import data_processing.data_utils as du
+from models.models import VideoDecoder, AudioDecoder, PstsDecoder
+from models import params_utils as pu
+from torch.utils.data import DataLoader
 # Set random seed for reproducibility
 torch.manual_seed(42)
 import os
 from os import path
+
+data_dir = os.path.join("demo_data", "demo_after_flattening")
 
 
 # Define the SimpleModel
@@ -110,5 +116,34 @@ def main():
 
 
 if __name__ == '__main__':
-    print("hi")
-    main()
+    num_frames = 16
+    dim_resnet_to_transformer = 1024
+    num_heads = 4
+    num_layers = 4
+    batch_first = True
+    dim_feedforward = dim_resnet_to_transformer
+    num_output_features = 512
+    dropout = 0.1
+    mask = torch.triu(torch.ones(num_frames, num_frames), 1).bool()
+
+    batch_size = 16
+
+    video_dataset = VideoDataset(data_dir, du.get_label_path(data_dir),
+                               du.train_v_frame_transformer,
+                               du.train_end_v_frame_transformer,
+                               du.train_video_transformer,
+                               num_frames=num_frames,
+                               test=False,
+                               step_size=1)
+    video_loader = DataLoader(video_dataset, batch_size=batch_size, shuffle=True)
+
+
+    video_params = pu.init_Video_decoder_params(num_frames=num_frames,
+                                              dim_resnet_to_transformer=1024,
+                                              num_heads=num_heads, dim_feedforward=dim_feedforward,
+                                              batch_first=batch_first, num_layers=num_layers,
+                                              num_output_features=num_output_features, mask=mask,
+                                              dropout=dropout, max_len=100)
+    video_decoder = VideoDecoder(video_params, True)
+    frames, label = video_dataset[0]
+    print(video_decoder(frames))

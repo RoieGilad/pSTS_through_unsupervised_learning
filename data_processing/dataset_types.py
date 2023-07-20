@@ -15,7 +15,7 @@ import torchaudio
 
 def get_sample_video_frames_interval(paths_to_video_sample_frames: List[str], num_frames: int, step_size: int,
                                      rand: float, video_frame_transform, end_frame_transform, video_batch_transform,
-                                     num_intervals: int, end_char: bool = True):
+                                     num_intervals: int, end_char: bool = False):
     """ The function return an interval of frames from the sample's frames
     after making some process on it"""
     frames = [Image.open(p) for p in paths_to_video_sample_frames]
@@ -80,10 +80,10 @@ class VideoDataset(Dataset):
         paths_to_frames = []
         first_interval = int((num_intervals - self.num_frames * self.step_size)
                              * tmp_rand)
-        print(first_interval)
+        real_index = du.get_real_index_by_path(self.samples[idx])
         for i in range(self.num_frames):
             interval_frames = natsorted(glob(path.join(self.samples[idx], "video",
-                                                       f"sample_{idx}_v_{first_interval + i}_*")))
+                                                       f"sample_{real_index}_v_{first_interval + i}_*")))
             paths_to_frames.append(random.choice(interval_frames))
         return paths_to_frames
 

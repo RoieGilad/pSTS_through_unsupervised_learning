@@ -90,9 +90,9 @@ if __name__ == '__main__':
     # dp.split_all_audio(destination_dir, 0, True)
     # dp.concatenate_all_audio(destination_dir)
 
-    # dp.data_flattening(video_source_dir_mini, audio_source_dir_mini, destination_dir_mini,
-    #                    False)
-    # dp.split_all_videos(destination_dir_mini, True)
-    # dp.center_all_faces(destination_dir_mini, True)
-    # dp.split_all_audio(destination_dir_mini, 100, True)
-    check_data_set(4, "audio")
+    dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
+                       False)
+    dp.split_all_videos(destination_dir, True)
+    dp.center_all_faces(destination_dir, True)
+    dp.split_all_audio(destination_dir, 100, True)
+    # check_data_set(4, "audio")

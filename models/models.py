@@ -8,14 +8,15 @@ from torch import nn, Tensor
 
 class PositionalEncoding(nn.Module):
     def __init__(self, positional_params: dict):
-        super().__init__()
+        super(PositionalEncoding, self).__init__()
         self.model_type = 'PositionalEncoding'
         d_model = positional_params['d_model']
         self.dropout = nn.Dropout(p=positional_params['dropout'])
 
-        position = torch.arange(positional_params['max_len']).unsqueeze(1)
+        position = torch.arange(0, positional_params['max_len'],
+                                dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(
-            torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
+            torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
         pe = torch.zeros(positional_params['max_len'], 1, d_model)
         pe[:, 0, 0::2] = torch.sin(position * div_term)
         pe[:, 0, 1::2] = torch.cos(position * div_term)
@@ -25,8 +26,8 @@ class PositionalEncoding(nn.Module):
         """Arguments:
             x: Tensor, shape=[seq_len, batch_size, embedding_dim]``
         """
-        x = x + self.pe[:x.size(0)]
-        return self.dropout(x)
+        positional_encoding = self.pe[:x.size(0), :]
+        return x + self.dropout(positional_encoding)
 
 
 class TransformerDecoder(nn.Module):
@@ -51,10 +52,10 @@ class TransformerDecoder(nn.Module):
         if init_weights:
             self.init_weights()
 
-    def forward(self, x, mask):
+    def forward(self, x):
         x *= math.sqrt(self.d_model)
-        x += self.positional_encoding(x)
-        x = self.transformer_decoder(x, mask)
+        x = self.positional_encoding(x)
+        x = self.transformer_decoder(x, self.mask)
         x = self.linear(x)
         return x
 
@@ -64,13 +65,13 @@ class TransformerDecoder(nn.Module):
 
 
 class VideoDecoder(nn.Module):
-    def __int__(self, model_params: dict, init_weights=True):
+    def __init__(self, model_params: dict, init_weights=True):
         super(VideoDecoder, self).__init__()
         self.model_type = 'VideoDecoder'
         self.num_frames = model_params['num_frames']
         self.model_params = model_params
         self.num_frames = model_params['num_frames']
-        self.resnet = models.resnet18(pretrained=False)
+        self.resnet = models.resnet18(weights=None)
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features,
                                    model_params[
                                        'dim_resnet_to_transformer'])  # function  as the embedding layer
@@ -119,12 +120,12 @@ class VideoDecoder(nn.Module):
 
 
 class AudioDecoder(nn.Module):
-    def __int__(self, model_params: dict, init_weights=True):
+    def __init__(self, model_params: dict, init_weights=True):
         super(AudioDecoder, self).__init__()
         self.model_type = 'AudioDecoder'
         self.model_params = model_params
         self.num_frames = model_params['num_frames']
-        self.resnet = models.resnet18(pretrained=False)
+        self.resnet = models.resnet18(weights=None)
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features,
                                    model_params[
                                        'dim_resnet_to_transformer'])  # function  as the embedding layer
@@ -173,7 +174,7 @@ class AudioDecoder(nn.Module):
 
 
 class PstsDecoder(nn.Module):
-    def __int__(self, model_params: dict=None, init_weights=True):
+    def __init__(self, model_params: dict=None, init_weights=True):
         super(PstsDecoder, self).__init__()
         self.model_type = 'PstsEncoder'
         self.num_frames = model_params['num_frames'] if model_params else None
