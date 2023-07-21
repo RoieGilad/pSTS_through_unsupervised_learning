@@ -60,52 +60,22 @@ class SimpleModel(nn.Module):
         self.load_state_dict(state_dict)
 
 
-def main():
-    # Set device
+def run_train(model, train_dataset, validation_dataset, batch_size):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # training_utils.ddp_setup()
-    # Hyperparameters
-    input_size = 28 * 28  # MNIST image size
-    hidden_size = 128
-    output_size = 10  # Number of classes in MNIST
     learning_rate = 0.001
-    num_epochs = 10
-    batch_size = 64
 
-    # Load MNIST dataset
-    transform = transforms.Compose(
-        [transforms.ToTensor(),
-         transforms.Normalize((0.5,), (0.5,))])
-
-    # Create datasets for training & validation, download if necessary
-    training_set = torchvision.datasets.FashionMNIST('./data_processing', train=True,
-                                                     transform=transform,
-                                                     download=True)
-    validation_set = torchvision.datasets.FashionMNIST('./data_processing', train=False,
-                                                       transform=transform,
-                                                       download=True)
-
-    # Create data_processing loaders for our datasets; shuffle for training, not for validation
-    # training_loader = torch.utils.data_processing.DataLoader(training_set,
-    #                                               batch_size=batch_size,
-    #                                               shuffle=True)
-    # validation_loader = torch.utils.data_processing.DataLoader(validation_set,
-    #                                                 batch_size=batch_size,
-    #                                                 shuffle=False)
-    # Create model instance
-    model = SimpleModel()
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     snapshot_path = os.path.join("debugging", "snapshot")
     dir_best_model = os.path.join("debugging", "best_model")
     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
                             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
-    train_params = {"train_dataset": training_set,
-                    "validation_dataset": validation_set,
+    train_params = {"train_dataset": train_dataset,
+                    "validation_dataset": validation_dataset,
                     "optimizer": optimizer,
                     "loss": loss_fn,
                     "batch_size": batch_size,
-                    "docu_per_batch": 100
+                    "docu_per_batch": 5
                     }
 
     trainer = Trainer(model, train_params, 10, snapshot_path, dir_best_model,
@@ -115,7 +85,7 @@ def main():
     # torchrun --standalone --nproc_per_node=1 training/trainning_debug_script.py
 
 
-if __name__ == '__main__':
+def main():
     num_frames = 16
     dim_resnet_to_transformer = 1024
     num_heads = 4
@@ -137,13 +107,19 @@ if __name__ == '__main__':
                                step_size=1)
     video_loader = DataLoader(video_dataset, batch_size=batch_size, shuffle=True)
 
-
     video_params = pu.init_Video_decoder_params(num_frames=num_frames,
-                                              dim_resnet_to_transformer=1024,
-                                              num_heads=num_heads, dim_feedforward=dim_feedforward,
-                                              batch_first=batch_first, num_layers=num_layers,
-                                              num_output_features=num_output_features, mask=mask,
-                                              dropout=dropout, max_len=100)
+                                                dim_resnet_to_transformer=1024,
+                                                num_heads=num_heads,
+                                                dim_feedforward=dim_feedforward,
+                                                batch_first=batch_first,
+                                                num_layers=num_layers,
+                                                num_output_features=num_output_features,
+                                                mask=mask,
+                                                dropout=dropout, max_len=100)
     video_decoder = VideoDecoder(video_params, True)
-    frames, label = video_dataset[0]
-    print(video_decoder(frames))
+
+    run_train(video_decoder, video_dataset, video_dataset, batch_size)
+
+
+if __name__ == '__main__':
+    main()
