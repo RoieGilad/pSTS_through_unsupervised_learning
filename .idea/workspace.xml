@@ -22,23 +22,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.neptune/async/run__99b2e3e9-512d-4c82-b3fa-cd795a1d51dd/exec-1689936068.514034-2023-07-21_13.41.08.514034/data-1.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.neptune/async/run__99b2e3e9-512d-4c82-b3fa-cd795a1d51dd/exec-1689936068.514034-2023-07-21_13.41.08.514034/last_ack_version" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.neptune/async/run__99b2e3e9-512d-4c82-b3fa-cd795a1d51dd/exec-1689936068.514034-2023-07-21_13.41.08.514034/last_put_version" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/debugging/best_model/v_hyperparams.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/debugging/best_model/v_resnet.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/debugging/best_model/v_transformer.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/debugging/snapshot/model/v_hyperparams.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/debugging/snapshot/model/v_resnet.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/debugging/snapshot/model/v_transformer.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/debugging/snapshot/trainer" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training/debugging/model/model.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/training/debugging/trainer" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/trainning_debug_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainning_debug_script.py" afterDir="false" />
-    </list>
+    <list default="true" id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -274,7 +258,7 @@
       <workItem from="1688484934561" duration="21883000" />
       <workItem from="1689255035282" duration="4159000" />
       <workItem from="1689340409928" duration="13827000" />
-      <workItem from="1689864234642" duration="25432000" />
+      <workItem from="1689864234642" duration="25896000" />
     </task>
     <servers />
   </component>
