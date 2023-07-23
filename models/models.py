@@ -1,4 +1,5 @@
 import math
+import os
 from os import path
 
 import torch
@@ -8,25 +9,28 @@ from torch import nn, Tensor
 
 class PositionalEncoding(nn.Module):
     def __init__(self, positional_params: dict):
-        super().__init__()
+        super(PositionalEncoding, self).__init__()
         self.model_type = 'PositionalEncoding'
         d_model = positional_params['d_model']
         self.dropout = nn.Dropout(p=positional_params['dropout'])
 
-        position = torch.arange(positional_params['max_len']).unsqueeze(1)
+        position = torch.arange(0, positional_params['max_len']).unsqueeze(1)
         div_term = torch.exp(
             torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
-        pe = torch.zeros(positional_params['max_len'], 1, d_model)
-        pe[:, 0, 0::2] = torch.sin(position * div_term)
-        pe[:, 0, 1::2] = torch.cos(position * div_term)
+        pe = torch.zeros(1, positional_params['max_len'], d_model)
+        pe[0, :, 0::2] = torch.sin(position * div_term)
+        pe[0, :, 1::2] = torch.cos(position * div_term)
+        # pe = pe.squeeze(dim=1)
         self.register_buffer('pe', pe)
 
     def forward(self, x: Tensor) -> Tensor:
         """Arguments:
             x: Tensor, shape=[seq_len, batch_size, embedding_dim]``
         """
-        x = x + self.pe[:x.size(0)]
-        return self.dropout(x)
+        dim = 0 if len(x.shape) <= 2 else 1
+        positional_encoding = self.pe[:, :x.size(dim), :]
+        print(x.shape, positional_encoding.shape)
+        return x + self.dropout(positional_encoding)
 
 
 class TransformerDecoder(nn.Module):
@@ -37,9 +41,13 @@ class TransformerDecoder(nn.Module):
             decoder_params['positional_params'])
         self.d_model = decoder_params['hidden_dim']
         decoder_layer = nn.TransformerDecoderLayer(d_model=self.d_model,
-                                                   nhead=decoder_params['num_heads'],
-                                                   dim_feedforward=decoder_params['dim_feedforward'],
-                                                   batch_first =decoder_params['batch_first'])
+                                                   nhead=decoder_params[
+                                                       'num_heads'],
+                                                   dim_feedforward=
+                                                   decoder_params[
+                                                       'dim_feedforward'],
+                                                   batch_first=decoder_params[
+                                                       'batch_first'])
         self.transformer_decoder = \
             nn.TransformerDecoder(decoder_layer,
                                   num_layers=decoder_params['num_layers'])
@@ -51,10 +59,10 @@ class TransformerDecoder(nn.Module):
         if init_weights:
             self.init_weights()
 
-    def forward(self, x, mask):
+    def forward(self, x):
         x *= math.sqrt(self.d_model)
-        x += self.positional_encoding(x)
-        x = self.transformer_decoder(x, mask)
+        x = self.positional_encoding(x)
+        x = self.transformer_decoder(x, x, self.mask)
         x = self.linear(x)
         return x
 
@@ -64,27 +72,30 @@ class TransformerDecoder(nn.Module):
 
 
 class VideoDecoder(nn.Module):
-    def __int__(self, model_params: dict, init_weights=True):
+    def __init__(self, model_params: dict, init_weights=True):
         super(VideoDecoder, self).__init__()
         self.model_type = 'VideoDecoder'
         self.num_frames = model_params['num_frames']
+        self.dim_resnet_to_transformer = model_params[
+            'dim_resnet_to_transformer']
         self.model_params = model_params
-        self.num_frames = model_params['num_frames']
-        self.resnet = models.resnet18(pretrained=False)
+        self.resnet = models.resnet18(weights=None)
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features,
-                                   model_params[
-                                       'dim_resnet_to_transformer'])  # function  as the embedding layer
+                                   self.dim_resnet_to_transformer)  # function  as the embedding layer
         self.decoder = TransformerDecoder(
             model_params['TransformerDecoder_params'])
         if init_weights:
             self.init_weights()
 
     def forward(self, frames):
+        is_batched = len(frames.shape) > 4
+        if is_batched:
+            bs, nf, c, h, w = frames.shape
+            frames = frames.reshape(bs * nf, c, h, w)
         frames = self.resnet(frames)
+        if is_batched:
+            frames = frames.reshape(bs, nf, self.dim_resnet_to_transformer)
         frames = self.decoder(frames)
-        # frames = torch.split(frames, self.num_frames, dim=0)
-        # frames = torch.stack([self.resnet(frame) for frame in frames])
-        # frames = self.decoder(frames)
         return frames
 
     def init_weights(self):
@@ -93,6 +104,8 @@ class VideoDecoder(nn.Module):
 
     def save_model(self, dir_to_save, device, distributed=False):
         self.eval()
+        if not path.exists(dir_to_save):
+            os.makedirs(dir_to_save, mode=0o777)
         resnet_path = path.join(dir_to_save, "v_resnet.pt")
         transformer_path = path.join(dir_to_save, "v_transformer.pt")
         hyperparams_path = path.join(dir_to_save, "v_hyperparams.pt")
@@ -119,12 +132,12 @@ class VideoDecoder(nn.Module):
 
 
 class AudioDecoder(nn.Module):
-    def __int__(self, model_params: dict, init_weights=True):
+    def __init__(self, model_params: dict, init_weights=True):
         super(AudioDecoder, self).__init__()
         self.model_type = 'AudioDecoder'
         self.model_params = model_params
         self.num_frames = model_params['num_frames']
-        self.resnet = models.resnet18(pretrained=False)
+        self.resnet = models.resnet18(weights=None)
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features,
                                    model_params[
                                        'dim_resnet_to_transformer'])  # function  as the embedding layer
@@ -136,9 +149,6 @@ class AudioDecoder(nn.Module):
     def forward(self, frames):
         frames = self.resnet(frames)
         frames = self.decoder(frames)
-        # frames = torch.split(frames, self.num_frames, dim=0)
-        # frames = torch.stack([self.resnet(frame) for frame in frames])
-        # frames = self.decoder(frames)
         return frames
 
     def init_weights(self):
@@ -147,6 +157,8 @@ class AudioDecoder(nn.Module):
 
     def save_model(self, dir_to_save, device, distributed=False):
         self.eval()
+        if not path.exists(dir_to_save):
+            os.makedirs(dir_to_save, mode=0o777)
         resnet_path = path.join(dir_to_save, "a_resnet.pt")
         transformer_path = path.join(dir_to_save, "a_transformer.pt")
         hyperparams_path = path.join(dir_to_save, "a_hyperparams.pt")
@@ -173,7 +185,7 @@ class AudioDecoder(nn.Module):
 
 
 class PstsDecoder(nn.Module):
-    def __int__(self, model_params: dict=None, init_weights=True):
+    def __init__(self, model_params: dict = None, init_weights=True):
         super(PstsDecoder, self).__init__()
         self.model_type = 'PstsEncoder'
         self.num_frames = model_params['num_frames'] if model_params else None
@@ -194,6 +206,8 @@ class PstsDecoder(nn.Module):
 
     def save_model(self, path_to_save, device, distributed=False):
         self.eval()
+        if not path.exists(path_to_save):
+            os.makedirs(path_to_save, mode=0o777)
         hyperparams_path = path.join(path_to_save, "psts_hyperparams.pt")
         torch.save(self.model_params, hyperparams_path)
         self.audio_decoder.save_model(path_to_save, device, distributed)
