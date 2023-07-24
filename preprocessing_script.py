@@ -34,14 +34,16 @@ def plot_processed_frame(image_tensor):
     plt.show()
 
 
-def plot_spectrogram(spectrogram, title):
+def plot_spectrogram(spectrogram, title=""):
+    if spectrogram.shape[0] != 1:
+        spectrogram = spectrogram[0:1, :, :]
     spectrogram = spectrogram.squeeze(dim=0)
     plt.figure()
     plt.imshow(spectrogram.log2(), aspect='auto', origin='lower')
     plt.colorbar(format='%+2.0f dB')
     plt.xlabel('Frame')
     plt.ylabel('Frequency bin')
-    plt.title('Spectrogram: '+title)
+    plt.title('Spectrogram: ' + title)
     plt.show()
 
 
@@ -71,8 +73,8 @@ def plot_two_spectrograms(spectrogram1, title1, spectrogram2, title2):
 
 def check_data_set(index, type):
     data_object = None
-    root_dir = r"demo_data/demo_after_flattening_mini"
-    path_to_labels = r"demo_data/demo_after_flattening_mini/data_md.xlsx"
+    root_dir = r"demo_data/demo_after_flattening"
+    path_to_labels = r"demo_data/demo_after_flattening/data_md.xlsx"
     if type == "video":
         data_object = dt.VideoDataset(root_dir, path_to_labels,
                                       du.train_v_frame_transformer,
@@ -100,10 +102,11 @@ def check_data_set(index, type):
               data_object_combined.get_label(index))
         processed_video_frames, processed_audio_frames, label = \
             data_object_combined[index]
-        for video_frame, audio_frame in zip(processed_video_frames,
-                                            processed_audio_frames):
+        print("output shape: ", processed_video_frames.shape, processed_audio_frames.shape)
+        for i, (video_frame, audio_frame) in enumerate(zip(processed_video_frames,
+                                            processed_audio_frames)):
             plot_processed_frame(video_frame)
-            plot_spectrogram(audio_frame)
+            plot_spectrogram(audio_frame, str(i))
         return
 
     print(f"{type} Object: ", data_object)
@@ -140,23 +143,24 @@ def checks_audio_after_transform(path_to_sample):
     spectrograms = [a_transforms.Spectrogram(n_fft=256, hop_length=16)(frame[0])
                     for frame in frames]
     for spectrogram in spectrograms:
-        spectrogram = spectrograms[39]
+        spectrogram = spectrograms[20]
         # plot_spectrogram(spectrogram, "before")
         target_size = (224, 224)
         for mode, ac in zip(modes, align_corners):
-            input = spectrogram.unsqueeze(0) if mode != 'linear' else spectrogram
+            input = spectrogram.unsqueeze(
+                0) if mode != 'linear' else spectrogram
             new_spectrogram = torch.nn.functional.interpolate(
                 input, size=target_size, mode=mode,
                 align_corners=ac)
             new_spectrogram = new_spectrogram.squeeze(dim=0)
             plot_two_spectrograms(spectrogram, "before", new_spectrogram, mode)
-            plot_spectrogram(spectrogram,mode)
+            plot_spectrogram(spectrogram, mode)
             print(spectrogram.size())
             print(new_spectrogram)
             print(new_spectrogram.size())
         return
 
-        # spectrogram_pil = F.to_pil_image(spectrogram)
+        # spectrogram_pil = F.to_pil_image(spectrogram) ``  `   `   ```
         # spectrogram_tensor = transforms.ToTensor()(spectrogram_pil)
         # mask = spectrogram_tensor == 0
         #
@@ -203,12 +207,12 @@ if __name__ == '__main__':
     dp.windows = True
     dp.cuda = False
 
-    checks_audio_after_transform(
-        "demo_data\demo_after_flattening\sample_0")
+    # checks_audio_after_transform(
+    #     "demo_data\demo_after_flattening\sample_0")
     # concatinate_wav_files("demo_data\demo_after_flattening_mini\sample_0")
     # dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
     #                    False)
     # dp.split_all_videos(destination_dir, True)
     # dp.center_all_faces(destination_dir, True)
     # dp.split_all_audio(destination_dir, 100, True)
-    # check_data_set(4, "audio")
+    check_data_set(4, "combined")

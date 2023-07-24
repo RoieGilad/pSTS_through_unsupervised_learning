@@ -134,6 +134,7 @@ class AudioDecoder(nn.Module):
     def __init__(self, model_params: dict, init_weights=True):
         super(AudioDecoder, self).__init__()
         self.model_type = 'AudioDecoder'
+        self.dim_resnet_to_transformer = model_params['dim_resnet_to_transformer']
         self.model_params = model_params
         self.num_frames = model_params['num_frames']
         self.resnet = models.resnet18(weights=None)

@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 import neptune
 import torchvision.transforms as transforms
 import torch.nn.functional as F
-from data_processing.dataset_types import VideoDataset
+from data_processing.dataset_types import VideoDataset, AudioDataset, CombinedDataset
 import data_processing.data_utils as du
 from models.models import VideoDecoder, AudioDecoder, PstsDecoder
 from models import params_utils as pu
@@ -80,7 +80,7 @@ def run_train(model, train_dataset, validation_dataset, batch_size):
 
     trainer = Trainer(model, train_params, 10, snapshot_path, dir_best_model,
                       False, device, nept)
-    trainer.train(1, True)
+    trainer.train(2, True)
     print("done")
     # torchrun --standalone --nproc_per_node=1 training/trainning_script.py
 
@@ -105,6 +105,14 @@ def main():
                                num_frames=num_frames,
                                test=False,
                                step_size=1)
+    audio_dataset = AudioDataset(data_dir, du.get_label_path(data_dir),
+                               du.train_a_frame_transformer,
+                               du.train_end_a_frame_transformer,
+                               du.train_audio_transformer,
+                               num_frames=num_frames,
+                               test=False,
+                               step_size=1)
+
     video_loader = DataLoader(video_dataset, batch_size=batch_size, shuffle=True)
 
     video_params = pu.init_Video_decoder_params(num_frames=num_frames,
@@ -116,10 +124,20 @@ def main():
                                                 num_output_features=num_output_features,
                                                 mask=mask,
                                                 dropout=dropout, max_len=100)
-    video_decoder = VideoDecoder(video_params, True)
+    audio_params = pu.init_audio_decoder_params(num_frames=num_frames,
+                                                dim_resnet_to_transformer=1024,
+                                                num_heads=num_heads,
+                                                dim_feedforward=dim_feedforward,
+                                                batch_first=batch_first,
+                                                num_layers=num_layers,
+                                                num_output_features=num_output_features,
+                                                mask=mask,
+                                                dropout=dropout, max_len=100)
+    video_encoder = VideoDecoder(video_params, True)
+    audio_encoder = AudioDecoder(audio_params, True)
 
-    run_train(video_decoder, video_dataset, video_dataset, batch_size)
-
+    # run_train(video_encoder, video_dataset, video_dataset, batch_size)
+    run_train(audio_encoder, audio_dataset, audio_dataset, batch_size)
 
 if __name__ == '__main__':
     main()

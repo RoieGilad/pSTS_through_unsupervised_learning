@@ -26,28 +26,23 @@ train_video_transformer = v_transforms.Compose([
     v_transforms.ColorJitter(),
     v_transforms.RandomCrop([224, 224])])
 
+train_a_frame_transformer = v_transforms.Compose([
+    a_transforms.Spectrogram(n_fft=256, hop_length=16),
+    lambda x: torch.nn.functional.interpolate(x.unsqueeze(0), size=(224, 224),
+                                              mode=mode, align_corners=align_corners),
+    lambda x: x.squeeze(dim=0),
+    lambda x: x.expand(3, -1, -1),
+    lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+
+train_end_a_frame_transformer = v_transforms.Compose([
+        v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+
+train_audio_transformer = v_transforms.Compose([])
 
 def audio_frame_transforms(waveform):
     transform = a_transforms.Spectrogram(n_fft=256, hop_length=16)
     mel_specgram = transform(waveform)
     return torch.squeeze(mel_specgram, dim=0)
-
-
-train_a_frame_transformer = v_transforms.Compose([
-    a_transforms.Spectrogram(n_fft=256, hop_length=16),
-    lambda  x: torch.nn.functional.interpolate(x, size=(224, 224), mode=mode,
-                align_corners=align_corners),
-    v_transforms.ToTensor(),
-    lambda x: x.expand(3, -1, -1),
-    lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
-
-train_end_a_frame_transformer = v_transforms.Compose(
-    [  # TODO same, end_frame already tensor
-        v_transforms.Resize((224, 224)), v_transforms.ToTensor(),
-        v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
-
-train_audio_transformer = v_transforms.Compose([])
-
 
 def add_addition_to_path(input_path, addition):
     """ for a given path = dirname/base_name.type

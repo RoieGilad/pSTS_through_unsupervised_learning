@@ -15,14 +15,15 @@ import torchaudio
 
 def get_sample_video_frames_interval(paths_to_video_sample_frames: List[str], num_frames: int, step_size: int,
                                      rand: float, video_frame_transform, end_frame_transform, video_batch_transform,
-                                     num_intervals: int, end_char: bool = False):
+                                     num_intervals: int, end_char: bool = True):
     """ The function return an interval of frames from the sample's frames
     after making some process on it"""
     frames = [Image.open(p) for p in paths_to_video_sample_frames]
     processed_frames = [video_frame_transform(f) for f in frames]
     if end_char:  # if True: add a black image at the end of every sequence
-        processed_frames.append(end_frame_transform(Image.new(mode="RGB", size=frames[0].size)))
-
+        processed_frames.append(end_frame_transform(Image.new(mode="RGB",
+                                                              size=frames[0].size,
+                                                              color=(0, 0, 0))))
     if processed_frames:
         processed_frames = torch.stack(processed_frames)
         processed_frames = video_batch_transform(processed_frames)
@@ -37,13 +38,12 @@ def get_sample_audio_frames_interval(paths_to_audio_sample_frames: List[str], nu
     start_idx = int((len(paths_to_audio_sample_frames) - num_frames * step_size) * rand)
     path_to_sample_frames_interval = paths_to_audio_sample_frames[
                                      start_idx: start_idx + num_frames * step_size: step_size]
-    print(path_to_sample_frames_interval)
     frames = [torchaudio.load(p)[0] for p in path_to_sample_frames_interval]
     processed_frames = [audio_frame_transform(f) for f in frames]
 
-    #if end_char:  # if True: add a black image at the end of every sequence
+    if end_char:  # if True: add a black image at the end of every sequence
         # Append silence to audio frames
-        #processed_frames.append(end_frame_transform(Image.new(mode="RGB", size=(frames[0].shape[0], frames[0].shape[1]))))
+        processed_frames.append(end_frame_transform(torch.zeros_like(processed_frames[0])))
 
     if processed_frames:
         processed_frames = torch.stack(processed_frames)
