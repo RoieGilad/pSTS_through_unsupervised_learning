@@ -10,6 +10,9 @@ import torch
 import numpy as np
 from PIL import Image
 
+mode = 'bilinear'
+align_corners = True
+
 train_v_frame_transformer = v_transforms.Compose([
     v_transforms.Resize((224, 224)), v_transforms.ToTensor(),
     v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
@@ -31,15 +34,9 @@ def audio_frame_transforms(waveform):
 
 
 train_a_frame_transformer = v_transforms.Compose([
-<<<<<<< HEAD
     a_transforms.Spectrogram(n_fft=256, hop_length=16),
-=======
-    # TODO think about what we do here, which size, how to normalize, add noise and how toTensor
-    a_transforms.Spectrogram(n_fft=256, hop_length=16),
-    # lambda x: torch.squeeze(x, dim=0)])#
->>>>>>> 9ce3810d8729886f60bec25a111d0f8edf5d4883
-    lambda x: F.to_pil_image(x),
-    lambda x: F.resize(x, [224, 224]),
+    lambda  x: torch.nn.functional.interpolate(x, size=(224, 224), mode=mode,
+                align_corners=align_corners),
     v_transforms.ToTensor(),
     lambda x: x.expand(3, -1, -1),
     lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
@@ -49,11 +46,7 @@ train_end_a_frame_transformer = v_transforms.Compose(
         v_transforms.Resize((224, 224)), v_transforms.ToTensor(),
         v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
-train_audio_transformer = v_transforms.Compose([  # TODO same
-    # v_transforms.RandomHorizontalFlip(p=0.5),
-    # v_transforms.ColorJitter(),
-    # v_transforms.RandomCrop([224, 224])
-])
+train_audio_transformer = v_transforms.Compose([])
 
 
 def add_addition_to_path(input_path, addition):
