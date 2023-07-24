@@ -31,13 +31,16 @@ def audio_frame_transforms(waveform):
 
 
 train_a_frame_transformer = v_transforms.Compose([
+<<<<<<< HEAD
+    a_transforms.Spectrogram(n_fft=256, hop_length=16),
+=======
     # TODO think about what we do here, which size, how to normalize, add noise and how toTensor
     a_transforms.Spectrogram(n_fft=256, hop_length=16),
     # lambda x: torch.squeeze(x, dim=0)])#
+>>>>>>> 9ce3810d8729886f60bec25a111d0f8edf5d4883
     lambda x: F.to_pil_image(x),
     lambda x: F.resize(x, [224, 224]),
     v_transforms.ToTensor(),
-    # lambda x: print(x),
     lambda x: x.expand(3, -1, -1),
     lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 

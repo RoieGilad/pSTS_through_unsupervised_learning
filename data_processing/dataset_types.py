@@ -37,14 +37,13 @@ def get_sample_audio_frames_interval(paths_to_audio_sample_frames: List[str], nu
     start_idx = int((len(paths_to_audio_sample_frames) - num_frames * step_size) * rand)
     path_to_sample_frames_interval = paths_to_audio_sample_frames[
                                      start_idx: start_idx + num_frames * step_size: step_size]
+    print(path_to_sample_frames_interval)
     frames = [torchaudio.load(p)[0] for p in path_to_sample_frames_interval]
     processed_frames = [audio_frame_transform(f) for f in frames]
 
-    if end_char:  # if True: add a black image at the end of every sequence
-        # Tensor silence that has the same number of channels and the same duration as the first frame
-        silence = torch.zeros(frames[0].shape[0], frames[0].shape[1])
+    #if end_char:  # if True: add a black image at the end of every sequence
         # Append silence to audio frames
-        processed_frames.append(end_frame_transform(Image.new(mode="RGB", size=(frames[0].shape[0], frames[0].shape[1]))))
+        #processed_frames.append(end_frame_transform(Image.new(mode="RGB", size=(frames[0].shape[0], frames[0].shape[1]))))
 
     if processed_frames:
         processed_frames = torch.stack(processed_frames)

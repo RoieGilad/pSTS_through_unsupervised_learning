@@ -1,11 +1,20 @@
 from data_processing import data_prep as dp
-from data_processing import data_utils as du
 from data_processing import dataset_types as dt
-import os
-import warnings
-import cv2
-import soundfile as sf
 import matplotlib.pyplot as plt
+from torchvision import transforms
+from glob import glob
+import soundfile as sf
+from data_processing import data_utils as du
+import torchaudio
+import glob
+import os
+from os import path
+from torchvision.transforms import functional as F
+import torchaudio.transforms as a_transforms
+from natsort import natsorted
+import torch
+
+
 
 audio_source_dir = os.path.join("demo_data", "audio_before_flattening")
 video_source_dir = os.path.join("demo_data", "video_before_flattening")
@@ -26,6 +35,7 @@ def plot_processed_frame(image_tensor):
 
 
 def plot_spectrogram(spectrogram):
+    spectrogram = spectrogram.squeeze(dim=0)
     plt.figure()
     plt.imshow(spectrogram.log2(), aspect='auto', origin='lower')
     plt.colorbar(format='%+2.0f dB')
@@ -77,8 +87,65 @@ def check_data_set(index, type):
     # Spectrogram plot for debug
     else:
         print(frame.size())
+        print(frame)
+        frame = F.to_pil_image(frame)
+        print(frame)
+        frame = transforms.ToTensor()(frame)
+        print(frame)
         plot_processed_frame(frame)
         #plot_spectrogram(frame)
+
+def checks_audio_after_transform(path_to_sample):
+    path_to_frames = natsorted(glob.glob(path.join(path_to_sample, "audio", "*.wav")))
+    frames = [torchaudio.load(p) for p in path_to_frames]
+    sample_rate = frames[0][1]
+
+    spectrograms = [a_transforms.Spectrogram(n_fft=256, hop_length=16)(frame[0]) for frame in frames]
+    i = 0
+    for spectrogram in spectrograms:
+        spectrogram = spectrograms[39]
+        plot_spectrogram(spectrogram)
+        target_size = (224, 224)
+        new_spectrogram = torch.nn.functional.interpolate(spectrogram.unsqueeze(0), size=target_size, mode='bilinear', align_corners=True)
+        new_spectrogram = new_spectrogram.squeeze(dim=0)
+        plot_spectrogram(new_spectrogram)
+        print(spectrogram)
+        print(spectrogram.size())
+        print(new_spectrogram)
+        print(new_spectrogram.size())
+        return
+
+
+        """spectrogram_pil = F.to_pil_image(spectrogram)
+        spectrogram_tensor = transforms.ToTensor()(spectrogram_pil)
+        mask = spectrogram_tensor == 0
+    
+        # Zero out the corresponding values in spectrogram using the mask
+        spectrogram_zeroed = spectrogram * (~mask)
+        spectrogram_zeroed = spectrogram_zeroed.to(torch.cdouble)
+    
+        waveform = a_transforms.InverseSpectrogram(n_fft=256, hop_length=16)(spectrogram_zeroed)
+        waveform = waveform.to(torch.float32)
+    
+        torchaudio.save(f'{path_to_sample}/audio/after_{i}.wav', waveform, sample_rate)
+        i += 1"""
+
+def concatinate_wav_files(path_to_files):
+    input_files = natsorted(glob.glob(path.join(path_to_files, "audio", "after*")))
+    output_file = "output.wav"
+
+    # Initialize an empty audio array to store the concatenated audio
+    audio_data = []
+
+    # Read each input WAV file and append its audio data to the array
+    for file in input_files:
+        data, sr = sf.read(file)
+        audio_data.extend(data)
+
+    output_path = os.path.join(path_to_files, output_file)
+
+    # Write the concatenated audio data to the output WAV file
+    sf.write(output_path, audio_data, sr)
 
 
 def prepare_data():
@@ -99,9 +166,20 @@ if __name__ == '__main__':
     # dp.split_all_audio(destination_dir, 0, True)
     # dp.concatenate_all_audio(destination_dir)
 
+<<<<<<< HEAD
+    # dp.data_flattening(video_source_dir_mini, audio_source_dir_mini, destination_dir_mini,
+    #                    False)
+    # dp.split_all_videos(destination_dir_mini, True)
+    # dp.center_all_faces(destination_dir_mini, True)
+    # dp.split_all_audio(destination_dir_mini, 100, True)
+    #check_data_set(4, "audio")
+    checks_audio_after_transform("demo_data\demo_after_flattening_mini\sample_0")
+    #concatinate_wav_files("demo_data\demo_after_flattening_mini\sample_0")
+=======
     dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
                        False)
     dp.split_all_videos(destination_dir, True)
     dp.center_all_faces(destination_dir, True)
     dp.split_all_audio(destination_dir, 100, True)
     # check_data_set(4, "audio")
+>>>>>>> 9ce3810d8729886f60bec25a111d0f8edf5d4883
