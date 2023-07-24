@@ -81,8 +81,17 @@ def check_data_set(index, type):
         #plot_spectrogram(frame)
 
 
+def prepare_data():
+    # dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
+    #                    False)
+    # dp.split_all_videos(destination_dir, True)
+    dp.center_all_faces(destination_dir, True)
+    # dp.split_all_audio(destination_dir, 100, True)
+    dp.cuda = True
+
 if __name__ == '__main__':
     dp.windows = True
+    dp.cuda = False
     # dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
     #                    False)
     # dp.split_all_videos(destination_dir, True)

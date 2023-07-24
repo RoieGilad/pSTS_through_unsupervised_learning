@@ -29,7 +29,6 @@ class PositionalEncoding(nn.Module):
         """
         dim = 0 if len(x.shape) <= 2 else 1
         positional_encoding = self.pe[:, :x.size(dim), :]
-        print(x.shape, positional_encoding.shape)
         return x + self.dropout(positional_encoding)
 
 
@@ -111,8 +110,8 @@ class VideoDecoder(nn.Module):
         hyperparams_path = path.join(dir_to_save, "v_hyperparams.pt")
 
         if not distributed and device.type == 'cuda':
-            torch.save(self.resnet.state_dict().cpu(), resnet_path)
-            torch.save(self.decoder.state_dict().cpu(), transformer_path)
+            torch.save(self.resnet.state_dict(), resnet_path)
+            torch.save(self.decoder.state_dict(), transformer_path)
         else:
             torch.save(self.resnet.state_dict(), resnet_path)
             torch.save(self.decoder.state_dict(), transformer_path)
@@ -121,7 +120,7 @@ class VideoDecoder(nn.Module):
     def load_model(self, dir_to_load):
         hyperparams_path = path.join(dir_to_load, "v_hyperparams.pt")
         model_params = torch.load(hyperparams_path)
-        self.__int__(model_params, False)
+        self.__init__(model_params, False)
         self.load_model_weights(dir_to_load)
 
     def load_model_weights(self, dir_to_load):
@@ -147,7 +146,13 @@ class AudioDecoder(nn.Module):
             self.init_weights()
 
     def forward(self, frames):
+        is_batched = len(frames.shape) > 4
+        if is_batched:
+            bs, nf, c, h, w = frames.shape
+            frames = frames.reshape(bs * nf, c, h, w)
         frames = self.resnet(frames)
+        if is_batched:
+            frames = frames.reshape(bs, nf, self.dim_resnet_to_transformer)
         frames = self.decoder(frames)
         return frames
 
@@ -164,8 +169,8 @@ class AudioDecoder(nn.Module):
         hyperparams_path = path.join(dir_to_save, "a_hyperparams.pt")
 
         if not distributed and device.type == 'cuda':
-            torch.save(self.resnet.state_dict().cpu(), resnet_path)
-            torch.save(self.decoder.state_dict().cpu(), transformer_path)
+            torch.save(self.resnet.state_dict(), resnet_path)
+            torch.save(self.decoder.state_dict(), transformer_path)
         else:
             torch.save(self.resnet.state_dict(), resnet_path)
             torch.save(self.decoder.state_dict(), transformer_path)
@@ -174,7 +179,7 @@ class AudioDecoder(nn.Module):
     def load_model(self, dir_to_load):
         hyperparams_path = path.join(dir_to_load, "a_hyperparams.pt")
         model_params = torch.load(hyperparams_path)
-        self.__int__(model_params, False)
+        self.__init__(model_params, False)
         self.load_model_weights(dir_to_load)
 
     def load_model_weights(self, dir_to_load):
@@ -216,6 +221,6 @@ class PstsDecoder(nn.Module):
     def load_model(self, path_to_load):
         hyperparams_path = path.join(path_to_load, "hyperparams.pt")
         model_params = torch.load(hyperparams_path)
-        self.__int__(model_params, False)
+        self.__init__(model_params, False)
         self.audio_decoder.load_model_weights(path_to_load)
         self.video_decoder.load_model_weights(path_to_load)

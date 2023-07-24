@@ -6,16 +6,16 @@ from .box_utils import nms, calibrate_box, get_image_boxes, convert_to_square
 from .first_stage import run_first_stage
 
 
-def detect_faces(image, min_face_size=20.0,
+def detect_faces(image, cuda=False, min_face_size=20.0,
                  thresholds=[0.6, 0.7, 0.8],
-                 nms_thresholds=[0.7, 0.7, 0.7]):
+                 nms_thresholds=[0.7, 0.7, 0.7], ):
     """
     Arguments:
         image: an instance of PIL.Image.
+        cuda: move model to GPU
         min_face_size: a float number.
         thresholds: a list of length 3.
         nms_thresholds: a list of length 3.
-
     Returns:
         two float numpy arrays of shapes [n_boxes, 4] and [n_boxes, 10],
         bounding boxes and facial landmarks.
@@ -26,7 +26,11 @@ def detect_faces(image, min_face_size=20.0,
     rnet = RNet()
     onet = ONet()
     onet.eval()
-
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if cuda:
+        pnet.cuda(device)
+        rnet.cuda(device)
+        onet.cuda(device)
     # BUILD AN IMAGE PYRAMID
     width, height = image.size
     min_length = min(height, width)
@@ -75,11 +79,14 @@ def detect_faces(image, min_face_size=20.0,
         bounding_boxes[:, 0:4] = np.round(bounding_boxes[:, 0:4])
 
         # STAGE 2
-
         img_boxes = get_image_boxes(bounding_boxes, image, size=24)
         img_boxes = torch.FloatTensor(img_boxes)
-
+        if cuda:
+            img_boxes = img_boxes.to(device)
+            rnet.to(device)
         output = rnet(img_boxes)
+        if cuda:
+            output = output[0].cpu(), output[1].cpu()
         offsets = output[0].data.numpy()  # shape [n_boxes, 4]
         probs = output[1].data.numpy()  # shape [n_boxes, 2]
 
@@ -100,7 +107,12 @@ def detect_faces(image, min_face_size=20.0,
         if len(img_boxes) == 0: 
             return [], []
         img_boxes = torch.FloatTensor(img_boxes)
+        if cuda:
+            img_boxes = img_boxes.to(device)
+            onet.to(device)
         output = onet(img_boxes)
+        if cuda:
+            output = output[0].cpu(), output[1].cpu(), output[2].cpu()
         landmarks = output[0].data.numpy()  # shape [n_boxes, 10]
         offsets = output[1].data.numpy()  # shape [n_boxes, 4]
         probs = output[2].data.numpy()  # shape [n_boxes, 2]

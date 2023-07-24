@@ -80,9 +80,9 @@ def run_train(model, train_dataset, validation_dataset, batch_size):
 
     trainer = Trainer(model, train_params, 10, snapshot_path, dir_best_model,
                       False, device, nept)
-    trainer.train(2, True)
+    trainer.train(1, True)
     print("done")
-    # torchrun --standalone --nproc_per_node=1 training/trainning_debug_script.py
+    # torchrun --standalone --nproc_per_node=1 training/trainning_script.py
 
 
 def main():

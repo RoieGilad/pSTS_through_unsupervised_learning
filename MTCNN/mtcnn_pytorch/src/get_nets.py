@@ -76,7 +76,7 @@ class RNet(nn.Module):
     def __init__(self):
 
         super(RNet, self).__init__()
-
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.features = nn.Sequential(OrderedDict([
             ('conv1', nn.Conv2d(3, 28, 3, 1)),
             ('prelu1', nn.PReLU(28)),
@@ -95,11 +95,14 @@ class RNet(nn.Module):
         ]))
 
         self.conv5_1 = nn.Linear(128, 2)
+        self.conv5_1.to(device)
         self.conv5_2 = nn.Linear(128, 4)
+        self.conv5_2.to(device)
 
         weights = np.load('MTCNN/mtcnn_pytorch/src/weights/rnet.npy', allow_pickle=True)[()]
         for n, p in self.named_parameters():
             p.data = torch.FloatTensor(weights[n])
+            p.to(device)
 
     def forward(self, x):
         """
@@ -121,7 +124,7 @@ class ONet(nn.Module):
     def __init__(self):
 
         super(ONet, self).__init__()
-
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.features = nn.Sequential(OrderedDict([
             ('conv1', nn.Conv2d(3, 32, 3, 1)),
             ('prelu1', nn.PReLU(32)),
@@ -145,13 +148,17 @@ class ONet(nn.Module):
         ]))
 
         self.conv6_1 = nn.Linear(256, 2)
+        self.conv6_1.to(device)
         self.conv6_2 = nn.Linear(256, 4)
+        self.conv6_2.to(device)
         self.conv6_3 = nn.Linear(256, 10)
+        self.conv6_3.to(device)
+
 
         weights = np.load('MTCNN/mtcnn_pytorch/src/weights/onet.npy', allow_pickle=True)[()]
         for n, p in self.named_parameters():
             p.data = torch.FloatTensor(weights[n])
-
+            p.to(device)
     def forward(self, x):
         """
         Arguments:

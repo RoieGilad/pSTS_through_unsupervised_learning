@@ -18,7 +18,7 @@ import data_processing.data_utils as du
 import MTCNN.mtcnn_pytorch.src
 
 windows = True  # TODO change for gpu
-
+cuda = False  #  TODO chnange for GPU
 
 def create_metadata_file():
     md = pd.DataFrame()
@@ -77,7 +77,7 @@ def center_face_by_path(path_to_image, override=True):
     num_tries = 50
     for i in range(num_tries):
         try:
-            bounding_boxes, _ = MTCNN.mtcnn_pytorch.src.detect_faces(img_to_run)
+            bounding_boxes, _ = MTCNN.mtcnn_pytorch.src.detect_faces(img_to_run, cuda)
             if len(bounding_boxes) > 0:
                 cropped_img = img_to_run.crop(bounding_boxes[0][:4])
                 if not override:
