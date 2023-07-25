@@ -156,8 +156,6 @@ if __name__ == '__main__':
     # dp.center_all_faces(destination_dir, True)
     # dp.split_all_audio(destination_dir, 0, True)
     # dp.concatenate_all_audio(destination_dir)
-
-<<<<<<< HEAD
     # dp.data_flattening(video_source_dir_mini, audio_source_dir_mini, destination_dir_mini,
     #                    False)
     # dp.split_all_videos(destination_dir_mini, True)
@@ -166,11 +164,5 @@ if __name__ == '__main__':
     #check_data_set(4, "audio")
     checks_audio_after_transform("demo_data\demo_after_flattening_mini\sample_0")
     #concatinate_wav_files("demo_data\demo_after_flattening_mini\sample_0")
-=======
-    dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
-                       False)
-    dp.split_all_videos(destination_dir, True)
-    dp.center_all_faces(destination_dir, True)
-    dp.split_all_audio(destination_dir, 100, True)
     # check_data_set(4, "audio")
->>>>>>> 9ce3810d8729886f60bec25a111d0f8edf5d4883
+
