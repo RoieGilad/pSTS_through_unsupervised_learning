@@ -90,12 +90,8 @@ class VideoDecoder(nn.Module):
     def forward(self, frames):
         is_batched = len(frames.shape) > 4
         if is_batched:
-            print(self.end_frame)
-            print(self.end_frame.size())
-            self.end_frame.unsqueeze(0).repeat(frames.shape[0], 1, 1, 1, 1)
-            print(self.end_frame)
-            print(self.end_frame.size())
-            frames = torch.cat((frames, self.end_frame), dim=1)
+            end_frame = self.end_frame.unsqueeze(0).repeat(frames.shape[0], 1, 1, 1, 1)
+            frames = torch.cat((frames, end_frame), dim=1)
             bs, nf, c, h, w = frames.shape
             frames = frames.reshape(bs * nf, c, h, w)
         else:
@@ -152,14 +148,19 @@ class AudioDecoder(nn.Module):
                                        'dim_resnet_to_transformer'])  # function  as the embedding layer
         self.decoder = TransformerDecoder(
             model_params['TransformerDecoder_params'])
+        self.end_frame = nn.Parameter(torch.randn(3, 224, 224))
         if init_weights:
             self.init_weights()
 
     def forward(self, frames):
         is_batched = len(frames.shape) > 4
         if is_batched:
+            end_frame = self.end_frame.unsqueeze(0).repeat(frames.shape[0], 1, 1, 1, 1)
+            frames = torch.cat((frames, end_frame), dim=1)
             bs, nf, c, h, w = frames.shape
             frames = frames.reshape(bs * nf, c, h, w)
+        else:
+            frames = torch.cat((frames, self.end_frame), dim=0)
         frames = self.resnet(frames)
         if is_batched:
             frames = frames.reshape(bs, nf, self.dim_resnet_to_transformer)

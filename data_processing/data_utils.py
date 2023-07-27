@@ -19,11 +19,11 @@ align_corners = None
 amplitude_gain = 0
 
 train_v_frame_transformer = v_transforms.Compose([
-    v_transforms.Resize((224, 224)), v_transforms.ToTensor(),
+    v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
     v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_end_v_frame_transformer = v_transforms.Compose([
-    v_transforms.Resize((224, 224)), v_transforms.ToTensor(),
+    v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
     v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_video_transformer = v_transforms.Compose([
