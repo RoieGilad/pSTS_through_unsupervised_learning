@@ -50,9 +50,9 @@ if __name__ == "__main__":
     download_videos(video_dataset_dir, base_video_url)
     download_test(test_dataset_dir, base_test_url)
 
-    system('cat /dataset/video/vox2_dev_mp4* > vox2_mp4.zip')
-    system('cat /dataset/audio/vox2_dev_aac* > vox2_aac.zip')
-    system('unzip vox2_mp4.zip')
-    system('unzip vox2_aac.zip')
+    #system('cat /dataset/video/vox2_dev_mp4* > vox2_mp4.zip')
+    #system('cat /dataset/audio/vox2_dev_aac* > vox2_aac.zip')
+    #system('unzip vox2_mp4.zip')
+    #system('unzip vox2_aac.zip')
 
 
