@@ -35,6 +35,7 @@ def get_sample_audio_frames_interval(paths_to_audio_sample_frames: List[str], nu
                                      end_char: bool = True):
     """ The function return an interval of frames from the sample's frames
     after making some process on it"""
+    du.pick_new_amplitude_gain()
     start_idx = int((len(paths_to_audio_sample_frames) - num_frames * step_size) * rand)
     path_to_sample_frames_interval = paths_to_audio_sample_frames[
                                      start_idx: start_idx + num_frames * step_size: step_size]

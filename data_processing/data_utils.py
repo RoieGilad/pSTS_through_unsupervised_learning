@@ -1,7 +1,10 @@
 import glob
 import os
+import random
 import shutil
 from os import path, remove
+
+import torchaudio
 import torchvision.transforms as v_transforms
 from torchvision.transforms import functional as F
 import torchaudio.transforms as a_transforms
@@ -9,9 +12,11 @@ from natsort import natsorted
 import torch
 import numpy as np
 from PIL import Image
+from tqdm import tqdm
 
-mode = 'bilinear'
-align_corners = True
+mode = 'nearest'
+align_corners = None
+amplitude_gain = 0
 
 train_v_frame_transformer = v_transforms.Compose([
     v_transforms.Resize((224, 224)), v_transforms.ToTensor(),
@@ -27,12 +32,15 @@ train_video_transformer = v_transforms.Compose([
     v_transforms.RandomCrop([224, 224])])
 
 train_a_frame_transformer = v_transforms.Compose([
+    lambda x: change_amplitude(x),
+    lambda x: add_gaussian_white_noise(x),
     a_transforms.Spectrogram(n_fft=256, hop_length=16),
     lambda x: torch.nn.functional.interpolate(x.unsqueeze(0), size=(224, 224),
                                               mode=mode, align_corners=align_corners),
     lambda x: x.squeeze(dim=0),
     lambda x: x.expand(3, -1, -1),
-    lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+    # lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+])
 
 train_end_a_frame_transformer = v_transforms.Compose([
         v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
@@ -191,3 +199,69 @@ def get_real_index_by_path(sample_path):
     """expected path to be in format some_path/sample_{real_index} and the
     function will return real_index"""
     return sample_path[sample_path.rfind("_") + 1:]
+
+
+def add_gaussian_white_noise(waveform, noise_level=0.01):
+    """receives a waveform tensor and add to it a gaussian white noise
+    according to the noise level"""
+    noise = torch.randn_like(waveform) * noise_level
+    return waveform + noise
+
+
+def pick_new_amplitude_gain(low= 0.05, high=3.5):
+    global amplitude_gain
+    amplitude_gain = random.uniform(low, high)
+
+
+def change_amplitude(waveform):
+    "change the amplitude of the waveform by the factor of amplitude_gain"
+    amplitude_vol= a_transforms.Vol(gain=amplitude_gain, gain_type="amplitude")
+    return amplitude_vol(waveform)
+
+
+def get_mean_std_video(path_to_data):
+    transform = v_transforms.Compose([
+        v_transforms.Resize((224, 224)), v_transforms.ToTensor()])
+    sum_channels, squared_sum_channels, total_elements = 0, 0, 0
+    for vf in tqdm(video_folder_iterator(path_to_data),
+                   desc="get_mean_std_video:"):
+        batch = []
+        for jpeg_path in file_iterator_by_type(vf, "jpg"):
+            with Image.open(jpeg_path) as frame:
+                batch.append(transform(frame))
+        batch = torch.stack(batch, dim=0)
+        total_elements += batch.size(0) * batch.size(2) * batch.size(3)
+        sum_channels += torch.sum(batch, dim=(0, 2, 3))
+        squared_sum_channels += torch.sum(batch ** 2, dim=(0, 2, 3))
+
+    mean_channels = sum_channels / total_elements
+    variance_channels = (squared_sum_channels - (mean_channels ** 2)) / total_elements
+    std_channels = torch.sqrt(variance_channels)
+    return mean_channels, std_channels
+
+
+def get_mean_std_audio(path_to_data):
+    transform = v_transforms.Compose([
+        a_transforms.Spectrogram(n_fft=256, hop_length=16),
+        lambda x: torch.nn.functional.interpolate(x.unsqueeze(0),
+                                                  size=(224, 224),
+                                                  mode=mode,
+                                                  align_corners=align_corners),
+        lambda x: x.squeeze(dim=0),
+        lambda x: x.expand(3, -1, -1),
+    ])
+    sum_channels, squared_sum_channels, total_elements = 0, 0, 0
+    for af in tqdm(audio_folder_iterator(path_to_data),
+                                         desc="get_mean_std_audio:"):
+        batch = [torchaudio.load(p)[0] for p in file_iterator_by_type(af, "wav")]
+        batch = [transform(f) for f in batch]
+        batch = torch.stack(batch, dim=0)
+        total_elements += batch.size(0) * batch.size(2) * batch.size(3)
+        sum_channels += torch.sum(batch, dim=(0, 2, 3))
+        squared_sum_channels += torch.sum(batch ** 2, dim=(0, 2, 3))
+
+    mean_channels = sum_channels / total_elements
+    variance_channels = (squared_sum_channels - (mean_channels ** 2)) / total_elements
+    std_channels = torch.sqrt(variance_channels)
+    return mean_channels, std_channels
+
