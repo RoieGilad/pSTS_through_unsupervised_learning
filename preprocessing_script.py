@@ -143,7 +143,7 @@ def checks_audio_after_transform(path_to_sample):
     spectrograms = [a_transforms.Spectrogram(n_fft=256, hop_length=16)(frame[0])
                     for frame in frames]
     for spectrogram in spectrograms:
-        spectrogram = spectrograms[20]
+        spectrogram = spectrograms[2]
         # plot_spectrogram(spectrogram, "before")
         target_size = (224, 224)
         for mode, ac in zip(modes, align_corners):
@@ -154,7 +154,7 @@ def checks_audio_after_transform(path_to_sample):
                 align_corners=ac)
             new_spectrogram = new_spectrogram.squeeze(dim=0)
             plot_two_spectrograms(spectrogram, "before", new_spectrogram, mode)
-            plot_spectrogram(spectrogram, mode)
+            plot_spectrogram(new_spectrogram, mode)
             print(spectrogram.size())
             print(new_spectrogram)
             print(new_spectrogram.size())
@@ -215,4 +215,6 @@ if __name__ == '__main__':
     # dp.split_all_videos(destination_dir, True)
     # dp.center_all_faces(destination_dir, True)
     # dp.split_all_audio(destination_dir, 100, True)
-    check_data_set(4, "combined")
+    # check_data_set(4, "combined")
+    print("audios: ", du.get_mean_std_audio(destination_dir))
+    print("videos: ", du.get_mean_std_video(destination_dir))
