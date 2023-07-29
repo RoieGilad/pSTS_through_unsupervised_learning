@@ -1,5 +1,6 @@
 import torchvision
 
+import Loss
 from training.Trainer import Trainer
 from training import training_utils
 import torch
@@ -20,8 +21,16 @@ from torch.utils.data import DataLoader
 torch.manual_seed(42)
 import os
 from os import path
+from Loss.pstsLoss import pstsLoss
+import training.training_utils as tu
 
 data_dir = os.path.join("demo_data", "demo_after_flattening")
+transforms_dict = {'a_frame_transform': du.train_a_frame_transformer,
+                   'end_a_frame_transform': du.train_end_a_frame_transformer,
+                   'a_batch_transform': du.train_audio_transformer,
+                   'v_frame_transform': du.train_v_frame_transformer,
+                   'end_v_frame_transform': du.train_end_v_frame_transformer,
+                   'v_batch_transform': du.train_video_transformer}
 
 
 # Define the SimpleModel
@@ -64,7 +73,7 @@ def run_train(model, train_dataset, validation_dataset, batch_size):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     learning_rate = 0.001
 
-    loss_fn = nn.CrossEntropyLoss()
+    loss_fn = pstsLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     snapshot_path = os.path.join("debugging", "snapshot")
     dir_best_model = os.path.join("debugging", "best_model")
@@ -79,7 +88,7 @@ def run_train(model, train_dataset, validation_dataset, batch_size):
                     }
 
     trainer = Trainer(model, train_params, 10, snapshot_path, dir_best_model,
-                      False, device, nept)
+                      False, device, nept, tu.run_one_batch_psts)
     trainer.train(2, True)
     print("done")
     # torchrun --standalone --nproc_per_node=1 training/trainning_script.py
@@ -94,9 +103,9 @@ def main():
     dim_feedforward = dim_resnet_to_transformer
     num_output_features = 512
     dropout = 0.1
-    mask = torch.triu(torch.ones(num_frames, num_frames), 1).bool()
+    mask = torch.triu(torch.ones(num_frames + 1, num_frames + 1), 1).bool()
 
-    batch_size = 16
+    batch_size = 8
 
     video_dataset = VideoDataset(data_dir, du.get_label_path(data_dir),
                                du.train_v_frame_transformer,
@@ -112,6 +121,12 @@ def main():
                                num_frames=num_frames,
                                test=False,
                                step_size=1)
+
+    combined_dataset = CombinedDataset(data_dir, du.get_label_path(data_dir),
+                                       transforms_dict,
+                                       num_frames=num_frames,
+                                       test=False,
+                                       step_size=1)
 
     video_loader = DataLoader(video_dataset, batch_size=batch_size, shuffle=True)
 
@@ -133,11 +148,17 @@ def main():
                                                 num_output_features=num_output_features,
                                                 mask=mask,
                                                 dropout=dropout, max_len=100)
+    psts_params = pu.init_psts_decoder_params(num_frames=num_frames,
+                                              video_params=video_params,
+                                              audio_params=audio_params)
+
     video_encoder = VideoDecoder(video_params, True)
     audio_encoder = AudioDecoder(audio_params, True)
+    psts_encoder = PstsDecoder(psts_params, True)
 
-    # run_train(video_encoder, video_dataset, video_dataset, batch_size)
-    run_train(audio_encoder, audio_dataset, audio_dataset, batch_size)
+    #run_train(video_encoder, video_dataset, video_dataset, batch_size)
+    #run_train(audio_encoder, audio_dataset, audio_dataset, batch_size)
+    run_train(psts_encoder, combined_dataset, combined_dataset, batch_size)
 
 if __name__ == '__main__':
     main()

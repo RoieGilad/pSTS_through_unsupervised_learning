@@ -1,5 +1,5 @@
 import torch
-from Loss import pstsLoss
+from Loss.pstsLoss import pstsLoss
 
 
 if __name__ == '__main__':

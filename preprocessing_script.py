@@ -91,7 +91,7 @@ def check_data_set(index, type):
                            'a_batch_transform': du.train_audio_transformer,
                            'v_frame_transform': du.train_v_frame_transformer,
                            'end_v_frame_transform': du.train_end_v_frame_transformer,
-                           'v_batch_transform': du.train_video_transformer, }
+                           'v_batch_transform': du.train_video_transformer}
         data_object_combined = dt.CombinedDataset(root_dir, path_to_labels,
                                                   transforms_dict)
 
@@ -210,11 +210,11 @@ if __name__ == '__main__':
     # checks_audio_after_transform(
     #     "demo_data\demo_after_flattening\sample_0")
     # concatinate_wav_files("demo_data\demo_after_flattening_mini\sample_0")
-    # dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
-    #                    False)
+    dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
+                       False)
     # dp.split_all_videos(destination_dir, True)
     # dp.center_all_faces(destination_dir, True)
     # dp.split_all_audio(destination_dir, 100, True)
-    # check_data_set(4, "combined")
-    print("audios: ", du.get_mean_std_audio(destination_dir))
-    print("videos: ", du.get_mean_std_video(destination_dir))
+    # check_data_set(0, "video")
+    # print("audios: ", du.get_mean_std_audio(destination_dir))
+    # print("videos: ", du.get_mean_std_video(destination_dir))

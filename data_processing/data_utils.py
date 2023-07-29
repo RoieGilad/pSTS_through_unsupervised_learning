@@ -10,6 +10,7 @@ from torchvision.transforms import functional as F
 import torchaudio.transforms as a_transforms
 from natsort import natsorted
 import torch
+import pandas as pd
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
@@ -19,11 +20,11 @@ align_corners = None
 amplitude_gain = 0
 
 train_v_frame_transformer = v_transforms.Compose([
-    v_transforms.Resize((224, 224)), v_transforms.ToTensor(),
+    v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
     v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_end_v_frame_transformer = v_transforms.Compose([
-    v_transforms.Resize((224, 224)), v_transforms.ToTensor(),
+    v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
     v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_video_transformer = v_transforms.Compose([
@@ -36,21 +37,24 @@ train_a_frame_transformer = v_transforms.Compose([
     lambda x: add_gaussian_white_noise(x),
     a_transforms.Spectrogram(n_fft=256, hop_length=16),
     lambda x: torch.nn.functional.interpolate(x.unsqueeze(0), size=(224, 224),
-                                              mode=mode, align_corners=align_corners),
+                                              mode=mode,
+                                              align_corners=align_corners),
     lambda x: x.squeeze(dim=0),
     lambda x: x.expand(3, -1, -1),
     # lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 ])
 
 train_end_a_frame_transformer = v_transforms.Compose([
-        v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+    v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_audio_transformer = v_transforms.Compose([])
+
 
 def audio_frame_transforms(waveform):
     transform = a_transforms.Spectrogram(n_fft=256, hop_length=16)
     mel_specgram = transform(waveform)
     return torch.squeeze(mel_specgram, dim=0)
+
 
 def add_addition_to_path(input_path, addition):
     """ for a given path = dirname/base_name.type
@@ -208,14 +212,14 @@ def add_gaussian_white_noise(waveform, noise_level=0.01):
     return waveform + noise
 
 
-def pick_new_amplitude_gain(low= 0.05, high=3.5):
+def pick_new_amplitude_gain(low=0.05, high=3.5):
     global amplitude_gain
     amplitude_gain = random.uniform(low, high)
 
 
 def change_amplitude(waveform):
     "change the amplitude of the waveform by the factor of amplitude_gain"
-    amplitude_vol= a_transforms.Vol(gain=amplitude_gain, gain_type="amplitude")
+    amplitude_vol = a_transforms.Vol(gain=amplitude_gain, gain_type="amplitude")
     return amplitude_vol(waveform)
 
 
@@ -235,7 +239,8 @@ def get_mean_std_video(path_to_data):
         squared_sum_channels += torch.sum(batch ** 2, dim=(0, 2, 3))
 
     mean_channels = sum_channels / total_elements
-    variance_channels = (squared_sum_channels - (mean_channels ** 2)) / total_elements
+    variance_channels = (squared_sum_channels - (
+            mean_channels ** 2)) / total_elements
     std_channels = torch.sqrt(variance_channels)
     return mean_channels, std_channels
 
@@ -252,8 +257,9 @@ def get_mean_std_audio(path_to_data):
     ])
     sum_channels, squared_sum_channels, total_elements = 0, 0, 0
     for af in tqdm(audio_folder_iterator(path_to_data),
-                                         desc="get_mean_std_audio:"):
-        batch = [torchaudio.load(p)[0] for p in file_iterator_by_type(af, "wav")]
+                   desc="get_mean_std_audio:"):
+        batch = [torchaudio.load(p)[0] for p in
+                 file_iterator_by_type(af, "wav")]
         batch = [transform(f) for f in batch]
         batch = torch.stack(batch, dim=0)
         total_elements += batch.size(0) * batch.size(2) * batch.size(3)
@@ -261,7 +267,42 @@ def get_mean_std_audio(path_to_data):
         squared_sum_channels += torch.sum(batch ** 2, dim=(0, 2, 3))
 
     mean_channels = sum_channels / total_elements
-    variance_channels = (squared_sum_channels - (mean_channels ** 2)) / total_elements
+    variance_channels = (squared_sum_channels - (
+            mean_channels ** 2)) / total_elements
     std_channels = torch.sqrt(variance_channels)
     return mean_channels, std_channels
 
+
+def add_idx_to_path(path_to_save, idx):
+    directory, filename = os.path.split(path_to_save)
+    filename_without_ext, file_extension = os.path.splitext(filename)
+    file_extension = file_extension[1:] if file_extension else ""
+    if file_extension:
+        return os.path.join(directory,
+                            filename_without_ext + f'_{idx}.' + file_extension)
+    return os.path.join(directory, filename_without_ext + f'_{idx}')
+
+
+def split_and_save(df, path_to_save):
+    max_size = 1000000
+    split_dataframe_lst = []
+    num_chunks = len(df) // max_size + 1
+    for i in range(num_chunks):
+        start_idx = i * max_size
+        end_idx = (i + 1) * max_size
+        split_dataframe_lst.append(df.iloc[start_idx:min(end_idx, len(df))])
+
+    for i in range(len(split_dataframe_lst)):
+        path_with_idx = add_idx_to_path(path_to_save, i)
+        split_dataframe_lst[i].to_excel(path_with_idx, index=False)
+        os.chmod(path_with_idx, 0o0777)
+    return
+
+
+def read_metadata(p):
+    directory, filename = os.path.split(p)
+    metadata_paths = file_iterator_by_type(directory, "xlsx")
+    metadata_dataframes = [pd.read_excel(p) for p in metadata_paths]
+    concatenated_df = pd.concat(metadata_dataframes)
+    concatenated_df.reset_index(drop=True, inplace=True)
+    return concatenated_df

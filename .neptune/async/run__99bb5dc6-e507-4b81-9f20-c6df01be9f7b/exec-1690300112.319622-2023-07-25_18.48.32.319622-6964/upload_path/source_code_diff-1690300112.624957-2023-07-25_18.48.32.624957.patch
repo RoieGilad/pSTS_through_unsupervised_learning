@@ -1,0 +1,180 @@
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+index bae77da..ef53875 100644
+--- a/.idea/workspace.xml
++++ b/.idea/workspace.xml
+@@ -24,8 +24,6 @@
+   <component name="ChangeListManager">
+     <list default="true" id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/data_processing/data_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_utils.py" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/data_processing/dataset_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/dataset_types.py" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/models/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/models.py" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/preprocessing_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing_script.py" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/trainning_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainning_script.py" afterDir="false" />
+@@ -96,7 +94,7 @@
+       <recent name="C:\Users\AVIV\Roie\Galit_Project\pSTS_through_unsupervised_learning" />
+     </key>
+   </component>
+-  <component name="RunManager" selected="Python.preprocessing_script (1)">
++  <component name="RunManager" selected="Python.trainning_script (1)">
+     <configuration name="data_pre_processing_script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+       <module name="pSTS_through_unsupervised_learning" />
+       <option name="INTERPRETER_OPTIONS" value="" />
+@@ -239,11 +237,11 @@
+     </list>
+     <recent_temporary>
+       <list>
+-        <item itemvalue="Python.preprocessing_script (1)" />
+         <item itemvalue="Python.trainning_script (1)" />
++        <item itemvalue="Python.data_pre_processing_script" />
++        <item itemvalue="Python.preprocessing_script (1)" />
+         <item itemvalue="Python.preprocessing_script" />
+         <item itemvalue="Python.trainning_script" />
+-        <item itemvalue="Python.data_pre_processing_script" />
+       </list>
+     </recent_temporary>
+   </component>
+@@ -310,7 +308,7 @@
+         </line-breakpoint>
+         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+           <url>file://$PROJECT_DIR$/models/models.py</url>
+-          <line>96</line>
++          <line>105</line>
+           <option name="timeStamp" value="32" />
+         </line-breakpoint>
+         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+@@ -342,20 +340,20 @@
+     </watches-manager>
+   </component>
+   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+-    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$data_prep_debug.coverage" NAME="data_prep_debug Coverage Results" MODIFIED="1685610018946" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+-    <SUITE FILE_PATH="coverage/dataset_types_py$data_pre_processing_script.coverage" NAME="data_pre_processing_script Coverage Results" MODIFIED="1688501545176" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+-    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$data_prep.coverage" NAME="data_prep Coverage Results" MODIFIED="1685312523794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+-    <SUITE FILE_PATH="coverage/dataset_types_py$trainning_script__1_.coverage" NAME="trainning_script (1) Coverage Results" MODIFIED="1690190804282" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+-    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$loss_debug_script.coverage" NAME="loss_debug_script Coverage Results" MODIFIED="1687684942746" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Loss" />
+-    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$runner_for_debug__1_.coverage" NAME="runner_for_debug (1) Coverage Results" MODIFIED="1689098148642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+-    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$trainning_debug_script__1_.coverage" NAME="trainning_debug_script (1) Coverage Results" MODIFIED="1689142809518" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+-    <SUITE FILE_PATH="coverage/dataset_types_py$preprocessing_script__1_.coverage" NAME="preprocessing_script (1) Coverage Results" MODIFIED="1690198193641" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
++    <SUITE FILE_PATH="coverage/dataset_types_py$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1688575662509" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
++    <SUITE FILE_PATH="coverage/dataset_types_py$trainning_script__1_.coverage" NAME="trainning_script (1) Coverage Results" MODIFIED="1690299728905" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
++    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$trainning_debug_script__1_.coverage" NAME="trainning_debug_script (1) Coverage Results" MODIFIED="1689098897092" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+     <SUITE FILE_PATH="coverage/dataset_types_py$dataset_types.coverage" NAME="dataset_types Coverage Results" MODIFIED="1687032235349" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+-    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1689088897930" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+-    <SUITE FILE_PATH="coverage/dataset_types_py$runner_for_debug__1_.coverage" NAME="runner_for_debug (1) Coverage Results" MODIFIED="1690119582677" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
++    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$runner_for_debug__1_.coverage" NAME="runner_for_debug (1) Coverage Results" MODIFIED="1689098148642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
++    <SUITE FILE_PATH="coverage/dataset_types_py$runner_for_debug__1_.coverage" NAME="runner_for_debug (1) Coverage Results" MODIFIED="1690143877658" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+     <SUITE FILE_PATH="coverage/dataset_types_py$trainning_debug_script__1_.coverage" NAME="trainning_debug_script (1) Coverage Results" MODIFIED="1689945129904" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+-    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$Center_Faces_runner.coverage" NAME="Center_Faces_runner Coverage Results" MODIFIED="1685535577202" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/MTCNN" />
++    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$data_prep.coverage" NAME="data_prep Coverage Results" MODIFIED="1685312523794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
+     <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$trainning_debug_script.coverage" NAME="trainning_debug_script Coverage Results" MODIFIED="1689071043573" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+-    <SUITE FILE_PATH="coverage/dataset_types_py$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1688575662509" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
++    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$Center_Faces_runner.coverage" NAME="Center_Faces_runner Coverage Results" MODIFIED="1685535577202" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/MTCNN" />
++    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$loss_debug_script.coverage" NAME="loss_debug_script Coverage Results" MODIFIED="1687684942746" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Loss" />
++    <SUITE FILE_PATH="coverage/dataset_types_py$data_pre_processing_script.coverage" NAME="data_pre_processing_script Coverage Results" MODIFIED="1690297557902" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
++    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1689088897930" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
++    <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$data_prep_debug.coverage" NAME="data_prep_debug Coverage Results" MODIFIED="1685610018946" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
++    <SUITE FILE_PATH="coverage/dataset_types_py$preprocessing_script__1_.coverage" NAME="preprocessing_script (1) Coverage Results" MODIFIED="1690198193641" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+   </component>
+ </project>
+\ No newline at end of file
+diff --git a/data_processing/__pycache__/data_prep.cpython-39.pyc b/data_processing/__pycache__/data_prep.cpython-39.pyc
+index c7d034f..fbbd284 100644
+Binary files a/data_processing/__pycache__/data_prep.cpython-39.pyc and b/data_processing/__pycache__/data_prep.cpython-39.pyc differ
+diff --git a/data_processing/__pycache__/data_utils.cpython-39.pyc b/data_processing/__pycache__/data_utils.cpython-39.pyc
+index d3e88c6..cf4777a 100644
+Binary files a/data_processing/__pycache__/data_utils.cpython-39.pyc and b/data_processing/__pycache__/data_utils.cpython-39.pyc differ
+diff --git a/data_processing/__pycache__/dataset_types.cpython-39.pyc b/data_processing/__pycache__/dataset_types.cpython-39.pyc
+index 56b84f7..e6e19d0 100644
+Binary files a/data_processing/__pycache__/dataset_types.cpython-39.pyc and b/data_processing/__pycache__/dataset_types.cpython-39.pyc differ
+diff --git a/models/models.py b/models/models.py
+index b249c6c..96c53b3 100644
+--- a/models/models.py
++++ b/models/models.py
+@@ -83,14 +83,23 @@ class VideoDecoder(nn.Module):
+                                    self.dim_resnet_to_transformer)  # function  as the embedding layer
+         self.decoder = TransformerDecoder(
+             model_params['TransformerDecoder_params'])
++        self.end_frame = nn.Parameter(torch.randn(3, 224, 224))
+         if init_weights:
+             self.init_weights()
+ 
+     def forward(self, frames):
+         is_batched = len(frames.shape) > 4
+         if is_batched:
++            print(self.end_frame)
++            print(self.end_frame.size())
++            self.end_frame.unsqueeze(0).repeat(frames.shape[0], 1, 1, 1, 1)
++            print(self.end_frame)
++            print(self.end_frame.size())
++            frames = torch.cat((frames, self.end_frame), dim=1)
+             bs, nf, c, h, w = frames.shape
+             frames = frames.reshape(bs * nf, c, h, w)
++        else:
++            frames = torch.cat((frames, self.end_frame), dim=0)
+         frames = self.resnet(frames)
+         if is_batched:
+             frames = frames.reshape(bs, nf, self.dim_resnet_to_transformer)
+diff --git a/preprocessing_script.py b/preprocessing_script.py
+index 0af5727..48887ce 100644
+--- a/preprocessing_script.py
++++ b/preprocessing_script.py
+@@ -91,7 +91,7 @@ def check_data_set(index, type):
+                            'a_batch_transform': du.train_audio_transformer,
+                            'v_frame_transform': du.train_v_frame_transformer,
+                            'end_v_frame_transform': du.train_end_v_frame_transformer,
+-                           'v_batch_transform': du.train_video_transformer, }
++                           'v_batch_transform': du.train_video_transformer}
+         data_object_combined = dt.CombinedDataset(root_dir, path_to_labels,
+                                                   transforms_dict)
+ 
+diff --git a/trainning_script.py b/trainning_script.py
+index 78ec767..c697980 100644
+--- a/trainning_script.py
++++ b/trainning_script.py
+@@ -22,6 +22,12 @@ import os
+ from os import path
+ 
+ data_dir = os.path.join("demo_data", "demo_after_flattening")
++transforms_dict = {'a_frame_transform': du.train_a_frame_transformer,
++                   'end_a_frame_transform': du.train_end_a_frame_transformer,
++                   'a_batch_transform': du.train_audio_transformer,
++                   'v_frame_transform': du.train_v_frame_transformer,
++                   'end_v_frame_transform': du.train_end_v_frame_transformer,
++                   'v_batch_transform': du.train_video_transformer}
+ 
+ 
+ # Define the SimpleModel
+@@ -69,7 +75,8 @@ def run_train(model, train_dataset, validation_dataset, batch_size):
+     snapshot_path = os.path.join("debugging", "snapshot")
+     dir_best_model = os.path.join("debugging", "best_model")
+     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
+-                            api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
++                            api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI1Zjg1ZTBkYi1jYzJkLTQ4YWItYjg2Yy1iYTUyOTVhMzUwOGEifQ==")
++
+     train_params = {"train_dataset": train_dataset,
+                     "validation_dataset": validation_dataset,
+                     "optimizer": optimizer,
+@@ -113,6 +120,12 @@ def main():
+                                test=False,
+                                step_size=1)
+ 
++    combined_dataset = CombinedDataset(data_dir, du.get_label_path(data_dir),
++                                       transforms_dict,
++                                       num_frames=num_frames,
++                                       test=False,
++                                       step_size=1)
++
+     video_loader = DataLoader(video_dataset, batch_size=batch_size, shuffle=True)
+ 
+     video_params = pu.init_Video_decoder_params(num_frames=num_frames,
+@@ -136,8 +149,8 @@ def main():
+     video_encoder = VideoDecoder(video_params, True)
+     audio_encoder = AudioDecoder(audio_params, True)
+ 
+-    # run_train(video_encoder, video_dataset, video_dataset, batch_size)
+-    run_train(audio_encoder, audio_dataset, audio_dataset, batch_size)
++    run_train(video_encoder, video_dataset, video_dataset, batch_size)
++    # run_train(audio_encoder, audio_dataset, audio_dataset, batch_size)
+ 
+ if __name__ == '__main__':
+     main()

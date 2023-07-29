@@ -65,8 +65,7 @@ def data_flattening(video_source_dir, audio_source_dir, destination_dir,
 
     metadata_df['sample_index'] = np.asarray(sample_indexes)
     metadata_df['speaker_id'] = np.asarray(speaker_ids)
-    metadata_df.to_excel(md_path, index=False)
-    os.chmod(md_path, 0o0777)
+    du.split_and_save(metadata_df, md_path)
     print("Data flattened successfully")
     return sample_num
 
@@ -109,15 +108,15 @@ def delete_samples(root_dir:str, to_delete: List[str]):
         if du.get_sample_index(sample_dir) in to_delete:
             shutil.rmtree(sample_dir)
     md_path = du.get_label_path(root_dir)
-    data_md = pd.read_excel(md_path)
+    data_md = du.read_metadata(md_path)
     index_to_delete = []
     for i, row in data_md.iterrows():
         if 'sample_' + str(row['sample_index']) in to_delete:
             index_to_delete.append(i)
     data_md.drop(index_to_delete, inplace=True)
     data_md.reset_index(drop=True, inplace=True)
-    data_md.to_excel(md_path, index=False)
-    os.chmod(md_path, 0o0777)
+    du.split_and_save(data_md, md_path)
+
 
 
 def center_all_faces(root_dir: str, override=True):
@@ -191,7 +190,7 @@ def split_all_videos(path_to_data: str, delete_video: bool = False):
     the last metadata dataframe after saving all frames rates for each
     video"""
     md_path = du.get_label_path(path_to_data)
-    metadata_df = pd.read_excel(md_path)
+    metadata_df = du.read_metadata(md_path)
     index_to_fr, index_to_nf, index_to_ni = dict(), dict(), dict()
     for path_to_video_dir in tqdm(du.video_folder_iterator(path_to_data),
                                   desc="Split Videos:"):
@@ -208,8 +207,8 @@ def split_all_videos(path_to_data: str, delete_video: bool = False):
     metadata_df.insert(2, "frame_rate", index_to_fr, False)
     metadata_df.insert(3, "numer_of_frames", index_to_nf, False)
     metadata_df.insert(4, "num_video_intervals", index_to_ni, False)
-    metadata_df.to_excel(md_path, index=False)
-    os.chmod(md_path, 0o0777)
+    du.split_and_save(metadata_df, md_path)
+
 
 
 def convert_mp4a_to_wav(path_to_audio_file):
@@ -266,7 +265,7 @@ def split_audio_by_frame_rate(path_to_audio_file: str,
 
 def split_all_audio(path_to_data: str, interval: int, delete_input=False):
     path_to_md = du.get_label_path(path_to_data)
-    data_md = pd.read_excel(path_to_md)
+    data_md = du.read_metadata(path_to_md)
     index_to_num = dict()
     for path_to_audio_folder in tqdm(du.audio_folder_iterator(path_to_data),
                                      desc="Split Audio:"):
@@ -286,20 +285,20 @@ def split_all_audio(path_to_data: str, interval: int, delete_input=False):
     index_to_num = np.asarray(
         [index_to_num[i] for i in sorted(index_to_num.keys())])
     data_md.insert(5, "num_audio_intervals", index_to_num, False)
-    data_md.to_excel(path_to_md, index=False)
-    os.chmod(path_to_md, 0o0777)
+    du.split_and_save(data_md, path_to_md)
+
 
 
 def update_intervals_num(path_to_data):
     """ The function checks if the video and the audio files are already had been processed.
     Then, the function update the metadata file with the minimum intervals for each sample"""
     path_to_md = du.get_label_path(path_to_data)
-    data_md = pd.read_excel(path_to_md)
+    data_md = du.read_metadata(path_to_md)
     if 'num_audio_intervals' in data_md and 'num_video_intervals' in data_md:
         data_md['num_of_intervals'] = data_md[['num_audio_intervals', 'num_video_intervals']].min(axis=1)
         data_md = data_md.drop(['num_audio_intervals', 'num_video_intervals'], axis=1)
-        data_md.to_excel(path_to_md, index=False)
-    os.chmod(path_to_md, 0o0777)
+        du.split_and_save(data_md, path_to_md)
+
 
 
 

@@ -1,0 +1,12 @@
+{"obj": {"type": "AssignString", "path": ["sys", "name"], "value": "Untitled"}, "version": 1}
+{"obj": {"type": "AssignString", "path": ["sys", "description"], "value": ""}, "version": 2}
+{"obj": {"type": "AssignString", "path": ["monitoring", "eb06aea4", "hostname"], "value": "DESKTOP-3ELLJST"}, "version": 3}
+{"obj": {"type": "AssignString", "path": ["sys", "hostname"], "value": "DESKTOP-3ELLJST"}, "version": 4}
+{"obj": {"type": "AssignString", "path": ["monitoring", "eb06aea4", "pid"], "value": "25268"}, "version": 5}
+{"obj": {"type": "AssignString", "path": ["monitoring", "eb06aea4", "tid"], "value": "30844"}, "version": 6}
+{"obj": {"type": "AssignBool", "path": ["sys", "failed"], "value": false}, "version": 7}
+{"obj": {"type": "ClearStringLog", "path": ["monitoring", "eb06aea4", "stdout"]}, "version": 8}
+{"obj": {"type": "ClearStringLog", "path": ["monitoring", "eb06aea4", "stderr"]}, "version": 9}
+{"obj": {"type": "AssignString", "path": ["source_code", "entrypoint"], "value": "trainning_script.py"}, "version": 10}
+{"obj": {"type": "UploadFileSet", "path": ["source_code", "files"], "file_globs": ["C:\\Users\\offir\\repos\\pSTS_through_unsupervised_learning\\trainning_script.py"], "reset": "False"}, "version": 11}
+{"obj": {"type": "UploadFile", "path": ["source_code", "diff"], "ext": "patch", "file_path": null, "tmp_file_name": "source_code_diff-1690299740.575933-2023-07-25_18.42.20.575933.patch", "clean_after_upload": false}, "version": 12}
