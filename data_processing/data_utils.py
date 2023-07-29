@@ -23,28 +23,20 @@ train_v_frame_transformer = v_transforms.Compose([
     v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
     v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
-train_end_v_frame_transformer = v_transforms.Compose([
-    v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
-    v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
-
 train_video_transformer = v_transforms.Compose([
     v_transforms.RandomHorizontalFlip(p=0.5),
     v_transforms.ColorJitter(),
     v_transforms.RandomCrop([224, 224])])
 
 train_a_frame_transformer = v_transforms.Compose([
-    lambda x: change_amplitude(x),
-    lambda x: add_gaussian_white_noise(x),
+    # lambda x: change_amplitude(x),
+    # lambda x: add_gaussian_white_noise(x),
     a_transforms.Spectrogram(n_fft=256, hop_length=16),
     lambda x: torch.nn.functional.interpolate(x.unsqueeze(0), size=(224, 224),
                                               mode=mode,
                                               align_corners=align_corners),
     lambda x: x.squeeze(dim=0),
     lambda x: x.expand(3, -1, -1),
-    # lambda x: F.normalize(x, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-])
-
-train_end_a_frame_transformer = v_transforms.Compose([
     v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
 train_audio_transformer = v_transforms.Compose([])

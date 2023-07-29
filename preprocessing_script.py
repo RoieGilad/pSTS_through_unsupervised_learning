@@ -78,19 +78,15 @@ def check_data_set(index, type):
     if type == "video":
         data_object = dt.VideoDataset(root_dir, path_to_labels,
                                       du.train_v_frame_transformer,
-                                      du.train_end_v_frame_transformer,
                                       du.train_video_transformer)
     elif type == "audio":
         data_object = dt.AudioDataset(root_dir, path_to_labels,
                                       du.train_a_frame_transformer,
-                                      du.train_end_a_frame_transformer,
                                       du.train_audio_transformer)
     elif type == "combined":
         transforms_dict = {'a_frame_transform': du.train_a_frame_transformer,
-                           'end_a_frame_transform': du.train_end_a_frame_transformer,
                            'a_batch_transform': du.train_audio_transformer,
                            'v_frame_transform': du.train_v_frame_transformer,
-                           'end_v_frame_transform': du.train_end_v_frame_transformer,
                            'v_batch_transform': du.train_video_transformer}
         data_object_combined = dt.CombinedDataset(root_dir, path_to_labels,
                                                   transforms_dict)
