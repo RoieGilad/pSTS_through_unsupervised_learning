@@ -26,10 +26,8 @@ import training.training_utils as tu
 
 data_dir = os.path.join("demo_data", "demo_after_flattening")
 transforms_dict = {'a_frame_transform': du.train_a_frame_transformer,
-                   'end_a_frame_transform': du.train_end_a_frame_transformer,
                    'a_batch_transform': du.train_audio_transformer,
                    'v_frame_transform': du.train_v_frame_transformer,
-                   'end_v_frame_transform': du.train_end_v_frame_transformer,
                    'v_batch_transform': du.train_video_transformer}
 
 
@@ -109,14 +107,12 @@ def main():
 
     video_dataset = VideoDataset(data_dir, du.get_label_path(data_dir),
                                du.train_v_frame_transformer,
-                               du.train_end_v_frame_transformer,
                                du.train_video_transformer,
                                num_frames=num_frames,
                                test=False,
                                step_size=1)
     audio_dataset = AudioDataset(data_dir, du.get_label_path(data_dir),
                                du.train_a_frame_transformer,
-                               du.train_end_a_frame_transformer,
                                du.train_audio_transformer,
                                num_frames=num_frames,
                                test=False,

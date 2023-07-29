@@ -14,7 +14,7 @@ import torchaudio
 
 
 def get_sample_video_frames_interval(paths_to_video_sample_frames: List[str], num_frames: int, step_size: int,
-                                     rand: float, video_frame_transform, end_frame_transform, video_batch_transform,
+                                     rand: float, video_frame_transform, video_batch_transform,
                                      num_intervals: int):
     """ The function return an interval of frames from the sample's frames
     after making some process on it"""
@@ -28,7 +28,7 @@ def get_sample_video_frames_interval(paths_to_video_sample_frames: List[str], nu
 
 
 def get_sample_audio_frames_interval(paths_to_audio_sample_frames: List[str], num_frames: int, step_size: int,
-                                     rand: float, audio_frame_transform, end_frame_transform, audio_batch_transform):
+                                     rand: float, audio_frame_transform, audio_batch_transform):
     """ The function return an interval of frames from the sample's frames
     after making some process on it"""
     du.pick_new_amplitude_gain()
@@ -45,13 +45,12 @@ def get_sample_audio_frames_interval(paths_to_audio_sample_frames: List[str], nu
 
 
 class VideoDataset(Dataset):
-    def __init__(self, ds_root_dir: str, path_to_labels: str, frame_transform, end_transform,
+    def __init__(self, ds_root_dir: str, path_to_labels: str, frame_transform,
                  video_transform, num_frames: int = 16, test: bool = False,
                  step_size: int = 1):
         self.test = test
         self.frame_transform = frame_transform
         self.video_transform = video_transform
-        self.end_transform = end_transform
         self.ds_path = ds_root_dir
         self.samples = natsorted(glob(path.join(self.ds_path, 'sample*')))
         self.labels_map = pd.read_excel(path_to_labels)
@@ -87,7 +86,6 @@ class VideoDataset(Dataset):
         processed_frames = get_sample_video_frames_interval(paths_to_frames, self.num_frames,
                                                             self.step_size, tmp_rand,
                                                             self.frame_transform,
-                                                            self.end_transform,
                                                             self.video_transform, num_intervals)
         self.tmp_rand = -1
         label = self.get_label(idx)
@@ -95,12 +93,11 @@ class VideoDataset(Dataset):
 
 
 class AudioDataset(Dataset):
-    def __init__(self, ds_root_dir: str, path_to_labels: str, frame_transform, end_transform,
+    def __init__(self, ds_root_dir: str, path_to_labels: str, frame_transform,
                  audio_transform, num_frames: int = 16, test: bool = False,
                  step_size: int = 1):
         self.test = test
         self.frame_transform = frame_transform
-        self.end_transform = end_transform
         self.audio_transform = audio_transform
         self.ds_path = ds_root_dir
         self.samples = natsorted(glob(path.join(self.ds_path, 'sample*')))
@@ -127,7 +124,6 @@ class AudioDataset(Dataset):
         processed_frames = get_sample_audio_frames_interval(path_to_frames, self.num_frames,
                                                             self.step_size, tmp_rand,
                                                             self.frame_transform,
-                                                            self.end_transform,
                                                             self.audio_transform)
         self.tmp_rand = -1
         label = self.get_label(idx)
@@ -140,12 +136,10 @@ class CombinedDataset(Dataset):
         self.test = test
         self.audio_ds = AudioDataset(ds_root_dir, path_to_labels,
                                      transforms['a_frame_transform'],
-                                     transforms['end_a_frame_transform'],
                                      transforms['a_batch_transform'],
                                      num_frames, test, step_size)
         self.video_ds = VideoDataset(ds_root_dir, path_to_labels,
                                      transforms['v_frame_transform'],
-                                     transforms['end_v_frame_transform'],
                                      transforms['v_batch_transform'],
                                      num_frames, test, step_size)
         self.ds_path = ds_root_dir

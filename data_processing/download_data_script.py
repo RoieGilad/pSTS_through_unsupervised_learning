@@ -39,12 +39,16 @@ if __name__ == "__main__":
     base_test_url = "https://thor.robots.ox.ac.uk/~vgg/data/voxceleb/vox1a/vox2_test"
     dataset_dir = "/dataset"
     os.makedirs(dataset_dir, exist_ok=True)
+    os.chmod(dataset_dir, 0o0777)
     video_dataset_dir = "/dataset/video"
     os.makedirs(video_dataset_dir, exist_ok=True)
+    os.chmod(video_dataset_dir, 0o0777)
     audio_dataset_dir = "/dataset/audio"
     os.makedirs(audio_dataset_dir, exist_ok=True)
+    os.chmod(audio_dataset_dir, 0o0777)
     test_dataset_dir = "/dataset/test"
-    os.makedirs(audio_dataset_dir, exist_ok=True)
+    os.makedirs(test_dataset_dir, exist_ok=True)
+    os.chmod(test_dataset_dir, 0o0777)
 
     download_audios(audio_dataset_dir, base_audio_url)
     download_videos(video_dataset_dir, base_video_url)
