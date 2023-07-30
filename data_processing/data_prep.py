@@ -112,7 +112,8 @@ def center_faces_by_folder(vf, override=True):
         if "centered" not in jpeg_path:
             cnt_failure += center_face_by_path(jpeg_path, override)
         if cnt_failure / num_jpg > 0.15:
-            return [du.get_sample_index(vf)]
+            index = du.get_sample_index(vf)
+            return [index] if index else []
     return []
 
 
@@ -182,17 +183,17 @@ def save_video_frame(frame, path_to_video_dir, sample_index, frame_count,
     os.chmod(frame_path, 0o0777)
 
 
-def split_video_to_frames(path_to_video_dir: str, delete_video: bool = False):
+def split_video_to_frames(sample_index, path_to_video_dir: str,
+                          delete_video: bool = False):
     """extract the frames from the video and save
     them in the same directory. The function saves the number of
     frames as metadata for each sample video in the xl file"""
     path_to_video_file = \
         list(du.file_iterator_by_type(path_to_video_dir, "mp4"))[0]
-    sample_index = du.get_num_sample_index(path.dirname(path_to_video_file))
     video = cv2.VideoCapture(path_to_video_file)  # Open the video file
     if not video.isOpened():
         print(f'Error in split the video file of sample_{sample_index}')
-        return 0
+        return -1, -1, -1
     frame_interval = 100
     frame_rate, num_frames, num_intervals = iterate_over_frames(video,
                                                                 path_to_video_dir,
@@ -200,7 +201,7 @@ def split_video_to_frames(path_to_video_dir: str, delete_video: bool = False):
     video.release()
     if delete_video:
         remove(path_to_video_file)
-    return sample_index, frame_rate, num_frames, num_intervals
+    return frame_rate, num_frames, num_intervals
 
 
 def split_all_videos(path_to_data: str, delete_video: bool = False):
@@ -210,14 +211,20 @@ def split_all_videos(path_to_data: str, delete_video: bool = False):
     video"""
     md_path = du.get_label_path(path_to_data)
     metadata_df = du.read_metadata(md_path)
+    failed_to_split = []
     index_to_fr, index_to_nf, index_to_ni = dict(), dict(), dict()
     for path_to_video_dir in tqdm(du.video_folder_iterator(path_to_data),
                                   desc="Split Videos:"):
-        index, fr, nf, ni = split_video_to_frames(path_to_video_dir,
+        sample_index = du.get_num_sample_index(path.dirname(path_to_video_dir))
+        fr, nf, ni = split_video_to_frames(sample_index, path_to_video_dir,
                                                   delete_video)
-        index_to_fr[index] = fr
-        index_to_nf[index] = nf
-        index_to_ni[index] = ni
+        if fr == nf == ni == -1:
+            failed_to_split.append(sample_index)
+
+        index_to_fr[sample_index] = fr
+        index_to_nf[sample_index] = nf
+        index_to_ni[sample_index] = ni
+
     index_to_nf = np.asarray(
         [index_to_nf[i] for i in sorted(index_to_nf.keys())])
     index_to_fr = np.asarray(
@@ -228,6 +235,7 @@ def split_all_videos(path_to_data: str, delete_video: bool = False):
     metadata_df.insert(3, "numer_of_frames", index_to_nf, False)
     metadata_df.insert(4, "num_video_intervals", index_to_ni, False)
     du.split_and_save(metadata_df, md_path)
+    print(f'these samples have been failed to split: {failed_to_split}')
 
 
 def convert_mp4a_to_wav(path_to_audio_file):

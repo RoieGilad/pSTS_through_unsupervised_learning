@@ -13,9 +13,9 @@ from data_processing import data_utils as du
 import torchaudio
 
 
-def get_sample_video_frames_interval(paths_to_video_sample_frames: List[str], num_frames: int, step_size: int,
-                                     rand: float, video_frame_transform, video_batch_transform,
-                                     num_intervals: int):
+def get_sample_video_frames_interval(paths_to_video_sample_frames: List[str],
+                                     video_frame_transform,
+                                     video_batch_transform):
     """ The function return an interval of frames from the sample's frames
     after making some process on it"""
     frames = [Image.open(p) for p in paths_to_video_sample_frames]
