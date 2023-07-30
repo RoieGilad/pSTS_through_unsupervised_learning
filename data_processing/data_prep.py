@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 from os import path, remove
+from natsort import natsorted
 
 import cv2
 import numpy as np
@@ -19,7 +20,8 @@ import data_processing.data_utils as du
 import MTCNN.mtcnn_pytorch.src
 
 windows = True  # TODO change for gpu
-cuda = False  #  TODO chnange for GPU
+cuda = False  # TODO chnange for GPU
+
 
 def create_metadata_file():
     md = pd.DataFrame()
@@ -29,7 +31,7 @@ def create_metadata_file():
 
 
 def data_flattening(video_source_dir, audio_source_dir, destination_dir,
-                    delete_origin=False):
+                    delete_origin=False, sample_limit=160000):
     """ iterate source dir of voxceleb2 dataset
     and create samples directory with audio and video subdirectories.
     the function create xl file saving the sample label - speaker id
@@ -38,23 +40,30 @@ def data_flattening(video_source_dir, audio_source_dir, destination_dir,
     metadata_df = create_metadata_file()
     sample_num, row = 0, 0
     sample_indexes, speaker_ids = [], []
-    video_id_directories = sorted(glob.glob(path.join(video_source_dir, "id*")))
-    audio_id_directories = sorted(glob.glob(path.join(audio_source_dir, "id*")))
+    video_id_directories = natsorted(
+        glob.glob(path.join(video_source_dir, "id*")))
+    audio_id_directories = natsorted(
+        glob.glob(path.join(audio_source_dir, "id*")))
     sample_num = 0
     row = 0
 
     # Iterate over id directories of audio & video data_processing
     for video_id_directory, audio_id_directory in zip(video_id_directories,
                                                       audio_id_directories):
-        if not du.checks_same_videos_audios_data(video_id_directory, audio_id_directory):
+        if not du.checks_same_videos_audios_data(video_id_directory,
+                                                 audio_id_directory):
             return 0
         # Gets all audio & video sample corresponding speaker_id
-        video_id_samples = sorted(glob.glob(path.join(video_id_directory, '*', '*.mp4')))
-        audio_id_samples = sorted(glob.glob(path.join(audio_id_directory, '*', '*.m4a')))
+        video_id_samples = sorted(
+            glob.glob(path.join(video_id_directory, '*', '*.mp4')))
+        audio_id_samples = sorted(
+            glob.glob(path.join(audio_id_directory, '*', '*.m4a')))
         # Iterate over samples
-        for video_id_sample, audio_id_sample in zip(video_id_samples, audio_id_samples):
+        for video_id_sample, audio_id_sample in zip(video_id_samples,
+                                                    audio_id_samples):
 
-            if not du.checks_same_videos_audios_data(video_id_sample, audio_id_sample):
+            if not du.checks_same_videos_audios_data(video_id_sample,
+                                                     audio_id_sample):
                 return 0
             du.create_sample_video_audio_dirs(destination_dir, video_id_sample,
                                               audio_id_sample, sample_num,
@@ -63,6 +72,9 @@ def data_flattening(video_source_dir, audio_source_dir, destination_dir,
             speaker_ids.append(path.basename(video_id_directory))
             row += 1
             sample_num += 1
+
+        if sample_num > sample_limit:
+            break
 
     metadata_df['sample_index'] = np.asarray(sample_indexes)
     metadata_df['speaker_id'] = np.asarray(speaker_ids)
@@ -77,7 +89,8 @@ def center_face_by_path(path_to_image, override=True):
     num_tries = 50
     for i in range(num_tries):
         try:
-            bounding_boxes, _ = MTCNN.mtcnn_pytorch.src.detect_faces(img_to_run, cuda)
+            bounding_boxes, _ = MTCNN.mtcnn_pytorch.src.detect_faces(img_to_run,
+                                                                     cuda)
             if len(bounding_boxes) > 0:
                 cropped_img = img_to_run.crop(bounding_boxes[0][:4])
                 if not override:
@@ -103,9 +116,10 @@ def center_faces_by_folder(vf, override=True):
     return []
 
 
-def delete_samples(root_dir:str, to_delete: List[str]):
+def delete_samples(root_dir: str, to_delete: List[str]):
     to_delete = set(to_delete)
-    for sample_dir in du.folder_iterator_by_path(path.join(root_dir, "sample_*")):
+    for sample_dir in du.folder_iterator_by_path(
+            path.join(root_dir, "sample_*")):
         if du.get_sample_index(sample_dir) in to_delete:
             shutil.rmtree(sample_dir)
     md_path = du.get_label_path(root_dir)
@@ -117,7 +131,6 @@ def delete_samples(root_dir:str, to_delete: List[str]):
     data_md.drop(index_to_delete, inplace=True)
     data_md.reset_index(drop=True, inplace=True)
     du.split_and_save(data_md, md_path)
-
 
 
 def center_all_faces(root_dir: str, override=True):
@@ -152,41 +165,41 @@ def iterate_over_frames(video, path_to_video_dir, frame_interval):
         if frame_time_stamp >= interval:
             interval += frame_interval
             interval_num += 1
-        save_video_frame(frame, path_to_video_dir, sample_index, frame_count, interval_num)
+        save_video_frame(frame, path_to_video_dir, sample_index, frame_count,
+                         interval_num)
         frame_count += 1
         ret, frame = video.read()
     frame_rate = 1000 / frame_interval
     return frame_rate, frame_count, interval_num + 1
 
 
-def save_video_frame(frame, path_to_video_dir, sample_index, frame_count, interval_num):
+def save_video_frame(frame, path_to_video_dir, sample_index, frame_count,
+                     interval_num):
     """Save a video frame to the specified directory"""
-    start = time.time()
-    frame_path = path.join(path_to_video_dir, f"{sample_index}_v_{interval_num}_{frame_count}.jpg")
+    frame_path = path.join(path_to_video_dir,
+                           f"{sample_index}_v_{interval_num}_{frame_count}.jpg")
     cv2.imwrite(frame_path, frame)
     os.chmod(frame_path, 0o0777)
-    print("saving frame in: ", time.time()-start)
+
 
 def split_video_to_frames(path_to_video_dir: str, delete_video: bool = False):
     """extract the frames from the video and save
     them in the same directory. The function saves the number of
     frames as metadata for each sample video in the xl file"""
-    start = time.time()
     path_to_video_file = \
         list(du.file_iterator_by_type(path_to_video_dir, "mp4"))[0]
     sample_index = du.get_num_sample_index(path.dirname(path_to_video_file))
-    read_video = time.time()
     video = cv2.VideoCapture(path_to_video_file)  # Open the video file
-    print("time for video read: ", time.time()-read_video)
     if not video.isOpened():
         print(f'Error in split the video file of sample_{sample_index}')
         return 0
     frame_interval = 100
-    frame_rate, num_frames, num_intervals = iterate_over_frames(video, path_to_video_dir, frame_interval)
+    frame_rate, num_frames, num_intervals = iterate_over_frames(video,
+                                                                path_to_video_dir,
+                                                                frame_interval)
     video.release()
     if delete_video:
         remove(path_to_video_file)
-    print("time for video: ", time.time()-start)
     return sample_index, frame_rate, num_frames, num_intervals
 
 
@@ -200,7 +213,8 @@ def split_all_videos(path_to_data: str, delete_video: bool = False):
     index_to_fr, index_to_nf, index_to_ni = dict(), dict(), dict()
     for path_to_video_dir in tqdm(du.video_folder_iterator(path_to_data),
                                   desc="Split Videos:"):
-        index, fr, nf, ni = split_video_to_frames(path_to_video_dir, delete_video)
+        index, fr, nf, ni = split_video_to_frames(path_to_video_dir,
+                                                  delete_video)
         index_to_fr[index] = fr
         index_to_nf[index] = nf
         index_to_ni[index] = ni
@@ -214,7 +228,6 @@ def split_all_videos(path_to_data: str, delete_video: bool = False):
     metadata_df.insert(3, "numer_of_frames", index_to_nf, False)
     metadata_df.insert(4, "num_video_intervals", index_to_ni, False)
     du.split_and_save(metadata_df, md_path)
-
 
 
 def convert_mp4a_to_wav(path_to_audio_file):
@@ -241,9 +254,9 @@ def concatenate_audio_by_dir(input_dir, output_path):
 
 def concatenate_all_audio(path_to_data):
     for path_to_audio_folder in tqdm(du.audio_folder_iterator(path_to_data),
-                                    desc="Concatenate Audio:"):
+                                     desc="Concatenate Audio:"):
         concatenate_audio_by_dir(path_to_audio_folder,
-                                 path.join(path_to_audio_folder,"cont.wav"))
+                                 path.join(path_to_audio_folder, "cont.wav"))
 
 
 def split_audio(path_to_audio_file: str,
@@ -254,19 +267,16 @@ def split_audio(path_to_audio_file: str,
         will be deleted"""
     if du.is_mp4a(path_to_audio_file) and windows:
         path_to_audio_file = convert_mp4a_to_wav(path_to_audio_file)
-    read_audio = time.time()
     audio = AudioSegment.from_wav(path_to_audio_file)
-    print("time to read audio: ", time.time() - read_audio)
     duration_ms = len(audio)
     duration_desire = (duration_ms // interval) * interval
     num_slices = -1
     for start in range(0, duration_desire, interval):
         num_slices += 1
         slice = audio[start:start + interval]
-        output_path = du.add_addition_to_path(path_to_audio_file, f"a_{num_slices}")
-        save_audio = time.time()
+        output_path = du.add_addition_to_path(path_to_audio_file,
+                                              f"a_{num_slices}")
         slice.export(output_path, format="wav")
-        print("time to save_audio: ", time.time() - save_audio)
     if delete_input:
         remove(path_to_audio_file)
     return num_slices + 1
@@ -283,11 +293,9 @@ def split_all_audio(path_to_data: str, interval: int, delete_input=False):
         if video_frame_rate:
             for path_to_audio_file in du.file_iterator_by_type(
                     path_to_audio_folder, "m4a"):
-                start_split_audio = time.time()
                 index_to_num[sample_index] = split_audio(
                     path_to_audio_file, interval,
                     delete_input)
-                print("time for audio split: ", time.time() - start_split_audio)
 
         else:
             index_to_num[sample_index] = 0
@@ -306,10 +314,8 @@ def update_intervals_num(path_to_data):
     path_to_md = du.get_label_path(path_to_data)
     data_md = du.read_metadata(path_to_md)
     if 'num_audio_intervals' in data_md and 'num_video_intervals' in data_md:
-        data_md['num_of_intervals'] = data_md[['num_audio_intervals', 'num_video_intervals']].min(axis=1)
-        data_md = data_md.drop(['num_audio_intervals', 'num_video_intervals'], axis=1)
+        data_md['num_of_intervals'] = data_md[
+            ['num_audio_intervals', 'num_video_intervals']].min(axis=1)
+        data_md = data_md.drop(['num_audio_intervals', 'num_video_intervals'],
+                               axis=1)
         du.split_and_save(data_md, path_to_md)
-
-
-
-
