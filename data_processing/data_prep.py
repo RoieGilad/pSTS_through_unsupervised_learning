@@ -1,6 +1,7 @@
 import glob
 import os
 import shutil
+import time
 from os import path, remove
 
 import cv2
@@ -160,19 +161,23 @@ def iterate_over_frames(video, path_to_video_dir, frame_interval):
 
 def save_video_frame(frame, path_to_video_dir, sample_index, frame_count, interval_num):
     """Save a video frame to the specified directory"""
+    start = time.time()
     frame_path = path.join(path_to_video_dir, f"{sample_index}_v_{interval_num}_{frame_count}.jpg")
     cv2.imwrite(frame_path, frame)
     os.chmod(frame_path, 0o0777)
-
+    print("saving frame in: ", time.time()-start)
 
 def split_video_to_frames(path_to_video_dir: str, delete_video: bool = False):
     """extract the frames from the video and save
     them in the same directory. The function saves the number of
     frames as metadata for each sample video in the xl file"""
+    start = time.time()
     path_to_video_file = \
         list(du.file_iterator_by_type(path_to_video_dir, "mp4"))[0]
     sample_index = du.get_num_sample_index(path.dirname(path_to_video_file))
+    read_video = time.time()
     video = cv2.VideoCapture(path_to_video_file)  # Open the video file
+    print("time for video read: ", time.time()-read_video)
     if not video.isOpened():
         print(f'Error in split the video file of sample_{sample_index}')
         return 0
@@ -181,6 +186,7 @@ def split_video_to_frames(path_to_video_dir: str, delete_video: bool = False):
     video.release()
     if delete_video:
         remove(path_to_video_file)
+    print("time for video: ", time.time()-start)
     return sample_index, frame_rate, num_frames, num_intervals
 
 
@@ -240,16 +246,17 @@ def concatenate_all_audio(path_to_data):
                                  path.join(path_to_audio_folder,"cont.wav"))
 
 
-def split_audio_by_frame_rate(path_to_audio_file: str,
-                              interval: int, delete_input: bool = False):
+def split_audio(path_to_audio_file: str,
+                interval: int, delete_input: bool = False):
     """takes an audio file and split it a different audio files s.t. for each
         video frame there is an "audio frame" in size window_size and the video frame
         "taken" from the middle of the audio frame, if delete_input the input path
         will be deleted"""
     if du.is_mp4a(path_to_audio_file) and windows:
         path_to_audio_file = convert_mp4a_to_wav(path_to_audio_file)
-
+    read_audio = time.time()
     audio = AudioSegment.from_wav(path_to_audio_file)
+    print("time to read audio: ", time.time() - read_audio)
     duration_ms = len(audio)
     duration_desire = (duration_ms // interval) * interval
     num_slices = -1
@@ -257,7 +264,9 @@ def split_audio_by_frame_rate(path_to_audio_file: str,
         num_slices += 1
         slice = audio[start:start + interval]
         output_path = du.add_addition_to_path(path_to_audio_file, f"a_{num_slices}")
+        save_audio = time.time()
         slice.export(output_path, format="wav")
+        print("time to save_audio: ", time.time() - save_audio)
     if delete_input:
         remove(path_to_audio_file)
     return num_slices + 1
@@ -274,9 +283,12 @@ def split_all_audio(path_to_data: str, interval: int, delete_input=False):
         if video_frame_rate:
             for path_to_audio_file in du.file_iterator_by_type(
                     path_to_audio_folder, "m4a"):
-                index_to_num[sample_index] = split_audio_by_frame_rate(
+                start_split_audio = time.time()
+                index_to_num[sample_index] = split_audio(
                     path_to_audio_file, interval,
                     delete_input)
+                print("time for audio split: ", time.time() - start_split_audio)
+
         else:
             index_to_num[sample_index] = 0
             print(f'Error in split the video file of {sample_index}, '
@@ -286,7 +298,6 @@ def split_all_audio(path_to_data: str, interval: int, delete_input=False):
         [index_to_num[i] for i in sorted(index_to_num.keys())])
     data_md.insert(5, "num_audio_intervals", index_to_num, False)
     du.split_and_save(data_md, path_to_md)
-
 
 
 def update_intervals_num(path_to_data):

@@ -293,7 +293,7 @@ def split_and_save(df, path_to_save):
 
 def read_metadata(p):
     directory, filename = os.path.split(p)
-    metadata_paths = file_iterator_by_type(directory, "xlsx")
+    metadata_paths = [p for p in file_iterator_by_type(directory, "xlsx")]
     metadata_dataframes = [pd.read_excel(p) for p in metadata_paths]
     concatenated_df = pd.concat(metadata_dataframes)
     concatenated_df.reset_index(drop=True, inplace=True)
