@@ -16,7 +16,7 @@ from data_processing.dataset_types import VideoDataset, AudioDataset, CombinedDa
 import data_processing.data_utils as du
 from models.models import VideoDecoder, AudioDecoder, PstsDecoder
 from models import params_utils as pu
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 # Set random seed for reproducibility
 torch.manual_seed(42)
 import os
@@ -65,6 +65,12 @@ class SimpleModel(nn.Module):
         path_to_load = path.join(dir_to_load, "model.pt")
         state_dict = torch.load(path_to_load)
         self.load_state_dict(state_dict)
+
+
+def split_dataset(dataset, ratio=0.8):
+    size1 = int(ratio * len(dataset))
+    size2 = len(dataset) - size1
+    return random_split(dataset, [size1, size2])
 
 
 def run_train(model, train_dataset, validation_dataset, batch_size):
@@ -154,7 +160,10 @@ def main():
 
     #run_train(video_encoder, video_dataset, video_dataset, batch_size)
     #run_train(audio_encoder, audio_dataset, audio_dataset, batch_size)
-    run_train(psts_encoder, combined_dataset, combined_dataset, batch_size)
+    train_combined_dataset, validation_combined_dataset = split_dataset(
+        combined_dataset)
+    run_train(psts_encoder, train_combined_dataset, validation_combined_dataset,
+              batch_size)
 
 if __name__ == '__main__':
     main()

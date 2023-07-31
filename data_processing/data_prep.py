@@ -235,7 +235,7 @@ def split_all_videos(path_to_data: str, delete_video: bool = False):
     metadata_df.insert(3, "numer_of_frames", index_to_nf, False)
     metadata_df.insert(4, "num_video_intervals", index_to_ni, False)
     du.split_and_save(metadata_df, md_path)
-    print(f'these samples have been failed to split: {failed_to_split}')
+    print(f'these samples have been failed to video split: {failed_to_split}')
 
 
 def convert_mp4a_to_wav(path_to_audio_file):
@@ -294,11 +294,12 @@ def split_all_audio(path_to_data: str, interval: int, delete_input=False):
     path_to_md = du.get_label_path(path_to_data)
     data_md = du.read_metadata(path_to_md)
     index_to_num = dict()
+    samples_to_delete = []
     for path_to_audio_folder in tqdm(du.audio_folder_iterator(path_to_data),
                                      desc="Split Audio:"):
         sample_index = du.get_num_sample_index(path_to_audio_folder)
         video_frame_rate = du.get_video_frame_rate(data_md, sample_index)
-        if video_frame_rate:
+        if video_frame_rate > 0:
             for path_to_audio_file in du.file_iterator_by_type(
                     path_to_audio_folder, "m4a"):
                 index_to_num[sample_index] = split_audio(
@@ -307,6 +308,7 @@ def split_all_audio(path_to_data: str, interval: int, delete_input=False):
 
         else:
             index_to_num[sample_index] = 0
+            samples_to_delete.append('sample_' + str(sample_index))
             print(f'Error in split the video file of {sample_index}, '
                   f'got frame_rate {video_frame_rate}')
 
@@ -314,6 +316,9 @@ def split_all_audio(path_to_data: str, interval: int, delete_input=False):
         [index_to_num[i] for i in sorted(index_to_num.keys())])
     data_md.insert(5, "num_audio_intervals", index_to_num, False)
     du.split_and_save(data_md, path_to_md)
+    print(f'these samples have been failed to audio split: {samples_to_delete}')
+    if samples_to_delete:
+        delete_samples(path_to_data, samples_to_delete)
 
 
 def update_intervals_num(path_to_data):

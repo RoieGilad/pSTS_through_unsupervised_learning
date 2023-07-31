@@ -83,11 +83,9 @@ class VideoDataset(Dataset):
         num_intervals = self.labels_map.iloc[idx, 4]
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
         paths_to_frames = self.choose_frames_from_interval(idx, num_intervals, tmp_rand)
-        processed_frames = get_sample_video_frames_interval(paths_to_frames, self.num_frames,
-                                                            self.step_size, tmp_rand,
+        processed_frames = get_sample_video_frames_interval(paths_to_frames,
                                                             self.frame_transform,
-                                                            self.end_transform,
-                                                            self.video_transform, num_intervals)
+                                                            self.video_transform)
         self.tmp_rand = -1
         label = self.get_label(idx)
         return processed_frames, label
@@ -144,7 +142,6 @@ class CombinedDataset(Dataset):
                                      transforms['v_batch_transform'],
                                      num_frames, test, step_size)
         self.ds_path = ds_root_dir
-        self.labels_map = pd.read_excel(path_to_labels)
         self.samples = natsorted(glob(path.join(self.ds_path, 'sample*')))
         self.labels_map = du.read_metadata(path_to_labels)
         self.samples = natsorted(glob(path.join(self.ds_path, 'sample*')))
