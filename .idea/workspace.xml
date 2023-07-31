@@ -23,10 +23,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="050456eb-96ec-4f57-8469-63afc61faf32" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_processing/data_prep.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_prep.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_processing/dataset_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/dataset_types.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/trainning_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainning_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
