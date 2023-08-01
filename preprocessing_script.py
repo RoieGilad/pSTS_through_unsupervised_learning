@@ -209,11 +209,11 @@ if __name__ == '__main__':
     # checks_audio_after_transform(
     #     "demo_data\demo_after_flattening\sample_0")
     # concatinate_wav_files("demo_data\demo_after_flattening_mini\sample_0")
-    dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
-                       False)
-    dp.split_all_videos(destination_dir, True)
+    # dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
+    #                    False)
+    # dp.split_all_videos(destination_dir, True)
     # dp.center_all_faces(destination_dir, True)
-    dp.split_all_audio(destination_dir, 100, True)
+    # dp.split_all_audio(destination_dir, 100, True)
     # check_data_set(0, "video")
     # print("audios: ", du.get_mean_std_audio(destination_dir))
     # print("videos: ", du.get_mean_std_video(destination_dir))

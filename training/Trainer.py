@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime
 from os import path
 from training.training_utils import run_simple_batch
@@ -140,8 +141,8 @@ class Trainer:
         running_loss = 0.
         last_loss = 0.
         b_sz = len(next(iter(self.train_dataloader))[0])
-        print(f"[GPU{self.gpu_id}] Epoch {epoch} | Batchsize: {b_sz} | Steps: "
-              f"{len(self.train_dataloader)}")
+        print(f"[{'GPU' if self.distributed else 'CPU'}{self.gpu_id}] Epoch "
+              f"{epoch} | Batchsize: {b_sz} | Steps: {len(self.train_dataloader)}")
         if self.distributed:
             self.train_dataloader.sampler.set_epoch(epoch)
         for i, batch in enumerate(self.train_dataloader):
@@ -196,8 +197,10 @@ class Trainer:
         self.model.train()
         for epoch in range(self.epochs_run, max_epochs):
             print('EPOCH {}:'.format(epoch + 1))
+            time_start = time.time()
             avg_loss = self._run_epoch(epoch + 1)
             self.best_vloss = self._run_validation(avg_loss, epoch + 1)
+            print(f'Epoch {epoch} took {time.time() - time_start}')
             self.model.train()
             if self.gpu_id == 0:
                 self.run_docu['validation/best_vloss'] = self.best_vloss

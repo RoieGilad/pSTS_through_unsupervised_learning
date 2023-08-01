@@ -12,11 +12,13 @@ from torch.utils.data import DataLoader
 import neptune
 import torchvision.transforms as transforms
 import torch.nn.functional as F
-from data_processing.dataset_types import VideoDataset, AudioDataset, CombinedDataset
+from data_processing.dataset_types import VideoDataset, AudioDataset, \
+    CombinedDataset
 import data_processing.data_utils as du
 from models.models import VideoDecoder, AudioDecoder, PstsDecoder
 from models import params_utils as pu
 from torch.utils.data import DataLoader, random_split
+
 # Set random seed for reproducibility
 torch.manual_seed(42)
 import os
@@ -73,14 +75,14 @@ def split_dataset(dataset, ratio=0.8):
     return random_split(dataset, [size1, size2])
 
 
-def run_train(model, train_dataset, validation_dataset, batch_size):
+def run_train(model, train_dataset, validation_dataset, batch_size, run_id):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     learning_rate = 0.001
 
     loss_fn = pstsLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    snapshot_path = os.path.join("debugging", "snapshot")
-    dir_best_model = os.path.join("debugging", "best_model")
+    snapshot_path = os.path.join("models", str(run_id), "snapshot")
+    dir_best_model = os.path.join("models", str(run_id), "best_model")
     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
                             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     train_params = {"train_dataset": train_dataset,
@@ -92,14 +94,15 @@ def run_train(model, train_dataset, validation_dataset, batch_size):
                     }
 
     trainer = Trainer(model, train_params, 10, snapshot_path, dir_best_model,
-                      False, device, nept, tu.run_one_batch_psts)
-    trainer.train(2, True)
+                      True, device, nept, tu.run_one_batch_psts)
+    trainer.train(1, True)
     print("done")
     # torchrun --standalone --nproc_per_node=1 training/trainning_script.py
 
 
 def main():
-    num_frames = 16
+    dataset_dir = os.path.join(r'dataset', "160k_train_dataset")
+    num_frames = 15
     dim_resnet_to_transformer = 1024
     num_heads = 4
     num_layers = 4
@@ -109,20 +112,20 @@ def main():
     dropout = 0.1
     mask = torch.triu(torch.ones(num_frames + 1, num_frames + 1), 1).bool()
 
-    batch_size = 8
+    batch_size = 16
 
-    video_dataset = VideoDataset(data_dir, du.get_label_path(data_dir),
-                               du.train_v_frame_transformer,
-                               du.train_video_transformer,
-                               num_frames=num_frames,
-                               test=False,
-                               step_size=1)
-    audio_dataset = AudioDataset(data_dir, du.get_label_path(data_dir),
-                               du.train_a_frame_transformer,
-                               du.train_audio_transformer,
-                               num_frames=num_frames,
-                               test=False,
-                               step_size=1)
+    video_dataset = VideoDataset(dataset_dir, du.get_label_path(dataset_dir),
+                                 du.train_v_frame_transformer,
+                                 du.train_video_transformer,
+                                 num_frames=num_frames,
+                                 test=False,
+                                 step_size=1)
+    audio_dataset = AudioDataset(dataset_dir, du.get_label_path(dataset_dir),
+                                 du.train_a_frame_transformer,
+                                 du.train_audio_transformer,
+                                 num_frames=num_frames,
+                                 test=False,
+                                 step_size=1)
 
     combined_dataset = CombinedDataset(data_dir, du.get_label_path(data_dir),
                                        transforms_dict,
@@ -130,10 +133,11 @@ def main():
                                        test=False,
                                        step_size=1)
 
-    video_loader = DataLoader(video_dataset, batch_size=batch_size, shuffle=True)
+    video_loader = DataLoader(video_dataset, batch_size=batch_size,
+                              shuffle=True)
 
     video_params = pu.init_Video_decoder_params(num_frames=num_frames,
-                                                dim_resnet_to_transformer=1024,
+                                                dim_resnet_to_transformer=dim_resnet_to_transformer,
                                                 num_heads=num_heads,
                                                 dim_feedforward=dim_feedforward,
                                                 batch_first=batch_first,
@@ -142,7 +146,7 @@ def main():
                                                 mask=mask,
                                                 dropout=dropout, max_len=100)
     audio_params = pu.init_audio_decoder_params(num_frames=num_frames,
-                                                dim_resnet_to_transformer=1024,
+                                                dim_resnet_to_transformer=dim_resnet_to_transformer,
                                                 num_heads=num_heads,
                                                 dim_feedforward=dim_feedforward,
                                                 batch_first=batch_first,
@@ -158,12 +162,13 @@ def main():
     audio_encoder = AudioDecoder(audio_params, True)
     psts_encoder = PstsDecoder(psts_params, True)
 
-    #run_train(video_encoder, video_dataset, video_dataset, batch_size)
-    #run_train(audio_encoder, audio_dataset, audio_dataset, batch_size)
+    # run_train(video_encoder, video_dataset, video_dataset, batch_size)
+    # run_train(audio_encoder, audio_dataset, audio_dataset, batch_size)
     train_combined_dataset, validation_combined_dataset = split_dataset(
         combined_dataset)
     run_train(psts_encoder, train_combined_dataset, validation_combined_dataset,
-              batch_size)
+              batch_size, 1)
+
 
 if __name__ == '__main__':
     torch.manual_seed(42)
