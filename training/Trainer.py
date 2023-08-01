@@ -2,12 +2,11 @@ import os
 import time
 from datetime import datetime
 from os import path
-from training.training_utils import run_simple_batch
+from training.training_utils import run_simple_batch, ddp_setup
 import neptune
 import torch
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import DistributedSampler
-
 
 class Trainer:
     """
@@ -64,6 +63,8 @@ class Trainer:
             run_docu,
             run_one_batch=run_simple_batch
     ) -> None:
+        if distributed:
+            ddp_setup()
         self.gpu_id = int(os.environ["LOCAL_RANK"] if "LOCAL_RANK" in os.environ
                                                       and distributed else 0)
         self.distributed = distributed
@@ -89,6 +90,8 @@ class Trainer:
         if os.path.exists(snapshot_path):
             print("Loading snapshot")
             self._load_snapshot(snapshot_path)
+            self.model = self.model.to(self.gpu_id if self.distributed else self.device)
+
         if self.distributed:
             self.model = DDP(self.model, device_ids=[self.gpu_id])
 
