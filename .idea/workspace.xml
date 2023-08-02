@@ -22,14 +22,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_processing/data_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/data_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_processing/dataset_types.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/dataset_types.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_processing/download_data_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_processing/download_data_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preprocessing_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocessing_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/trainning_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainning_script.py" afterDir="false" />
-    </list>
+    <list default="true" id="993eb7f5-e08d-4cf5-b9c6-f0cd5aa6949c" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -247,6 +240,7 @@
       <workItem from="1689864234642" duration="26997000" />
       <workItem from="1690009986495" duration="13892000" />
       <workItem from="1690180478623" duration="12708000" />
+      <workItem from="1690620896832" duration="832000" />
     </task>
     <servers />
   </component>
