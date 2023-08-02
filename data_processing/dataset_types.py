@@ -13,9 +13,9 @@ from data_processing import data_utils as du
 import torchaudio
 
 
-def get_sample_video_frames_interval(paths_to_video_sample_frames: List[str], num_frames: int, step_size: int,
-                                     rand: float, video_frame_transform, video_batch_transform,
-                                     num_intervals: int):
+def get_sample_video_frames_interval(paths_to_video_sample_frames: List[str],
+                                     video_frame_transform,
+                                     video_batch_transform):
     """ The function return an interval of frames from the sample's frames
     after making some process on it"""
     frames = [Image.open(p) for p in paths_to_video_sample_frames]
@@ -53,7 +53,7 @@ class VideoDataset(Dataset):
         self.video_transform = video_transform
         self.ds_path = ds_root_dir
         self.samples = natsorted(glob(path.join(self.ds_path, 'sample*')))
-        self.labels_map = pd.read_excel(path_to_labels)
+        self.labels_map = du.read_metadata(path_to_labels)
         self.num_frames = num_frames
         self.step_size = step_size
         self.tmp_rand = -1
@@ -83,10 +83,9 @@ class VideoDataset(Dataset):
         num_intervals = self.labels_map.iloc[idx, 4]
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
         paths_to_frames = self.choose_frames_from_interval(idx, num_intervals, tmp_rand)
-        processed_frames = get_sample_video_frames_interval(paths_to_frames, self.num_frames,
-                                                            self.step_size, tmp_rand,
+        processed_frames = get_sample_video_frames_interval(paths_to_frames,
                                                             self.frame_transform,
-                                                            self.video_transform, num_intervals)
+                                                            self.video_transform)
         self.tmp_rand = -1
         label = self.get_label(idx)
         return processed_frames, label
@@ -101,7 +100,7 @@ class AudioDataset(Dataset):
         self.audio_transform = audio_transform
         self.ds_path = ds_root_dir
         self.samples = natsorted(glob(path.join(self.ds_path, 'sample*')))
-        self.labels_map = pd.read_excel(path_to_labels)
+        self.labels_map = du.read_metadata(path_to_labels)
         self.num_frames = num_frames
         self.step_size = step_size
         self.tmp_rand = -1
@@ -143,7 +142,8 @@ class CombinedDataset(Dataset):
                                      transforms['v_batch_transform'],
                                      num_frames, test, step_size)
         self.ds_path = ds_root_dir
-        self.labels_map = pd.read_excel(path_to_labels)
+        self.samples = natsorted(glob(path.join(self.ds_path, 'sample*')))
+        self.labels_map = du.read_metadata(path_to_labels)
         self.samples = natsorted(glob(path.join(self.ds_path, 'sample*')))
         self.transforms = transforms
         self.num_frames = num_frames

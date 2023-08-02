@@ -230,7 +230,7 @@ class PstsDecoder(nn.Module):
         self.video_decoder.save_model(path_to_save, device, distributed)
 
     def load_model(self, path_to_load):
-        hyperparams_path = path.join(path_to_load, "hyperparams.pt")
+        hyperparams_path = path.join(path_to_load, "psts_hyperparams.pt")
         model_params = torch.load(hyperparams_path)
         self.__init__(model_params, False)
         self.audio_decoder.load_model_weights(path_to_load)

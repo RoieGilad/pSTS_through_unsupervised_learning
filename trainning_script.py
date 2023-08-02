@@ -12,11 +12,13 @@ from torch.utils.data import DataLoader
 import neptune
 import torchvision.transforms as transforms
 import torch.nn.functional as F
-from data_processing.dataset_types import VideoDataset, AudioDataset, CombinedDataset
+from data_processing.dataset_types import VideoDataset, AudioDataset, \
+    CombinedDataset
 import data_processing.data_utils as du
 from models.models import VideoDecoder, AudioDecoder, PstsDecoder
 from models import params_utils as pu
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
+
 # Set random seed for reproducibility
 torch.manual_seed(42)
 import os
@@ -67,94 +69,118 @@ class SimpleModel(nn.Module):
         self.load_state_dict(state_dict)
 
 
-def run_train(model, train_dataset, validation_dataset, batch_size):
+def split_dataset(dataset, ratio=0.8):
+    size1 = int(ratio * len(dataset))
+    size2 = len(dataset) - size1
+    return random_split(dataset, [size1, size2])
+
+
+def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
+              nept, snapshot_path, dir_best_model):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     learning_rate = 0.001
 
-    loss_fn = pstsLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    snapshot_path = os.path.join("debugging", "snapshot")
-    dir_best_model = os.path.join("debugging", "best_model")
-    nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
-                            api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     train_params = {"train_dataset": train_dataset,
                     "validation_dataset": validation_dataset,
-                    "optimizer": optimizer,
-                    "loss": loss_fn,
+                    "optimizer": optim.Adam(model.parameters(), lr=learning_rate),
+                    "loss": pstsLoss(),
                     "batch_size": batch_size,
-                    "docu_per_batch": 5
+                    "docu_per_batch": 5,
+                    "learning_rate": learning_rate,
+                    "optimizer_name": "Adam",
+                    "loss_name": "pstsLoss",
+                    "snapshot_path": snapshot_path,
+                    'dir_best_model': dir_best_model,
+                    'model_run_id': run_id
                     }
+    nept['params/train_params'] = train_params
 
-    trainer = Trainer(model, train_params, 10, snapshot_path, dir_best_model,
-                      False, device, nept, tu.run_one_batch_psts)
-    trainer.train(2, True)
+    trainer = Trainer(model, train_params, 100, snapshot_path, dir_best_model,
+                      True, device, nept, tu.run_one_batch_psts)
+    trainer.train(1, True) # todo change the maximal epoch to reach
     print("done")
-    # torchrun --standalone --nproc_per_node=1 training/trainning_script.py
+    # torchrun --standalone --nproc_per_node=2 pSTS_through_unsupervised_learning/trainning_script.py
 
 
-def main():
-    num_frames = 16
-    dim_resnet_to_transformer = 1024
-    num_heads = 4
-    num_layers = 4
-    batch_first = True
-    dim_feedforward = dim_resnet_to_transformer
-    num_output_features = 512
-    dropout = 0.1
-    mask = torch.triu(torch.ones(num_frames + 1, num_frames + 1), 1).bool()
+def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
+    nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
+                            api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
+    seed = 42
+    dataset_dir = os.path.join(r'dataset', "160k_train_dataset")
+    batch_size = 16
+    num_frames = 15 # number of none ending frames (sequance will be +1)
+    torch.manual_seed(seed)
 
-    batch_size = 8
+    model_params = {'dataset_dir': dataset_dir,
+                    'batch_size': batch_size,
+                    'num_frames': num_frames,
+                    'dim_resnet_to_transformer': 1024,
+                    'num_heads': 4,
+                    'num_layers': 4,
+                    'batch_first': True,
+                    'dim_feedforward': 1024,    #equal to dim_resnet_to_transformer
+                    'num_output_features': 512,
+                    'dropout': 0.1,
+                    'mask': torch.triu(torch.ones(num_frames + 1, num_frames + 1), 1).bool(),
+                    'seed': seed}
+    nept['params/model_params'] = model_params
 
-    video_dataset = VideoDataset(data_dir, du.get_label_path(data_dir),
-                               du.train_v_frame_transformer,
-                               du.train_video_transformer,
-                               num_frames=num_frames,
-                               test=False,
-                               step_size=1)
-    audio_dataset = AudioDataset(data_dir, du.get_label_path(data_dir),
-                               du.train_a_frame_transformer,
-                               du.train_audio_transformer,
-                               num_frames=num_frames,
-                               test=False,
-                               step_size=1)
+    # video_dataset = VideoDataset(model_params["dataset_dir"],
+    #                              du.get_label_path(model_params["dataset_dir"]),
+    #                              du.train_v_frame_transformer,
+    #                              du.train_video_transformer,
+    #                              num_frames=num_frames,
+    #                              test=False,
+    #                              step_size=1)
+    # audio_dataset = AudioDataset(model_params["dataset_dir"],
+    #                              du.get_label_path(model_params["dataset_dir"]),
+    #                              du.train_a_frame_transformer,
+    #                              du.train_audio_transformer,
+    #                              num_frames=num_frames,
+    #                              test=False,
+    #                              step_size=1)
 
-    combined_dataset = CombinedDataset(data_dir, du.get_label_path(data_dir),
+    combined_dataset = CombinedDataset(model_params["dataset_dir"],
+                                       du.get_label_path(model_params["dataset_dir"]),
                                        transforms_dict,
                                        num_frames=num_frames,
                                        test=False,
                                        step_size=1)
 
-    video_loader = DataLoader(video_dataset, batch_size=batch_size, shuffle=True)
-
     video_params = pu.init_Video_decoder_params(num_frames=num_frames,
-                                                dim_resnet_to_transformer=1024,
-                                                num_heads=num_heads,
-                                                dim_feedforward=dim_feedforward,
-                                                batch_first=batch_first,
-                                                num_layers=num_layers,
-                                                num_output_features=num_output_features,
-                                                mask=mask,
-                                                dropout=dropout, max_len=100)
+                                                dim_resnet_to_transformer=model_params["dim_resnet_to_transformer"],
+                                                num_heads=model_params["num_heads"],
+                                                dim_feedforward=model_params["dim_feedforward"],
+                                                batch_first=model_params["batch_first"],
+                                                num_layers=model_params["num_layers"],
+                                                num_output_features=model_params["num_output_features"],
+                                                mask=model_params["mask"],
+                                                dropout=model_params["dropout"], max_len=100)
     audio_params = pu.init_audio_decoder_params(num_frames=num_frames,
-                                                dim_resnet_to_transformer=1024,
-                                                num_heads=num_heads,
-                                                dim_feedforward=dim_feedforward,
-                                                batch_first=batch_first,
-                                                num_layers=num_layers,
-                                                num_output_features=num_output_features,
-                                                mask=mask,
-                                                dropout=dropout, max_len=100)
+                                                dim_resnet_to_transformer=model_params["dim_resnet_to_transformer"],
+                                                num_heads=model_params["num_heads"],
+                                                dim_feedforward=model_params["dim_feedforward"],
+                                                batch_first=model_params["batch_first"],
+                                                num_layers=model_params["num_layers"],
+                                                num_output_features=model_params["num_output_features"],
+                                                mask=model_params["mask"],
+                                                dropout=model_params["dropout"], max_len=100)
     psts_params = pu.init_psts_decoder_params(num_frames=num_frames,
                                               video_params=video_params,
                                               audio_params=audio_params)
 
-    video_encoder = VideoDecoder(video_params, True)
-    audio_encoder = AudioDecoder(audio_params, True)
+    # video_encoder = VideoDecoder(video_params, True)
+    # audio_encoder = AudioDecoder(audio_params, True)
     psts_encoder = PstsDecoder(psts_params, True)
 
-    #run_train(video_encoder, video_dataset, video_dataset, batch_size)
-    #run_train(audio_encoder, audio_dataset, audio_dataset, batch_size)
-    run_train(psts_encoder, combined_dataset, combined_dataset, batch_size)
+    train_combined_dataset, validation_combined_dataset = split_dataset(
+        combined_dataset)   # split to validation
+    run_train(psts_encoder, train_combined_dataset, validation_combined_dataset,
+              batch_size, run_id, nept, snapshot_path, dir_best_model)
+
 
 if __name__ == '__main__':
-    main()
+    run_id = 1
+    snapshot_path = os.path.join("models", str(run_id), "snapshot")
+    dir_best_model = os.path.join("models", str(run_id), "best_model")
+    prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model)

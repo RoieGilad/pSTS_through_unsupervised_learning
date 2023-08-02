@@ -1,12 +1,12 @@
 import os
+import time
 from datetime import datetime
 from os import path
-from training.training_utils import run_simple_batch
+from training.training_utils import run_simple_batch, ddp_setup
 import neptune
 import torch
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import DistributedSampler
-
 
 class Trainer:
     """
@@ -63,6 +63,8 @@ class Trainer:
             run_docu,
             run_one_batch=run_simple_batch
     ) -> None:
+        if distributed:
+            ddp_setup()
         self.gpu_id = int(os.environ["LOCAL_RANK"] if "LOCAL_RANK" in os.environ
                                                       and distributed else 0)
         self.distributed = distributed
@@ -88,6 +90,8 @@ class Trainer:
         if os.path.exists(snapshot_path):
             print("Loading snapshot")
             self._load_snapshot(snapshot_path)
+            self.model = self.model.to(self.gpu_id if self.distributed else self.device)
+
         if self.distributed:
             self.model = DDP(self.model, device_ids=[self.gpu_id])
 
@@ -140,8 +144,8 @@ class Trainer:
         running_loss = 0.
         last_loss = 0.
         b_sz = len(next(iter(self.train_dataloader))[0])
-        print(f"[GPU{self.gpu_id}] Epoch {epoch} | Batchsize: {b_sz} | Steps: "
-              f"{len(self.train_dataloader)}")
+        print(f"[{'GPU' if self.distributed else 'CPU'}{self.gpu_id}] Epoch "
+              f"{epoch} | Batchsize: {b_sz} | Steps: {len(self.train_dataloader)}")
         if self.distributed:
             self.train_dataloader.sampler.set_epoch(epoch)
         for i, batch in enumerate(self.train_dataloader):
@@ -196,8 +200,10 @@ class Trainer:
         self.model.train()
         for epoch in range(self.epochs_run, max_epochs):
             print('EPOCH {}:'.format(epoch + 1))
+            time_start = time.time()
             avg_loss = self._run_epoch(epoch + 1)
             self.best_vloss = self._run_validation(avg_loss, epoch + 1)
+            print(f'Epoch {epoch} took {time.time() - time_start}')
             self.model.train()
             if self.gpu_id == 0:
                 self.run_docu['validation/best_vloss'] = self.best_vloss
