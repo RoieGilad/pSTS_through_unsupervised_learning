@@ -37,7 +37,7 @@ train_a_frame_transformer = v_transforms.Compose([
                                               align_corners=align_corners),
     lambda x: x.squeeze(dim=0),
     lambda x: x.expand(3, -1, -1),
-    v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+    v_transforms.Normalize([0.6147, 0.6147, 0.6147], [11.1462, 11.1462, 11.1462])])
 
 train_audio_transformer = v_transforms.Compose([])
 
@@ -298,3 +298,10 @@ def read_metadata(p):
     concatenated_df = pd.concat(metadata_dataframes)
     concatenated_df.reset_index(drop=True, inplace=True)
     return concatenated_df
+
+
+def save_mean_and_std(file_path, numbers):
+    with open(file_path, "w") as file:
+        file.write(str(numbers[0][0]) + " " + str(numbers[0][1]) + " " + str(numbers[0][2]))
+        file.write("\n")
+        file.write(str(numbers[1][0]) + " " + str(numbers[1][1]) + " " + str(numbers[1][2]))

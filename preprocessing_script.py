@@ -199,12 +199,14 @@ def prepare_data():
     # dp.split_all_videos(destination_dir, True)
     # dp.center_all_faces(destination_dir, True)
     # dp.split_all_audio(destination_dir, 100, True)
+    # print("audios: ", du.get_mean_std_audio(destination_dir))
+    # print("videos: ", du.get_mean_std_video(destination_dir))
     dp.cuda = True
 
 
 if __name__ == '__main__':
     dp.windows = True
-    dp.cuda = False
+    dp.cuda = True
     print("welcome to preprocessing")
     # checks_audio_after_transform(
     #     "demo_data\demo_after_flattening\sample_0")
@@ -218,12 +220,14 @@ if __name__ == '__main__':
     # print("audios: ", du.get_mean_std_audio(destination_dir))
     # print("videos: ", du.get_mean_std_video(destination_dir))
 
-    print("start flattening")
+    # print("start flattening")
     # dp.data_flattening(gpu_video_source_dir, gpu_audio_source_dir, gpu_destination_dir,
     #                    False)
-    print("start split videos")
+    # print("start split videos")
     # dp.split_all_videos(gpu_destination_dir, True)
-    print("start center images")
+    # print("start center images")
     # dp.center_all_faces(gpu_destination_dir, True)
-    print("start split audio")
+    # print("start split audio")
     # dp.split_all_audio(gpu_destination_dir, 100, True)
+    print("start_cal_mean_and_std")
+    dp.get_mean_and_std(gpu_destination_dir)

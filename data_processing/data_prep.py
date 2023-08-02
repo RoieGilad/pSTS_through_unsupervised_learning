@@ -332,3 +332,14 @@ def update_intervals_num(path_to_data):
         data_md = data_md.drop(['num_audio_intervals', 'num_video_intervals'],
                                axis=1)
         du.split_and_save(data_md, path_to_md)
+
+
+def get_mean_and_std(root_dir):
+    print("start cal mean and std of audio")
+    mean_std_audio = du.get_mean_std_audio(root_dir)
+    du.save_mean_and_std("audio_mean_std.txt", mean_std_audio)
+    print("audios: ", mean_std_audio)
+    print("start cal mean and std video")
+    mean_std_video = du.get_mean_std_video(root_dir)
+    du.save_mean_and_std("video_mean_std.txt", mean_std_video)
+    print("videos: ", mean_std_video)
