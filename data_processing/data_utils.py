@@ -21,7 +21,7 @@ amplitude_gain = 0
 
 train_v_frame_transformer = v_transforms.Compose([
     v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
-    v_transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
+    v_transforms.Normalize([0.4595, 0.3483, 0.3344], [0.5337, 0.4163, 0.4099])])
 
 train_video_transformer = v_transforms.Compose([
     v_transforms.RandomHorizontalFlip(p=0.5),
