@@ -145,7 +145,7 @@ class Trainer:
     def _run_epoch(self, epoch):
         self.model.train(True)  # Make sure gradient tracking is on
         running_loss = 0.
-        last_loss = 0.
+        sample_loss = 0.
         b_sz = len(next(iter(self.train_dataloader))[0])
         print(f"[{'GPU' if self.distributed else 'CPU'}{self.gpu_id}] Epoch "
               f"{epoch} | Batchsize: {b_sz} | Steps: {len(self.train_dataloader)}")
@@ -158,17 +158,18 @@ class Trainer:
             self.optimizer.step()  # Adjust learning weights
 
             running_loss += loss.item()  # Gather data_processing and report
+            sample_loss += loss.item()
             if i % self.docu_per_batch == self.docu_per_batch - 1:
-                last_loss = running_loss / self.docu_per_batch  # loss per batch
+                last_loss = sample_loss / self.docu_per_batch  # loss per batch
                 if self.gpu_id == 0:
                     print('batch {} loss: {}'.format(i + 1, last_loss))
 
                     self.run_docu[f'training/loss avg sample every ' \
                                   f'{self.docu_per_batch} batches'].append(
                         last_loss)
-                running_loss = 0.
+                sample_loss = 0.
 
-        return last_loss
+        return running_loss / len(self.train_dataloader)
 
     def _run_validation(self, avg_loss, epoch_number):
         self.model.eval()  # Set the model to evaluation mode
