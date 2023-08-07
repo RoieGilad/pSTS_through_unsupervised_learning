@@ -72,14 +72,14 @@ class SimpleModel(nn.Module):
 def split_dataset(dataset, ratio=0.8):
     size1 = int(ratio * len(dataset))
     size2 = len(dataset) - size1
-    # size1 = 40000
-    # size2 = 10000
-    size3 = 0 #len(dataset) - 50000
+    # size1 = 1024
+    # size2 = 256
+    size3 = len(dataset) - size1 - size2
     return random_split(dataset, [size1, size2, size3])
 
 
 def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
-              nept, snapshot_path, dir_best_model):
+              nept, snapshot_path, dir_best_model, unused_parameters):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     learning_rate = 0.001
 
@@ -98,8 +98,8 @@ def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
                     }
     nept['params/train_params'] = train_params
 
-    trainer = Trainer(model, train_params, 100, snapshot_path, dir_best_model,
-                      False, device, nept, tu.run_one_batch_psts)
+    trainer = Trainer(model, unused_parameters, train_params, 100, snapshot_path, dir_best_model,
+                      True, device, nept, tu.run_one_batch_psts)
     trainer.train(30, True) # todo change the maximal epoch to reach
     print("done")
     # torchrun --standalone --nproc_per_node=2 pSTS_through_unsupervised_learning/trainning_script.py
@@ -109,13 +109,16 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
                             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     seed = 42
-    dataset_dir =  r'demo_data/demo_after_flattening' #os.path.join(r'dataset', "10k_train_1000ms")
-    batch_size = 128
+    dataset_dir =  os.path.join(r'dataset', "10k_train_1000ms")
+    batch_size = 256
     num_frames = 1 # number of none ending frames (sequance will be +int(use_end_frame))
     use_end_frame = False
     use_decoder = False
     torch.manual_seed(seed)
+
     print(f'expected uniform probability loss: {2*math.log(batch_size*(num_frames+int(use_end_frame)))}')
+    unused_parameters = []
+
     model_params = {'dataset_dir': dataset_dir,
                     'batch_size': batch_size,
                     'num_frames': num_frames,
@@ -161,14 +164,19 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
 
     psts_encoder = PstsDecoder(psts_params, True, use_end_frame, use_decoder)
 
+    for idx, (name, param) in enumerate(psts_encoder.named_parameters()):
+        if use_end_frame == False and "end_frame" in name:
+            unused_parameters.append(idx)
+        if use_decoder == False and ".decoder." in name:
+            unused_parameters.append(idx)
     train_combined_dataset, validation_combined_dataset, _ = split_dataset(
         combined_dataset)   # split to validation
     run_train(psts_encoder, train_combined_dataset, validation_combined_dataset,
-              batch_size, run_id, nept, snapshot_path, dir_best_model)
+              batch_size, run_id, nept, snapshot_path, dir_best_model, unused_parameters)
 
 
 if __name__ == '__main__':
-    run_id = "batch size - 128, num of frames - 1, learning rate - 0.001, 1S audio, no decoder, no end frame"
+    run_id = "batch size - 256, num of frames - 1, learning rate - 0.001, 1S audio, no decoder, no end frame"
     snapshot_path = os.path.join("models", str(run_id), "snapshot")
     dir_best_model = os.path.join("models", str(run_id), "best_model")
     print(f'the current run_id to be run: {run_id}')

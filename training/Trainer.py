@@ -54,6 +54,7 @@ class Trainer:
     def __init__(
             self,
             model: torch.nn.Module,
+            unused_paramter_idx: list,
             train_params: dict,
             save_every: int,
             snapshot_path: str,
@@ -93,7 +94,9 @@ class Trainer:
             self.model = self.model.to(self.gpu_id if self.distributed else self.device)
 
         if self.distributed:
-            self.model = DDP(self.model, device_ids=[self.gpu_id])
+            self.model = DDP(self.model, device_ids=[self.gpu_id],
+                             #find_unused_parameters=True if unused_paramter_idx,
+                             static_graph= True if unused_paramter_idx else False)
 
     def set_dataloader(self, dataset):
         if self.distributed:
