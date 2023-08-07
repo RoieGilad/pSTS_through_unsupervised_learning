@@ -129,7 +129,8 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                     'dim_feedforward': 1024,    #equal to dim_resnet_to_transformer
                     'num_output_features': 512,
                     'dropout': 0.1,
-                    'mask': torch.triu(torch.ones(num_frames + 1, num_frames + 1), 1).bool(),
+                    'mask': torch.triu(torch.ones(num_frames + int(use_end_frame),
+                                                  num_frames + int(use_end_frame)), 1).bool(),
                     'seed': seed}
     nept['params/model_params'] = model_params
 

@@ -85,7 +85,7 @@ class VideoDecoder(nn.Module):
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features,
                                    self.dim_resnet_to_transformer)  # function  as the embedding layer
         self.decoder = TransformerDecoder(
-            model_params['TransformerDecoder_params'])
+            model_params['TransformerDecoder_params'], use_end_frame)
         self.end_frame = nn.Parameter(torch.randn(3, 224, 224))
         if init_weights:
             self.init_weights()
@@ -155,7 +155,7 @@ class AudioDecoder(nn.Module):
                                    model_params[
                                        'dim_resnet_to_transformer'])  # function  as the embedding layer
         self.decoder = TransformerDecoder(
-            model_params['TransformerDecoder_params'])
+            model_params['TransformerDecoder_params'], use_end_frame)
         self.end_frame = nn.Parameter(torch.randn(3, 224, 224))
         if init_weights:
             self.init_weights()
