@@ -203,7 +203,7 @@ class Trainer:
             time_start = time.time()
             avg_loss = self._run_epoch(epoch + 1)
             self.best_vloss = self._run_validation(avg_loss, epoch + 1)
-            print(f'Epoch {epoch} took {time.time() - time_start}')
+            print(f'Epoch {epoch+1} took {time.time() - time_start}')
             self.model.train()
             if self.gpu_id == 0:
                 self.run_docu['validation/best_vloss'] = self.best_vloss
@@ -219,3 +219,4 @@ class Trainer:
                             (not self.distributed)):
             self._save_snapshot(self.epochs_run)
         return self.model
+

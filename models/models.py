@@ -71,8 +71,11 @@ class TransformerDecoder(nn.Module):
 
 
 class VideoDecoder(nn.Module):
-    def __init__(self, model_params: dict, init_weights=True):
+    def __init__(self, model_params: dict, init_weights=True, use_end_frame=True,
+                 use_decoder=True):
         super(VideoDecoder, self).__init__()
+        self.use_end_frame = use_end_frame
+        self.use_decoder = use_decoder
         self.model_type = 'VideoDecoder'
         self.num_frames = model_params['num_frames']
         self.dim_resnet_to_transformer = model_params[
@@ -90,16 +93,18 @@ class VideoDecoder(nn.Module):
     def forward(self, frames):
         is_batched = len(frames.shape) > 4
         if is_batched:
-            end_frame = self.end_frame.unsqueeze(0).repeat(frames.shape[0], 1, 1, 1, 1)
-            frames = torch.cat((frames, end_frame), dim=1)
+            if self.use_end_frame:
+                end_frame = self.end_frame.unsqueeze(0).repeat(frames.shape[0], 1, 1, 1, 1)
+                frames = torch.cat((frames, end_frame), dim=1)
             bs, nf, c, h, w = frames.shape
             frames = frames.reshape(bs * nf, c, h, w)
-        else:
+        elif self.use_end_frame:
             frames = torch.cat((frames, self.end_frame), dim=0)
         frames = self.resnet(frames)
         if is_batched:
             frames = frames.reshape(bs, nf, self.dim_resnet_to_transformer)
-        frames = self.decoder(frames)
+        if self.use_decoder:
+            frames = self.decoder(frames)
         return frames
 
     def init_weights(self):
@@ -136,8 +141,11 @@ class VideoDecoder(nn.Module):
 
 
 class AudioDecoder(nn.Module):
-    def __init__(self, model_params: dict, init_weights=True):
+    def __init__(self, model_params: dict, init_weights=True, use_end_frame=True,
+                 use_decoder=True):
         super(AudioDecoder, self).__init__()
+        self.use_end_frame = use_end_frame
+        self.use_decoder = use_decoder
         self.model_type = 'AudioDecoder'
         self.dim_resnet_to_transformer = model_params['dim_resnet_to_transformer']
         self.model_params = model_params
@@ -155,16 +163,18 @@ class AudioDecoder(nn.Module):
     def forward(self, frames):
         is_batched = len(frames.shape) > 4
         if is_batched:
-            end_frame = self.end_frame.unsqueeze(0).repeat(frames.shape[0], 1, 1, 1, 1)
-            frames = torch.cat((frames, end_frame), dim=1)
+            if self.use_end_frame:
+                end_frame = self.end_frame.unsqueeze(0).repeat(frames.shape[0], 1, 1, 1, 1)
+                frames = torch.cat((frames, end_frame), dim=1)
             bs, nf, c, h, w = frames.shape
             frames = frames.reshape(bs * nf, c, h, w)
-        else:
+        elif self.use_end_frame:
             frames = torch.cat((frames, self.end_frame), dim=0)
         frames = self.resnet(frames)
         if is_batched:
             frames = frames.reshape(bs, nf, self.dim_resnet_to_transformer)
-        frames = self.decoder(frames)
+        if self.use_decoder:
+            frames = self.decoder(frames)
         return frames
 
     def init_weights(self):
@@ -201,14 +211,17 @@ class AudioDecoder(nn.Module):
 
 
 class PstsDecoder(nn.Module):
-    def __init__(self, model_params: dict = None, init_weights=True):
+    def __init__(self, model_params: dict = None, init_weights=True,
+                 use_end_frame=True, use_decoder=True):
         super(PstsDecoder, self).__init__()
         self.model_type = 'PstsEncoder'
         self.num_frames = model_params['num_frames'] if model_params else None
         self.audio_decoder = AudioDecoder(model_params['audio_params'],
-                                          init_weights) if model_params else None
+                                          init_weights, use_end_frame,
+                                          use_decoder) if model_params else None
         self.video_decoder = VideoDecoder(model_params['video_params'],
-                                          init_weights) if model_params else None
+                                          init_weights, use_end_frame,
+                                          use_decoder) if model_params else None
         self.model_params = model_params
 
     def forward_video(self, frames):
@@ -235,3 +248,12 @@ class PstsDecoder(nn.Module):
         self.__init__(model_params, False)
         self.audio_decoder.load_model_weights(path_to_load)
         self.video_decoder.load_model_weights(path_to_load)
+
+    def set_use_decoder(self, state):
+        self.video_decoder.use_decoder = state
+        self.audio_decoder.use_decoder = state
+
+    def set_use_end_frame(self, state):
+        self.video_decoder.use_end_frame = state
+        self.audio_decoder.use_end_frame = state
+
