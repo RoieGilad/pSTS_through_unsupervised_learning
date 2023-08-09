@@ -100,7 +100,7 @@ def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
 
     trainer = Trainer(model, unused_parameters, train_params, 100, snapshot_path, dir_best_model,
                       True, device, nept, tu.run_one_batch_psts)
-    trainer.train(30, True) # todo change the maximal epoch to reach
+    trainer.train(2, True) # todo change the maximal epoch to reach
     print("done")
     # torchrun --standalone --nproc_per_node=2 pSTS_through_unsupervised_learning/trainning_script.py
 
@@ -109,7 +109,7 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
                             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     seed = 42
-    dataset_dir =  os.path.join(r'dataset', "10k_train_1000ms")
+    dataset_dir = os.path.join(r'dataset', "10k_train_1000ms")
     batch_size = 256
     num_frames = 1 # number of none ending frames (sequance will be +int(use_end_frame))
     use_end_frame = False
@@ -122,6 +122,8 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
     model_params = {'dataset_dir': dataset_dir,
                     'batch_size': batch_size,
                     'num_frames': num_frames,
+                    'use_end_frame': use_end_frame,
+                    'use_decoder': use_decoder,
                     'dim_resnet_to_transformer': 1024,
                     'num_heads': 4,
                     'num_layers': 4,
@@ -149,7 +151,10 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                                                 num_layers=model_params["num_layers"],
                                                 num_output_features=model_params["num_output_features"],
                                                 mask=model_params["mask"],
-                                                dropout=model_params["dropout"], max_len=100)
+                                                dropout=model_params["dropout"],
+                                                max_len=100,
+                                                use_decoder=use_decoder,
+                                                use_end_frame=use_end_frame)
     audio_params = pu.init_audio_decoder_params(num_frames=num_frames,
                                                 dim_resnet_to_transformer=model_params["dim_resnet_to_transformer"],
                                                 num_heads=model_params["num_heads"],
@@ -158,7 +163,11 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                                                 num_layers=model_params["num_layers"],
                                                 num_output_features=model_params["num_output_features"],
                                                 mask=model_params["mask"],
-                                                dropout=model_params["dropout"], max_len=100)
+                                                dropout=model_params["dropout"],
+                                                max_len=100,
+                                                use_decoder = use_decoder,
+                                                use_end_frame = use_end_frame)
+
     psts_params = pu.init_psts_decoder_params(num_frames=num_frames,
                                               video_params=video_params,
                                               audio_params=audio_params)
