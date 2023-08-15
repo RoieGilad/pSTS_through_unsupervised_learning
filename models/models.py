@@ -141,6 +141,10 @@ class VideoDecoder(nn.Module):
         if self.use_decoder and self.decoder and os.path.exists(transformer_path):
             self.decoder.load_state_dict(torch.load(transformer_path))
 
+    def load_resnet(self, dir_to_load):
+        resnet_path = path.join(dir_to_load, "v_resnet.pt")
+        self.resnet.load_state_dict(torch.load(resnet_path))
+
 
 class AudioDecoder(nn.Module):
     def __init__(self, model_params: dict, init_weights=True):
@@ -213,6 +217,10 @@ class AudioDecoder(nn.Module):
         if self.use_decoder and self.decoder and os.path.exists(transformer_path):
             self.decoder.load_state_dict(torch.load(transformer_path))
 
+    def load_resnet(self, dir_to_load):
+        resnet_path = path.join(dir_to_load, "a_resnet.pt")
+        self.resnet.load_state_dict(torch.load(resnet_path))
+
 
 class PstsDecoder(nn.Module):
     def __init__(self, model_params: dict = None, init_weights=True,
@@ -259,3 +267,6 @@ class PstsDecoder(nn.Module):
         self.video_decoder.use_end_frame = state
         self.audio_decoder.use_end_frame = state
 
+    def load_resnet(self, path_to_load):
+        self.audio_decoder.load_resnet(path_to_load)
+        self.video_decoder.load_resnet(path_to_load)

@@ -208,7 +208,6 @@ class Trainer:
             avg_loss = self._run_epoch(epoch + 1)
             self.best_vloss = self._run_validation(avg_loss, epoch + 1)
             print(f'Epoch {epoch+1} took {time.time() - time_start}')
-            self.model.train()
             if self.gpu_id == 0:
                 self.run_docu['validation/best_vloss'] = self.best_vloss
                 self.run_docu['run_params/epoch_number'] = self.epochs_run = \
@@ -216,7 +215,7 @@ class Trainer:
             if ((self.distributed and self.gpu_id == 0) or (not self.distributed)) \
                     and epoch % self.save_every == 0:
                 self._save_snapshot(epoch + 1)
-                self.model.train()
+            self.model.train()
 
         self.run_docu.stop()
         if save_at_end and ((self.distributed and self.gpu_id == 0) or
