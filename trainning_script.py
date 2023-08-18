@@ -99,7 +99,7 @@ def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
     nept['params/train_params'] = train_params
 
     trainer = Trainer(model, unused_parameters, train_params, 100, snapshot_path, dir_best_model,
-                      True, device, nept, tu.run_one_batch_psts)
+                      False, device, nept, tu.run_one_batch_psts)
     trainer.train(2, True) # todo change the maximal epoch to reach
     print("done")
     # torchrun --standalone --nproc_per_node=2 pSTS_through_unsupervised_learning/trainning_script.py
@@ -109,7 +109,7 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
                             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     seed = 42
-    dataset_dir = os.path.join(r'dataset', "10k_train_1000ms")
+    dataset_dir = r'demo_data/demo_after_flattening' #os.path.join(r'dataset', "10k_train_1000ms")
     batch_size = 256
     num_frames = 1 # number of none ending frames (sequance will be +int(use_end_frame))
     use_end_frame = False
@@ -173,20 +173,19 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                                               audio_params=audio_params)
 
     psts_encoder = PstsDecoder(psts_params, True, use_end_frame, use_decoder)
+    # psts_encoder.load_resnet(r'models/batch size - 256, num of frames - 1, learning rate - 0.001, 1S audio, no decoder, no end frame/best_model') #load previous trainning of resnet
 
-    for idx, (name, param) in enumerate(psts_encoder.named_parameters()):
-        if use_end_frame == False and "end_frame" in name:
-            unused_parameters.append(idx)
-        if use_decoder == False and ".decoder." in name:
-            unused_parameters.append(idx)
+
+
     train_combined_dataset, validation_combined_dataset, _ = split_dataset(
         combined_dataset)   # split to validation
+
     run_train(psts_encoder, train_combined_dataset, validation_combined_dataset,
               batch_size, run_id, nept, snapshot_path, dir_best_model, unused_parameters)
 
 
 if __name__ == '__main__':
-    run_id = "batch size - 256, num of frames - 1, learning rate - 0.001, 1S audio, no decoder, no end frame"
+    run_id = "check"
     snapshot_path = os.path.join("models", str(run_id), "snapshot")
     dir_best_model = os.path.join("models", str(run_id), "best_model")
     print(f'the current run_id to be run: {run_id}')

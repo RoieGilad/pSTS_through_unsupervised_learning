@@ -32,10 +32,10 @@ train_a_frame_transformer = v_transforms.Compose([
     # lambda x: change_amplitude(x),
     # lambda x: add_gaussian_white_noise(x),
     a_transforms.Spectrogram(n_fft=256, hop_length=16),
-    lambda x: torch.nn.functional.interpolate(x.unsqueeze(0), size=(224, 224),
-                                              mode=mode,
-                                              align_corners=align_corners),
-    lambda x: x.squeeze(dim=0),
+    # lambda x: torch.nn.functional.interpolate(x.unsqueeze(0), size=(224, 224),
+    #                                           mode=mode,
+    #                                           align_corners=align_corners),
+    # lambda x: x.squeeze(dim=0),
     lambda x: x.expand(3, -1, -1),
     #v_transforms.Normalize([0.6147, 0.6147, 0.6147], [11.1462, 11.1462, 11.1462]) #mean and std of 160k sample and 100ms audio
     v_transforms.Normalize([0.6911, 0.6911, 0.6911], [12.7088, 12.7088, 12.7088]) # mean and std of 10k and 1s audio

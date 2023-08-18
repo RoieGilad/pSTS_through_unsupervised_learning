@@ -155,6 +155,8 @@ class AudioDecoder(nn.Module):
         self.dim_resnet_to_transformer = model_params['dim_resnet_to_transformer']
         self.model_params = model_params
         self.num_frames = model_params['num_frames']
+        self.first_layer_left = nn.Parameter(torch.rand(224, 129))
+        self.first_layer_right = nn.Linear(501, 224)
         self.resnet = models.resnet18(weights=None)
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features,
                                    model_params[
@@ -166,6 +168,7 @@ class AudioDecoder(nn.Module):
             self.init_weights()
 
     def forward(self, frames):
+        frames = self.first_layer_right(self.first_layer_left @ frames)
         is_batched = len(frames.shape) > 4
         if is_batched:
             if self.use_end_frame:
@@ -190,16 +193,22 @@ class AudioDecoder(nn.Module):
         self.eval()
         if not path.exists(dir_to_save):
             os.makedirs(dir_to_save, mode=0o777)
+        first_left_path = path.join(dir_to_save, "a_first_layer_left")
+        first_right_path = path.join(dir_to_save, "a_first_layer_right")
         resnet_path = path.join(dir_to_save, "a_resnet.pt")
         transformer_path = path.join(dir_to_save, "a_transformer.pt")
         hyperparams_path = path.join(dir_to_save, "a_hyperparams.pt")
 
         if not distributed and device.type == 'cuda':
             torch.save(self.resnet.state_dict(), resnet_path)
+            torch.save(self.first_layer_left, first_left_path)
+            torch.save(self.first_layer_right.state_dict(), first_right_path)
             if self.decoder:
                 torch.save(self.decoder.state_dict(), transformer_path)
         else:
             torch.save(self.resnet.state_dict(), resnet_path)
+            torch.save(self.first_layer_left, first_left_path)
+            torch.save(self.first_layer_right.state_dict(), first_right_path)
             if self.decoder:
                 torch.save(self.decoder.state_dict(), transformer_path)
         torch.save(self.model_params, hyperparams_path)
@@ -211,16 +220,23 @@ class AudioDecoder(nn.Module):
         self.load_model_weights(dir_to_load)
 
     def load_model_weights(self, dir_to_load):
+        first_left_path = path.join(dir_to_load, "a_first_layer_left")
+        first_right_path = path.join(dir_to_load, "a_first_layer_right")
         resnet_path = path.join(dir_to_load, "a_resnet.pt")
         transformer_path = path.join(dir_to_load, "a_transformer.pt")
+        self.first_layer_right.load_state_dict(torch.load(first_right_path))
+        self.first_layer_left = nn.Parameter(torch.load(first_left_path))
         self.resnet.load_state_dict(torch.load(resnet_path))
         if self.use_decoder and self.decoder and os.path.exists(transformer_path):
             self.decoder.load_state_dict(torch.load(transformer_path))
 
     def load_resnet(self, dir_to_load):
+        first_left_path = path.join(dir_to_load, "a_first_layer_left")
+        first_right_path = path.join(dir_to_load, "a_first_layer_right")
         resnet_path = path.join(dir_to_load, "a_resnet.pt")
         self.resnet.load_state_dict(torch.load(resnet_path))
-
+        self.first_layer_right.load_state_dict(torch.load(first_right_path))
+        self.first_layer_left = nn.Parameter(torch.load(first_left_path))
 
 class PstsDecoder(nn.Module):
     def __init__(self, model_params: dict = None, init_weights=True,
