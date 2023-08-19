@@ -1,2 +1,0 @@
-tensor(0.2346) tensor(0.2346) tensor(0.2346)
-tensor(2.7622) tensor(2.7622) tensor(2.7622)

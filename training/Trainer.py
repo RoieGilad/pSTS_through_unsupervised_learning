@@ -54,6 +54,7 @@ class Trainer:
     def __init__(
             self,
             model: torch.nn.Module,
+            unused_paramter_idx: list,
             train_params: dict,
             save_every: int,
             snapshot_path: str,
@@ -93,7 +94,9 @@ class Trainer:
             self.model = self.model.to(self.gpu_id if self.distributed else self.device)
 
         if self.distributed:
-            self.model = DDP(self.model, device_ids=[self.gpu_id])
+            self.model = DDP(self.model, device_ids=[self.gpu_id],
+                             #find_unused_parameters=True if unused_paramter_idx,
+                             static_graph= True if unused_paramter_idx else False)
 
     def set_dataloader(self, dataset):
         if self.distributed:
@@ -142,7 +145,7 @@ class Trainer:
     def _run_epoch(self, epoch):
         self.model.train(True)  # Make sure gradient tracking is on
         running_loss = 0.
-        last_loss = 0.
+        sample_loss = 0.
         b_sz = len(next(iter(self.train_dataloader))[0])
         print(f"[{'GPU' if self.distributed else 'CPU'}{self.gpu_id}] Epoch "
               f"{epoch} | Batchsize: {b_sz} | Steps: {len(self.train_dataloader)}")
@@ -155,17 +158,18 @@ class Trainer:
             self.optimizer.step()  # Adjust learning weights
 
             running_loss += loss.item()  # Gather data_processing and report
+            sample_loss += loss.item()
             if i % self.docu_per_batch == self.docu_per_batch - 1:
-                last_loss = running_loss / self.docu_per_batch  # loss per batch
+                last_loss = sample_loss / self.docu_per_batch  # loss per batch
                 if self.gpu_id == 0:
                     print('batch {} loss: {}'.format(i + 1, last_loss))
 
                     self.run_docu[f'training/loss avg sample every ' \
                                   f'{self.docu_per_batch} batches'].append(
                         last_loss)
-                running_loss = 0.
+                sample_loss = 0.
 
-        return last_loss
+        return running_loss / len(self.train_dataloader)
 
     def _run_validation(self, avg_loss, epoch_number):
         self.model.eval()  # Set the model to evaluation mode
@@ -203,8 +207,7 @@ class Trainer:
             time_start = time.time()
             avg_loss = self._run_epoch(epoch + 1)
             self.best_vloss = self._run_validation(avg_loss, epoch + 1)
-            print(f'Epoch {epoch} took {time.time() - time_start}')
-            self.model.train()
+            print(f'Epoch {epoch+1} took {time.time() - time_start}')
             if self.gpu_id == 0:
                 self.run_docu['validation/best_vloss'] = self.best_vloss
                 self.run_docu['run_params/epoch_number'] = self.epochs_run = \
@@ -212,10 +215,11 @@ class Trainer:
             if ((self.distributed and self.gpu_id == 0) or (not self.distributed)) \
                     and epoch % self.save_every == 0:
                 self._save_snapshot(epoch + 1)
-                self.model.train()
+            self.model.train()
 
         self.run_docu.stop()
         if save_at_end and ((self.distributed and self.gpu_id == 0) or
                             (not self.distributed)):
             self._save_snapshot(self.epochs_run)
         return self.model
+

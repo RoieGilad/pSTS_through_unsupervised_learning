@@ -1,5 +1,5 @@
 import torchvision
-
+import math
 import Loss
 from training.Trainer import Trainer
 from training import training_utils
@@ -72,11 +72,14 @@ class SimpleModel(nn.Module):
 def split_dataset(dataset, ratio=0.8):
     size1 = int(ratio * len(dataset))
     size2 = len(dataset) - size1
-    return random_split(dataset, [size1, size2])
+    # size1 = 1024
+    # size2 = 256
+    size3 = len(dataset) - size1 - size2
+    return random_split(dataset, [size1, size2, size3])
 
 
 def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
-              nept, snapshot_path, dir_best_model):
+              nept, snapshot_path, dir_best_model, unused_parameters):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     learning_rate = 0.001
 
@@ -85,7 +88,7 @@ def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
                     "optimizer": optim.Adam(model.parameters(), lr=learning_rate),
                     "loss": pstsLoss(),
                     "batch_size": batch_size,
-                    "docu_per_batch": 5,
+                    "docu_per_batch": 1,
                     "learning_rate": learning_rate,
                     "optimizer_name": "Adam",
                     "loss_name": "pstsLoss",
@@ -95,9 +98,9 @@ def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
                     }
     nept['params/train_params'] = train_params
 
-    trainer = Trainer(model, train_params, 100, snapshot_path, dir_best_model,
-                      True, device, nept, tu.run_one_batch_psts)
-    trainer.train(1, True) # todo change the maximal epoch to reach
+    trainer = Trainer(model, unused_parameters, train_params, 100, snapshot_path, dir_best_model,
+                      False, device, nept, tu.run_one_batch_psts)
+    trainer.train(2, True) # todo change the maximal epoch to reach
     print("done")
     # torchrun --standalone --nproc_per_node=2 pSTS_through_unsupervised_learning/trainning_script.py
 
@@ -106,14 +109,21 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
                             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     seed = 42
-    dataset_dir = os.path.join(r'dataset', "160k_train_dataset")
-    batch_size = 16
-    num_frames = 15 # number of none ending frames (sequance will be +1)
+    dataset_dir = r'demo_data/demo_after_flattening' #os.path.join(r'dataset', "10k_train_1000ms")
+    batch_size = 256
+    num_frames = 1 # number of none ending frames (sequance will be +int(use_end_frame))
+    use_end_frame = False
+    use_decoder = False
     torch.manual_seed(seed)
+
+    print(f'expected uniform probability loss: {2*math.log(batch_size*(num_frames+int(use_end_frame)))}')
+    unused_parameters = []
 
     model_params = {'dataset_dir': dataset_dir,
                     'batch_size': batch_size,
                     'num_frames': num_frames,
+                    'use_end_frame': use_end_frame,
+                    'use_decoder': use_decoder,
                     'dim_resnet_to_transformer': 1024,
                     'num_heads': 4,
                     'num_layers': 4,
@@ -121,24 +131,10 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                     'dim_feedforward': 1024,    #equal to dim_resnet_to_transformer
                     'num_output_features': 512,
                     'dropout': 0.1,
-                    'mask': torch.triu(torch.ones(num_frames + 1, num_frames + 1), 1).bool(),
+                    'mask': torch.triu(torch.ones(num_frames + int(use_end_frame),
+                                                  num_frames + int(use_end_frame)), 1).bool(),
                     'seed': seed}
     nept['params/model_params'] = model_params
-
-    # video_dataset = VideoDataset(model_params["dataset_dir"],
-    #                              du.get_label_path(model_params["dataset_dir"]),
-    #                              du.train_v_frame_transformer,
-    #                              du.train_video_transformer,
-    #                              num_frames=num_frames,
-    #                              test=False,
-    #                              step_size=1)
-    # audio_dataset = AudioDataset(model_params["dataset_dir"],
-    #                              du.get_label_path(model_params["dataset_dir"]),
-    #                              du.train_a_frame_transformer,
-    #                              du.train_audio_transformer,
-    #                              num_frames=num_frames,
-    #                              test=False,
-    #                              step_size=1)
 
     combined_dataset = CombinedDataset(model_params["dataset_dir"],
                                        du.get_label_path(model_params["dataset_dir"]),
@@ -155,7 +151,10 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                                                 num_layers=model_params["num_layers"],
                                                 num_output_features=model_params["num_output_features"],
                                                 mask=model_params["mask"],
-                                                dropout=model_params["dropout"], max_len=100)
+                                                dropout=model_params["dropout"],
+                                                max_len=100,
+                                                use_decoder=use_decoder,
+                                                use_end_frame=use_end_frame)
     audio_params = pu.init_audio_decoder_params(num_frames=num_frames,
                                                 dim_resnet_to_transformer=model_params["dim_resnet_to_transformer"],
                                                 num_heads=model_params["num_heads"],
@@ -164,23 +163,30 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                                                 num_layers=model_params["num_layers"],
                                                 num_output_features=model_params["num_output_features"],
                                                 mask=model_params["mask"],
-                                                dropout=model_params["dropout"], max_len=100)
+                                                dropout=model_params["dropout"],
+                                                max_len=100,
+                                                use_decoder = use_decoder,
+                                                use_end_frame = use_end_frame)
+
     psts_params = pu.init_psts_decoder_params(num_frames=num_frames,
                                               video_params=video_params,
                                               audio_params=audio_params)
 
-    # video_encoder = VideoDecoder(video_params, True)
-    # audio_encoder = AudioDecoder(audio_params, True)
-    psts_encoder = PstsDecoder(psts_params, True)
+    psts_encoder = PstsDecoder(psts_params, True, use_end_frame, use_decoder)
+    # psts_encoder.load_resnet(r'models/batch size - 256, num of frames - 1, learning rate - 0.001, 1S audio, no decoder, no end frame/best_model') #load previous trainning of resnet
 
-    train_combined_dataset, validation_combined_dataset = split_dataset(
+
+
+    train_combined_dataset, validation_combined_dataset, _ = split_dataset(
         combined_dataset)   # split to validation
+
     run_train(psts_encoder, train_combined_dataset, validation_combined_dataset,
-              batch_size, run_id, nept, snapshot_path, dir_best_model)
+              batch_size, run_id, nept, snapshot_path, dir_best_model, unused_parameters)
 
 
 if __name__ == '__main__':
-    run_id = 1
+    run_id = "check"
     snapshot_path = os.path.join("models", str(run_id), "snapshot")
     dir_best_model = os.path.join("models", str(run_id), "best_model")
+    print(f'the current run_id to be run: {run_id}')
     prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model)

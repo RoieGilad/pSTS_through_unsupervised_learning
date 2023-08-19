@@ -31,7 +31,7 @@ def create_metadata_file():
 
 
 def data_flattening(video_source_dir, audio_source_dir, destination_dir,
-                    delete_origin=False, sample_limit=160000):
+                    delete_origin=False, sample_limit=10000):
     """ iterate source dir of voxceleb2 dataset
     and create samples directory with audio and video subdirectories.
     the function create xl file saving the sample label - speaker id
@@ -338,7 +338,7 @@ def get_mean_and_std(root_dir):
     mean_std_audio = du.get_mean_std_audio(root_dir)
     du.save_mean_and_std("audio_mean_std.txt", mean_std_audio)
     print("audios: ", mean_std_audio)
-    print("start cal mean and std video")
-    mean_std_video = du.get_mean_std_video(root_dir)
-    du.save_mean_and_std("video_mean_std.txt", mean_std_video)
-    print("videos: ", mean_std_video)
+    # print("start cal mean and std video")
+    # mean_std_video = du.get_mean_std_video(root_dir)
+    # du.save_mean_and_std("video_mean_std.txt", mean_std_video)
+    # print("videos: ", mean_std_video)

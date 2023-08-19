@@ -25,8 +25,11 @@ def init_transformer_decoder_params(hidden_dim, num_heads, dim_feedforward,
 def init_Video_decoder_params(num_frames, dim_resnet_to_transformer,
                               num_heads, dim_feedforward, batch_first,
                               num_layers, num_output_features, mask,
-                              dropout, max_len=100):
+                              dropout, max_len=100, use_decoder=True,
+                              use_end_frame=True):
     params = {'num_frames': num_frames,
+              'use_decoder': use_decoder,
+              'use_end_frame': use_end_frame,
               'dim_resnet_to_transformer': dim_resnet_to_transformer,
               'TransformerDecoder_params': init_transformer_decoder_params(
                   dim_resnet_to_transformer, num_heads, dim_feedforward,
@@ -38,8 +41,11 @@ def init_Video_decoder_params(num_frames, dim_resnet_to_transformer,
 def init_audio_decoder_params(num_frames, dim_resnet_to_transformer,
                               num_heads, dim_feedforward, batch_first,
                               num_layers, num_output_features, mask,
-                              dropout, max_len=100):
+                              dropout, max_len=100, use_decoder=True,
+                              use_end_frame=True):
     params = {'num_frames': num_frames,
+              'use_decoder': use_decoder,
+              'use_end_frame': use_end_frame,
               'dim_resnet_to_transformer': dim_resnet_to_transformer,
               'TransformerDecoder_params': init_transformer_decoder_params(
                   dim_resnet_to_transformer, num_heads, dim_feedforward,

@@ -76,8 +76,8 @@ def plot_two_spectrograms(spectrogram1, title1, spectrogram2, title2):
 
 def check_data_set(index, type):
     data_object = None
-    root_dir = r"demo_data/after"
-    path_to_labels = r"demo_data/after/data_md.xlsx"
+    root_dir = r"demo_data/demo_after_flattening"
+    path_to_labels = r"demo_data/demo_after_flattening/data_md.xlsx"
     if type == "video":
         data_object = dt.VideoDataset(root_dir, path_to_labels,
                                       du.train_v_frame_transformer,
@@ -194,41 +194,28 @@ def concatinate_wav_files(path_to_files):
 
 
 def prepare_data():
-    # dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
-    #                    False)
-    # dp.split_all_videos(destination_dir, True)
-    # dp.center_all_faces(destination_dir, True)
-    # dp.split_all_audio(destination_dir, 100, True)
-    # print("audios: ", du.get_mean_std_audio(destination_dir))
-    # print("videos: ", du.get_mean_std_video(destination_dir))
+    dp.windows = True
     dp.cuda = True
+    time_interval = 500
+    sample_limit = 10000
+    destination_dir = os.path.join(r'dataset', f'10k_train_{str(time_interval)}ms')
+    video_source_dir = r'dataset/vox2_audio'
+    audio_source_dir = r'dataset/vox2_video'
+    print("welcome to preprocessing")
+    dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
+                       False, sample_limit)
+    print("start split videos")
+    dp.split_all_videos(destination_dir, time_interval, True)
+    # print("start center images")
+    # dp.center_all_faces(destination_dir, True)
+    print("start split audio")
+    dp.split_all_audio(destination_dir, time_interval, True)
+    print("start_cal_mean_and_std")
+    dp.get_mean_and_std(destination_dir)
+
 
 
 if __name__ == '__main__':
-    #dp.windows = True
-    #dp.cuda = True
-    #print("welcome to preprocessing")
-    # checks_audio_after_transform(
-    #     "demo_data\demo_after_flattening\sample_0")
-    # concatinate_wav_files("demo_data\demo_after_flattening_mini\sample_0")
-    # dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
-    #                    False)
-    # dp.split_all_videos(destination_dir, True)
-    # dp.center_all_faces(destination_dir, True)
-    # dp.split_all_audio(destination_dir, 100, True)
-    # check_data_set(0, "video")
-    # print("audios: ", du.get_mean_std_audio(destination_dir))
-    # print("videos: ", du.get_mean_std_video(destination_dir))
-
-    # print("start flattening")
-    # dp.data_flattening(gpu_video_source_dir, gpu_audio_source_dir, gpu_destination_dir,
-    #                    False)
-    # print("start split videos")
-    # dp.split_all_videos(gpu_destination_dir, True)
-    # print("start center images")
-    # dp.center_all_faces(gpu_destination_dir, True)
-    # print("start split audio")
-    # dp.split_all_audio(gpu_destination_dir, 100, True)
-    #print("start_cal_mean_and_std")
-    #dp.get_mean_and_std(gpu_destination_dir)
-    check_data_set(4, "combined")
+    dp.windows = True
+    dp.cuda = True
+    prepare_data()
