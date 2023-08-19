@@ -88,7 +88,7 @@ def main():
 
     # Split videos into frames
     if run_split_video:
-        data_prep.split_all_videos(destination_dir, save_curr_data)
+        data_prep.split_all_videos(destination_dir, 1000, save_curr_data)
 
     # Center faces after split
     if run_centering:
@@ -96,7 +96,7 @@ def main():
 
     # split audio corresponding video's frames
     if run_split_audio:
-        data_prep.split_all_audio(destination_dir, 100, save_curr_data)
+        data_prep.split_all_audio(destination_dir, 1000, save_curr_data)
 
     data_prep.update_intervals_num(destination_dir)
 

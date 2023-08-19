@@ -76,8 +76,8 @@ def plot_two_spectrograms(spectrogram1, title1, spectrogram2, title2):
 
 def check_data_set(index, type):
     data_object = None
-    root_dir = r"demo_data/demo_after_flattening"
-    path_to_labels = r"demo_data/demo_after_flattening/data_md.xlsx"
+    root_dir = r"demo_data/after"
+    path_to_labels = r"demo_data/after/data_md.xlsx"
     if type == "video":
         data_object = dt.VideoDataset(root_dir, path_to_labels,
                                       du.train_v_frame_transformer,
@@ -205,9 +205,9 @@ def prepare_data():
 
 
 if __name__ == '__main__':
-    dp.windows = True
-    dp.cuda = True
-    print("welcome to preprocessing")
+    #dp.windows = True
+    #dp.cuda = True
+    #print("welcome to preprocessing")
     # checks_audio_after_transform(
     #     "demo_data\demo_after_flattening\sample_0")
     # concatinate_wav_files("demo_data\demo_after_flattening_mini\sample_0")
@@ -229,5 +229,6 @@ if __name__ == '__main__':
     # dp.center_all_faces(gpu_destination_dir, True)
     # print("start split audio")
     # dp.split_all_audio(gpu_destination_dir, 100, True)
-    print("start_cal_mean_and_std")
-    dp.get_mean_and_std(gpu_destination_dir)
+    #print("start_cal_mean_and_std")
+    #dp.get_mean_and_std(gpu_destination_dir)
+    check_data_set(4, "combined")

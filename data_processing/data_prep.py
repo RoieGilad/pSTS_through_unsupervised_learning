@@ -154,7 +154,7 @@ def iterate_over_frames(video, path_to_video_dir, frame_interval):
     frame_origin_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
     frame_origin_rate = video.get(cv2.CAP_PROP_FPS)
     duration_ms = (frame_origin_count / frame_origin_rate) * 1000
-    duration_desire = (duration_ms // 100) * 100
+    duration_desire = (duration_ms // frame_interval) * frame_interval
     frame_count = 0
     interval = frame_interval
     interval_num = 0
@@ -184,7 +184,7 @@ def save_video_frame(frame, path_to_video_dir, sample_index, frame_count,
 
 
 def split_video_to_frames(sample_index, path_to_video_dir: str,
-                          delete_video: bool = False):
+                          frame_interval, delete_video: bool = False):
     """extract the frames from the video and save
     them in the same directory. The function saves the number of
     frames as metadata for each sample video in the xl file"""
@@ -194,7 +194,6 @@ def split_video_to_frames(sample_index, path_to_video_dir: str,
     if not video.isOpened():
         print(f'Error in split the video file of sample_{sample_index}')
         return -1, -1, -1
-    frame_interval = 100
     frame_rate, num_frames, num_intervals = iterate_over_frames(video,
                                                                 path_to_video_dir,
                                                                 frame_interval)
@@ -204,7 +203,7 @@ def split_video_to_frames(sample_index, path_to_video_dir: str,
     return frame_rate, num_frames, num_intervals
 
 
-def split_all_videos(path_to_data: str, delete_video: bool = False):
+def split_all_videos(path_to_data: str, frame_interval, delete_video: bool = False):
     """ The function iterate all video directories corresponding each
     sample and calls split_video_to_frames function. the function save
     the last metadata dataframe after saving all frames rates for each
@@ -217,7 +216,7 @@ def split_all_videos(path_to_data: str, delete_video: bool = False):
                                   desc="Split Videos:"):
         sample_index = du.get_num_sample_index(path.dirname(path_to_video_dir))
         fr, nf, ni = split_video_to_frames(sample_index, path_to_video_dir,
-                                                  delete_video)
+                                           frame_interval, delete_video)
         if fr == nf == ni == -1:
             failed_to_split.append(sample_index)
 
