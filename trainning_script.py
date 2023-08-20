@@ -112,8 +112,8 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
     dataset_dir = r'demo_data/demo_after_flattening' #os.path.join(r'dataset', "10k_train_1000ms")
     batch_size = 256
     num_frames = 1 # number of none ending frames (sequance will be +int(use_end_frame))
-    use_end_frame = False
-    use_decoder = False
+    use_end_frame = True
+    use_decoder = True
     torch.manual_seed(seed)
 
     print(f'expected uniform probability loss: {2*math.log(batch_size*(num_frames+int(use_end_frame)))}')
@@ -174,8 +174,13 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
 
     psts_encoder = PstsDecoder(psts_params, True, use_end_frame, use_decoder)
     # psts_encoder.load_resnet(r'models/batch size - 256, num of frames - 1, learning rate - 0.001, 1S audio, no decoder, no end frame/best_model') #load previous trainning of resnet
+    psts_encoder.set_resnet_gradient(False)
 
-
+    for name, param in psts_encoder.named_parameters():
+        print(f"Parameter Name: {name}")
+        print(f'Requires Grad: {hasattr(param, "requires_grad")} ')
+        if hasattr(param, "requires_grad"):
+            print("has grad and its state is: ", param.requires_grad)
 
     train_combined_dataset, validation_combined_dataset, _ = split_dataset(
         combined_dataset)   # split to validation
