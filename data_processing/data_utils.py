@@ -21,11 +21,15 @@ amplitude_gain = 0
 
 train_v_frame_transformer = v_transforms.Compose([
     v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
-    v_transforms.Normalize([0.4595, 0.3483, 0.3344], [0.5337, 0.4163, 0.4099])])
+    # v_transforms.Normalize([0.4595, 0.3483, 0.3344], [0.5337, 0.4163, 0.4099])])#mean and std of 160k sample and 100ms audio
+    # v_transforms.Normalize([0.4642, 0.3595, 0.3521], [0.5421, 0.4302, 0.4297])])#mean and std of 10k sample and 500ms audio
+    v_transforms.Normalize([0.4595, 0.3483, 0.3345], [0.5337, 0.4163, 0.4100])])#mean and std of 160k sample and 500ms audio
+
+
 
 train_video_transformer = v_transforms.Compose([
     v_transforms.RandomHorizontalFlip(p=0.5),
-    v_transforms.ColorJitter(),
+    # v_transforms.ColorJitter(),
     v_transforms.RandomCrop([224, 224])])
 
 train_a_frame_transformer = v_transforms.Compose([
@@ -38,7 +42,12 @@ train_a_frame_transformer = v_transforms.Compose([
     # lambda x: x.squeeze(dim=0),
     lambda x: x.expand(3, -1, -1),
     #v_transforms.Normalize([0.6147, 0.6147, 0.6147], [11.1462, 11.1462, 11.1462]) #mean and std of 160k sample and 100ms audio
-    v_transforms.Normalize([0.6911, 0.6911, 0.6911], [12.7088, 12.7088, 12.7088]) # mean and std of 10k and 1s audio
+    # v_transforms.Normalize([0.6911, 0.6911, 0.6911], [12.7088, 12.7088, 12.7088]) # mean and std of 10k and 1s audio
+    # v_transforms.Normalize([0.6906, 0.6906, 0.6906], [12.6992, 12.6992, 12.6992]) # mean and std of 10k and 1s audio
+    # v_transforms.Normalize([0.6157, 0.6157, 0.6157], [11.2199, 11.2199, 11.2199]) #mean and std of 160k sample and 500ms audio
+    v_transforms.Normalize([0.6151, 0.6151, 0.6151], [11.1725, 11.1725, 11.1725]) #mean and std of 160k sample and 500ms audio without interpolation
+
+
 ])
 
 train_audio_transformer = v_transforms.Compose([])
@@ -242,11 +251,11 @@ def get_mean_std_video(path_to_data):
 def get_mean_std_audio(path_to_data):
     transform = v_transforms.Compose([
         a_transforms.Spectrogram(n_fft=256, hop_length=16),
-        lambda x: torch.nn.functional.interpolate(x.unsqueeze(0),
-                                                  size=(224, 224),
-                                                  mode=mode,
-                                                  align_corners=align_corners),
-        lambda x: x.squeeze(dim=0),
+        #lambda x: torch.nn.functional.interpolate(x.unsqueeze(0),
+         #                                         size=(224, 224),
+          #                                        mode=mode,
+           #                                       align_corners=align_corners),
+        #lambda x: x.squeeze(dim=0),
         lambda x: x.expand(3, -1, -1),
     ])
     sum_channels, squared_sum_channels, total_elements = 0, 0, 0

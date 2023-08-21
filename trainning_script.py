@@ -174,7 +174,7 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
 
     psts_encoder = PstsDecoder(psts_params, True, use_end_frame, use_decoder)
     # psts_encoder.load_resnet(r'models/batch size - 256, num of frames - 1, learning rate - 0.001, 1S audio, no decoder, no end frame/best_model') #load previous trainning of resnet
-    psts_encoder.set_resnet_gradient(False)
+    psts_encoder.set_resnet_gradient(False, False)
 
     for name, param in psts_encoder.named_parameters():
         print(f"Parameter Name: {name}")
