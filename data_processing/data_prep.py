@@ -342,3 +342,25 @@ def get_mean_and_std(root_dir):
     # mean_std_video = du.get_mean_std_video(root_dir)
     # du.save_mean_and_std("video_mean_std.txt", mean_std_video)
     # print("videos: ", mean_std_video)
+
+
+def filter_dataset_by_label(root_dir, reference_dir):
+    reference_md = du.read_metadata(du.get_label_path(reference_dir))
+    unique_labels = set(reference_md['speaker_id'].unique())
+    filter_samples_by_label(root_dir, unique_labels)
+
+
+def filter_samples_by_label(root_dir, labels_to_keep):
+    for sample_dir in du.folder_iterator_by_path(
+            path.join(root_dir, "sample_*")):
+        if du.get_sample_index(sample_dir) not in labels_to_keep:
+            shutil.rmtree(sample_dir)
+    md_path = du.get_label_path(root_dir)
+    data_md = du.read_metadata(md_path)
+    index_to_delete = []
+    for i, row in data_md.iterrows():
+        if 'sample_' + str(row['sample_index']) not in labels_to_keep:
+            index_to_delete.append(i)
+    data_md.drop(index_to_delete, inplace=True)
+    data_md.reset_index(drop=True, inplace=True)
+    du.split_and_save(data_md, md_path)

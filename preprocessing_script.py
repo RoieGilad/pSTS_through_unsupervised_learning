@@ -218,4 +218,5 @@ def prepare_data():
 if __name__ == '__main__':
     dp.windows = True
     dp.cuda = True
-    prepare_data()
+    dp.filter_dataset_by_label(r'demo_data/demo_after_flattening', r'demo_data/demo_after_flattening')
+    # prepare_data()
