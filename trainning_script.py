@@ -69,11 +69,11 @@ class SimpleModel(nn.Module):
         self.load_state_dict(state_dict)
 
 
-def split_dataset(dataset, ratio=0.8):
+def split_dataset(dataset, ratio=0.9):
     size1 = int(ratio * len(dataset))
     size2 = len(dataset) - size1
-    # size1 = 1024
-    # size2 = 256
+    # size1 = 20480
+    # size2 = 2048
     size3 = len(dataset) - size1 - size2
     return random_split(dataset, [size1, size2, size3])
 
@@ -81,7 +81,7 @@ def split_dataset(dataset, ratio=0.8):
 def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
               nept, snapshot_path, dir_best_model, unused_parameters):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    learning_rate = 0.001
+    learning_rate = 0.0000001
 
     train_params = {"train_dataset": train_dataset,
                     "validation_dataset": validation_dataset,
@@ -99,8 +99,8 @@ def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
     nept['params/train_params'] = train_params
 
     trainer = Trainer(model, unused_parameters, train_params, 100, snapshot_path, dir_best_model,
-                      False, device, nept, tu.run_one_batch_psts)
-    trainer.train(2, True) # todo change the maximal epoch to reach
+                      True, device, nept, tu.run_one_batch_psts)
+    trainer.train(40, True)  # todo change the maximal epoch to reach
     print("done")
     # torchrun --standalone --nproc_per_node=2 pSTS_through_unsupervised_learning/trainning_script.py
 
@@ -109,14 +109,14 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
     nept = neptune.init_run(project="psts-through-unsupervised-learning/psts",
                             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     seed = 42
-    dataset_dir = r'demo_data/demo_after_flattening' #os.path.join(r'dataset', "10k_train_1000ms")
-    batch_size = 256
-    num_frames = 1 # number of none ending frames (sequance will be +int(use_end_frame))
+    dataset_dir = os.path.join(r'dataset', "160k_train_500ms")
+    batch_size = 54
+    num_frames = 3  # number of none ending frames (sequance will be +int(use_end_frame))
     use_end_frame = True
     use_decoder = True
     torch.manual_seed(seed)
 
-    print(f'expected uniform probability loss: {2*math.log(batch_size*(num_frames+int(use_end_frame)))}')
+    print(f'expected uniform probability loss: {2 * math.log(batch_size * (num_frames + int(use_end_frame)))}')
     unused_parameters = []
 
     model_params = {'dataset_dir': dataset_dir,
@@ -124,13 +124,13 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                     'num_frames': num_frames,
                     'use_end_frame': use_end_frame,
                     'use_decoder': use_decoder,
-                    'dim_resnet_to_transformer': 1024,
+                    'dim_resnet_to_transformer': 2048,
                     'num_heads': 4,
-                    'num_layers': 4,
+                    'num_layers': 2,
                     'batch_first': True,
-                    'dim_feedforward': 1024,    #equal to dim_resnet_to_transformer
+                    'dim_feedforward': 2048,  # equal to dim_resnet_to_transformer
                     'num_output_features': 512,
-                    'dropout': 0.1,
+                    'dropout': 0.3,
                     'mask': torch.triu(torch.ones(num_frames + int(use_end_frame),
                                                   num_frames + int(use_end_frame)), 1).bool(),
                     'seed': seed}
@@ -165,32 +165,28 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                                                 mask=model_params["mask"],
                                                 dropout=model_params["dropout"],
                                                 max_len=100,
-                                                use_decoder = use_decoder,
-                                                use_end_frame = use_end_frame)
+                                                use_decoder=use_decoder,
+                                                use_end_frame=use_end_frame)
 
     psts_params = pu.init_psts_decoder_params(num_frames=num_frames,
                                               video_params=video_params,
                                               audio_params=audio_params)
 
     psts_encoder = PstsDecoder(psts_params, True, use_end_frame, use_decoder)
-    # psts_encoder.load_resnet(r'models/batch size - 256, num of frames - 1, learning rate - 0.001, 1S audio, no decoder, no end frame/best_model') #load previous trainning of resnet
+    psts_encoder.load_resnet(
+        r'models/continue ---models/check linear transforms LR = 0.0001 whole DS, rnadom frame & interval, train - 0.9. 4 frames/best_model')  # load previous trainning of resnet
     psts_encoder.set_resnet_gradient(False, False)
 
-    for name, param in psts_encoder.named_parameters():
-        print(f"Parameter Name: {name}")
-        print(f'Requires Grad: {hasattr(param, "requires_grad")} ')
-        if hasattr(param, "requires_grad"):
-            print("has grad and its state is: ", param.requires_grad)
-
     train_combined_dataset, validation_combined_dataset, _ = split_dataset(
-        combined_dataset)   # split to validation
+        combined_dataset)  # split to validation
 
     run_train(psts_encoder, train_combined_dataset, validation_combined_dataset,
               batch_size, run_id, nept, snapshot_path, dir_best_model, unused_parameters)
 
 
 if __name__ == '__main__':
-    run_id = "check"
+    # run_id = "sanity check resnet 20k, 1 frame"
+    run_id = "check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2"
     snapshot_path = os.path.join("models", str(run_id), "snapshot")
     dir_best_model = os.path.join("models", str(run_id), "best_model")
     print(f'the current run_id to be run: {run_id}')

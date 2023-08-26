@@ -27,11 +27,12 @@ def create_metadata_file():
     md = pd.DataFrame()
     md['sample_index'] = []
     md['speaker_id'] = []
+    md['id_part'] = []
     return md
 
 
 def data_flattening(video_source_dir, audio_source_dir, destination_dir,
-                    delete_origin=False, sample_limit=10000):
+                     delete_origin=False, sample_limit=10000):
     """ iterate source dir of voxceleb2 dataset
     and create samples directory with audio and video subdirectories.
     the function create xl file saving the sample label - speaker id
@@ -39,7 +40,7 @@ def data_flattening(video_source_dir, audio_source_dir, destination_dir,
     md_path = du.get_label_path(destination_dir)
     metadata_df = create_metadata_file()
     sample_num, row = 0, 0
-    sample_indexes, speaker_ids = [], []
+    sample_indexes, speaker_ids, id_part = [], [], []
     video_id_directories = natsorted(
         glob.glob(path.join(video_source_dir, "id*")))
     audio_id_directories = natsorted(
@@ -53,31 +54,43 @@ def data_flattening(video_source_dir, audio_source_dir, destination_dir,
         if not du.checks_same_videos_audios_data(video_id_directory,
                                                  audio_id_directory):
             return 0
-        # Gets all audio & video sample corresponding speaker_id
-        video_id_samples = sorted(
-            glob.glob(path.join(video_id_directory, '*', '*.mp4')))
-        audio_id_samples = sorted(
-            glob.glob(path.join(audio_id_directory, '*', '*.m4a')))
-        # Iterate over samples
-        for video_id_sample, audio_id_sample in zip(video_id_samples,
-                                                    audio_id_samples):
+        id = path.basename(video_id_directory)
+        part = 0
+        # Get the next-level subdirectories (number of video/audio)
+        video_subdirectories = natsorted(glob.glob(path.join(video_id_directory, '*')))
+        audio_subdirectories = natsorted(glob.glob(path.join(audio_id_directory, '*')))
 
-            if not du.checks_same_videos_audios_data(video_id_sample,
-                                                     audio_id_sample):
-                return 0
-            du.create_sample_video_audio_dirs(destination_dir, video_id_sample,
-                                              audio_id_sample, sample_num,
-                                              delete_origin)
-            sample_indexes.append(sample_num)
-            speaker_ids.append(path.basename(video_id_directory))
-            row += 1
-            sample_num += 1
+        # Iterate over video and audio subdirectories
+        for video_subdir, audio_subdir in zip(video_subdirectories, audio_subdirectories):
+            video_id_samples = sorted(
+                glob.glob(path.join(video_subdir, '*.mp4')))
+            audio_id_samples = sorted(
+                glob.glob(path.join(audio_subdir, '*.m4a')))
+
+            for video_id_sample, audio_id_sample in zip(video_id_samples,
+                                                        audio_id_samples):
+
+                if not du.checks_same_videos_audios_data(video_id_sample,
+                                                         audio_id_sample):
+                    return 0
+                du.create_sample_video_audio_dirs(destination_dir, video_id_sample,
+                                                  audio_id_sample, sample_num, delete_origin)
+                sample_indexes.append(sample_num)
+                id_part.append(part)
+                speaker_ids.append(id)
+                row += 1
+                sample_num += 1
+
+            if sample_num > sample_limit:
+                break
+            part += 1
 
         if sample_num > sample_limit:
             break
 
     metadata_df['sample_index'] = np.asarray(sample_indexes)
     metadata_df['speaker_id'] = np.asarray(speaker_ids)
+    metadata_df['id_part'] = np.asarray(id_part)
     du.split_and_save(metadata_df, md_path)
     print("Data flattened successfully")
     return sample_num
@@ -230,9 +243,9 @@ def split_all_videos(path_to_data: str, frame_interval, delete_video: bool = Fal
         [index_to_fr[i] for i in sorted(index_to_fr.keys())])
     index_to_ni = np.asarray(
         [index_to_ni[i] for i in sorted(index_to_ni.keys())])
-    metadata_df.insert(2, "frame_rate", index_to_fr, False)
-    metadata_df.insert(3, "numer_of_frames", index_to_nf, False)
-    metadata_df.insert(4, "num_video_intervals", index_to_ni, False)
+    metadata_df.insert(3, "frame_rate", index_to_fr, False)
+    metadata_df.insert(4, "numer_of_frames", index_to_nf, False)
+    metadata_df.insert(5, "num_video_intervals", index_to_ni, False)
     du.split_and_save(metadata_df, md_path)
     print(f'these samples have been failed to video split: {failed_to_split}')
 

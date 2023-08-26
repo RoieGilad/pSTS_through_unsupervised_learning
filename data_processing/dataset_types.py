@@ -33,6 +33,7 @@ def get_sample_audio_frames_interval(paths_to_audio_sample_frames: List[str], nu
     after making some process on it"""
     du.pick_new_amplitude_gain()
     start_idx = int((len(paths_to_audio_sample_frames) - num_frames * step_size) * rand)
+    # start_idx = 2
     path_to_sample_frames_interval = paths_to_audio_sample_frames[
                                      start_idx: start_idx + num_frames * step_size: step_size]
     frames = [torchaudio.load(p)[0] for p in path_to_sample_frames_interval]
@@ -71,11 +72,13 @@ class VideoDataset(Dataset):
         paths_to_frames = []
         first_interval = int((num_intervals - self.num_frames * self.step_size)
                              * tmp_rand)
+        #first_interval = 2
         real_index = du.get_real_index_by_path(self.samples[idx])
         for i in range(self.num_frames):
             interval_frames = natsorted(glob(path.join(self.samples[idx], "video",
                                                        f"sample_{real_index}_v_{first_interval + i}_*")))
             paths_to_frames.append(random.choice(interval_frames))
+            #paths_to_frames.append(interval_frames[len(interval_frames)//2])
         return paths_to_frames
 
     def __getitem__(self, idx):

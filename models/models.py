@@ -170,7 +170,7 @@ class AudioDecoder(nn.Module):
         self.num_frames = model_params['num_frames']
         self.first_layer_left = nn.Parameter(torch.rand(224, 129))
         self.first_layer_left.requires_grad =True
-        self.first_layer_right = nn.Linear(101, 224) # TODO change to 501
+        self.first_layer_right = nn.Linear(501, 224) # TODO change to 501
         self.resnet = models.resnet18(weights=None)
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features,
                                    model_params[
