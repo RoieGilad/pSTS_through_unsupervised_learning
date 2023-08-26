@@ -29,7 +29,7 @@ train_v_frame_transformer = v_transforms.Compose([
 
 train_video_transformer = v_transforms.Compose([
     v_transforms.RandomHorizontalFlip(p=0.5),
-    #v_transforms.ColorJitter(),
+    # v_transforms.ColorJitter(),
     v_transforms.RandomCrop([224, 224])])
 
 train_a_frame_transformer = v_transforms.Compose([
