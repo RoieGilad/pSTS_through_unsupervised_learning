@@ -110,11 +110,14 @@ class Trainer:
 
     def _load_snapshot(self, snapshot_path):
         path_to_trainer = os.path.join(snapshot_path, "trainer")
+        path_to_optimizer = os.path.join(self.snapshot_path, "optimizer")
         if self.distributed:
             loc = f"cuda:{self.gpu_id}"
             snapshot = torch.load(path_to_trainer, map_location=loc)
         else:
             snapshot = torch.load(path_to_trainer)
+        optimizer_state = torch.load(path_to_optimizer)
+        self.optimizer.load_state_dict(optimizer_state)
         self.model.load_model(snapshot["MODEL_STATE_PATH"])
         self.epochs_run = snapshot["EPOCHS_RUN"]
         print(f"Resuming training from snapshot at Epoch {self.epochs_run}")
@@ -124,6 +127,7 @@ class Trainer:
             os.makedirs(self.snapshot_path, mode=0o777)
         path_to_model = os.path.join(self.snapshot_path, "model")
         path_to_trainer = os.path.join(self.snapshot_path, "trainer")
+        path_to_optimizer = os.path.join(self.snapshot_path, "optimizer")
         if self.distributed:
             self.model.module.save_model(path_to_model, self.device,
                                          self.distributed)
@@ -133,7 +137,9 @@ class Trainer:
         snapshot = {
             "MODEL_STATE_PATH": path_to_model,
             "EPOCHS_RUN": epoch,
+            "path_to_optimizer": path_to_optimizer
         }
+        torch.save(self.optimizer.state_dict(), path_to_optimizer)
         torch.save(snapshot, path_to_trainer)
         print(
             f"Epoch {epoch} | Training snapshot saved at {self.snapshot_path}")

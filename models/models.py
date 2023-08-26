@@ -86,14 +86,29 @@ class VideoDecoder(nn.Module):
         self.decoder = TransformerDecoder(
             model_params['TransformerDecoder_params'], self.use_end_frame) if self.use_decoder else None
         self.end_frame = nn.Parameter(torch.randn(3, 224, 224)) if self.use_decoder else None
+        self.resnet_gradient = True
         if init_weights:
             self.init_weights()
 
+    def set_resnet_gradient(self, state: bool):
+        self.resnet_gradient = state
+
     def forward(self, frames):
+        if self.resnet_gradient:
+            with torch.no_grad():
+                frames = self.forward_resnet(frames)
+        else:
+            frames = self.forward_resnet(frames)
+        if self.use_decoder:
+            frames = self.decoder(frames)
+        return frames
+
+    def forward_resnet(self, frames):
         is_batched = len(frames.shape) > 4
         if is_batched:
             if self.use_end_frame:
-                end_frame = self.end_frame.unsqueeze(0).repeat(frames.shape[0], 1, 1, 1, 1)
+                end_frame = self.end_frame.unsqueeze(0).repeat(frames.shape[0],
+                                                               1, 1, 1, 1)
                 frames = torch.cat((frames, end_frame), dim=1)
             bs, nf, c, h, w = frames.shape
             frames = frames.reshape(bs * nf, c, h, w)
@@ -102,8 +117,6 @@ class VideoDecoder(nn.Module):
         frames = self.resnet(frames)
         if is_batched:
             frames = frames.reshape(bs, nf, self.dim_resnet_to_transformer)
-        if self.use_decoder:
-            frames = self.decoder(frames)
         return frames
 
     def init_weights(self):
@@ -128,20 +141,20 @@ class VideoDecoder(nn.Module):
                 torch.save(self.decoder.state_dict(), transformer_path)
         torch.save(self.model_params, hyperparams_path)
 
-    def load_model(self, dir_to_load):
+    def load_model(self, dir_to_load: str):
         hyperparams_path = path.join(dir_to_load, "v_hyperparams.pt")
         model_params = torch.load(hyperparams_path)
         self.__init__(model_params, False)
         self.load_model_weights(dir_to_load)
 
-    def load_model_weights(self, dir_to_load):
+    def load_model_weights(self, dir_to_load: str):
         resnet_path = path.join(dir_to_load, "v_resnet.pt")
         transformer_path = path.join(dir_to_load, "v_transformer.pt")
         self.resnet.load_state_dict(torch.load(resnet_path))
         if self.use_decoder and self.decoder and os.path.exists(transformer_path):
             self.decoder.load_state_dict(torch.load(transformer_path))
 
-    def load_resnet(self, dir_to_load):
+    def load_resnet(self, dir_to_load: str):
         resnet_path = path.join(dir_to_load, "v_resnet.pt")
         self.resnet.load_state_dict(torch.load(resnet_path))
 
@@ -156,7 +169,8 @@ class AudioDecoder(nn.Module):
         self.model_params = model_params
         self.num_frames = model_params['num_frames']
         self.first_layer_left = nn.Parameter(torch.rand(224, 129))
-        self.first_layer_right = nn.Linear(501, 224)
+        self.first_layer_left.requires_grad =True
+        self.first_layer_right = nn.Linear(501, 224) # TODO change to 501
         self.resnet = models.resnet18(weights=None)
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features,
                                    model_params[
@@ -164,10 +178,24 @@ class AudioDecoder(nn.Module):
         self.decoder = TransformerDecoder(
             model_params['TransformerDecoder_params'], self.use_end_frame) if self.use_decoder else None
         self.end_frame = nn.Parameter(torch.randn(3, 224, 224)) if self.use_end_frame else None
+        self.resnet_gradient = True
         if init_weights:
             self.init_weights()
 
+    def set_resnet_gradient(self, state: bool):
+        self.resnet_gradient = state
+
     def forward(self, frames):
+        if self.resnet_gradient:
+            with torch.no_grad():
+                frames = self.forward_resnet(frames)
+        else:
+            frames = self.forward_resnet(frames)
+        if self.use_decoder:
+            frames = self.decoder(frames)
+        return frames
+
+    def forward_resnet(self, frames):
         frames = self.first_layer_right(self.first_layer_left @ frames)
         is_batched = len(frames.shape) > 4
         if is_batched:
@@ -181,9 +209,8 @@ class AudioDecoder(nn.Module):
         frames = self.resnet(frames)
         if is_batched:
             frames = frames.reshape(bs, nf, self.dim_resnet_to_transformer)
-        if self.use_decoder:
-            frames = self.decoder(frames)
         return frames
+
 
     def init_weights(self):
         nn.init.normal_(self.resnet.fc.weight, mean=0.0, std=0.01)
@@ -213,13 +240,13 @@ class AudioDecoder(nn.Module):
                 torch.save(self.decoder.state_dict(), transformer_path)
         torch.save(self.model_params, hyperparams_path)
 
-    def load_model(self, dir_to_load):
+    def load_model(self, dir_to_load: str):
         hyperparams_path = path.join(dir_to_load, "a_hyperparams.pt")
         model_params = torch.load(hyperparams_path)
         self.__init__(model_params, False)
         self.load_model_weights(dir_to_load)
 
-    def load_model_weights(self, dir_to_load):
+    def load_model_weights(self, dir_to_load: str):
         first_left_path = path.join(dir_to_load, "a_first_layer_left")
         first_right_path = path.join(dir_to_load, "a_first_layer_right")
         resnet_path = path.join(dir_to_load, "a_resnet.pt")
@@ -230,13 +257,14 @@ class AudioDecoder(nn.Module):
         if self.use_decoder and self.decoder and os.path.exists(transformer_path):
             self.decoder.load_state_dict(torch.load(transformer_path))
 
-    def load_resnet(self, dir_to_load):
+    def load_resnet(self, dir_to_load: str):
         first_left_path = path.join(dir_to_load, "a_first_layer_left")
         first_right_path = path.join(dir_to_load, "a_first_layer_right")
         resnet_path = path.join(dir_to_load, "a_resnet.pt")
         self.resnet.load_state_dict(torch.load(resnet_path))
         self.first_layer_right.load_state_dict(torch.load(first_right_path))
         self.first_layer_left = nn.Parameter(torch.load(first_left_path))
+        self.first_layer_left.requires_grad = True
 
 class PstsDecoder(nn.Module):
     def __init__(self, model_params: dict = None, init_weights=True,
@@ -268,21 +296,26 @@ class PstsDecoder(nn.Module):
         self.audio_decoder.save_model(path_to_save, device, distributed)
         self.video_decoder.save_model(path_to_save, device, distributed)
 
-    def load_model(self, path_to_load):
+    def load_model(self, path_to_load: str):
         hyperparams_path = path.join(path_to_load, "psts_hyperparams.pt")
         model_params = torch.load(hyperparams_path)
         self.__init__(model_params, False)
         self.audio_decoder.load_model_weights(path_to_load)
         self.video_decoder.load_model_weights(path_to_load)
 
-    def set_use_decoder(self, state):
+    def set_use_decoder(self, state: bool):
         self.video_decoder.use_decoder = state
         self.audio_decoder.use_decoder = state
 
-    def set_use_end_frame(self, state):
+    def set_use_end_frame(self, state: bool):
         self.video_decoder.use_end_frame = state
         self.audio_decoder.use_end_frame = state
 
-    def load_resnet(self, path_to_load):
+    def load_resnet(self, path_to_load: str):
         self.audio_decoder.load_resnet(path_to_load)
         self.video_decoder.load_resnet(path_to_load)
+
+    def set_resnet_gradient(self, state_video: bool, state_audio: bool):
+        self.video_decoder.set_resnet_gradient(state_video)
+        self.audio_decoder.set_resnet_gradient(state_audio)
+

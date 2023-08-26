@@ -28,6 +28,7 @@ gpu_audio_source_dir = r'dataset/vox2_audio/dev/aac'
 gpu_video_source_dir = r'dataset/vox2_video/dev/mp4'
 gpu_destination_dir = os.path.join(r'dataset', "160k_train_dataset")
 
+
 def plot_processed_frame(image_tensor):
     normalized_image = (image_tensor - image_tensor.min()) / \
                        (image_tensor.max() - image_tensor.min())
@@ -76,8 +77,8 @@ def plot_two_spectrograms(spectrogram1, title1, spectrogram2, title2):
 
 def check_data_set(index, type):
     data_object = None
-    root_dir = r"demo_data/demo_after_flattening"
-    path_to_labels = r"demo_data/demo_after_flattening/data_md.xlsx"
+    root_dir = r"../dataset/160k_train_500ms"
+    path_to_labels = r"../dataset/160k_train_500ms/data_md.xlsx"
     if type == "video":
         data_object = dt.VideoDataset(root_dir, path_to_labels,
                                       du.train_v_frame_transformer,
@@ -103,7 +104,7 @@ def check_data_set(index, type):
             data_object_combined[index]
         print("output shape: ", processed_video_frames.shape, processed_audio_frames.shape)
         for i, (video_frame, audio_frame) in enumerate(zip(processed_video_frames,
-                                            processed_audio_frames)):
+                                                           processed_audio_frames)):
             plot_processed_frame(video_frame)
             plot_spectrogram(audio_frame, str(i))
         return
@@ -193,14 +194,16 @@ def concatinate_wav_files(path_to_files):
     sf.write(output_path, audio_data, sr)
 
 
-def prepare_data():
+def prepare_data(test=False):
     dp.windows = True
     dp.cuda = True
     time_interval = 500
-    sample_limit = 10000
-    destination_dir = os.path.join(r'dataset', f'10k_train_{str(time_interval)}ms')
-    video_source_dir = r'dataset/vox2_audio'
-    audio_source_dir = r'dataset/vox2_video'
+    sample_limit = 160000
+
+    destination_dir = os.path.join(r'dataset', f'160k_train_{str(time_interval)}ms')
+    video_source_dir = r'dataset/vox2_video/dev/mp4'
+    audio_source_dir = r'dataset/vox2_audio/dev/aac'
+    print(destination_dir, video_source_dir, audio_source_dir)
     print("welcome to preprocessing")
     dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
                        False, sample_limit)
@@ -212,7 +215,6 @@ def prepare_data():
     dp.split_all_audio(destination_dir, time_interval, True)
     print("start_cal_mean_and_std")
     dp.get_mean_and_std(destination_dir)
-
 
 
 if __name__ == '__main__':
