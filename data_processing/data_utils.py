@@ -25,12 +25,17 @@ train_v_frame_transformer = v_transforms.Compose([
     # v_transforms.Normalize([0.4642, 0.3595, 0.3521], [0.5421, 0.4302, 0.4297])])#mean and std of 10k sample and 500ms audio
     v_transforms.Normalize([0.4595, 0.3483, 0.3345], [0.5337, 0.4163, 0.4100])])#mean and std of 160k sample and 500ms audio
 
-
+val_v_frame_transformer = v_transforms.Compose([
+    v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
+    v_transforms.Normalize([0.4595, 0.3483, 0.3345], [0.5337, 0.4163,
+                                                      0.4100])])  # mean and std of 160k sample and 500ms audio
 
 train_video_transformer = v_transforms.Compose([
     v_transforms.RandomHorizontalFlip(p=0.5),
     # v_transforms.ColorJitter(),
     v_transforms.RandomCrop([224, 224])])
+
+val_video_transformer = v_transforms.Compose([])
 
 train_a_frame_transformer = v_transforms.Compose([
     # lambda x: change_amplitude(x),
@@ -46,12 +51,17 @@ train_a_frame_transformer = v_transforms.Compose([
     # v_transforms.Normalize([0.6906, 0.6906, 0.6906], [12.6992, 12.6992, 12.6992]) # mean and std of 10k and 1s audio
     # v_transforms.Normalize([0.6157, 0.6157, 0.6157], [11.2199, 11.2199, 11.2199]) #mean and std of 160k sample and 500ms audio
     v_transforms.Normalize([0.6151, 0.6151, 0.6151], [11.1725, 11.1725, 11.1725]) #mean and std of 160k sample and 500ms audio without interpolation
+])
 
-
+val_a_frame_transformer = v_transforms.Compose([
+    a_transforms.Spectrogram(n_fft=256, hop_length=16),
+    lambda x: x.expand(3, -1, -1),
+    v_transforms.Normalize([0.6151, 0.6151, 0.6151], [11.1725, 11.1725, 11.1725]) #mean and std of 160k sample and 500ms audio without interpolation
 ])
 
 train_audio_transformer = v_transforms.Compose([])
 
+val_audio_transformer = v_transforms.Compose([])
 
 def audio_frame_transforms(waveform):
     transform = a_transforms.Spectrogram(n_fft=256, hop_length=16)

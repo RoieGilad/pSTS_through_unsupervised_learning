@@ -85,7 +85,8 @@ def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
 
     train_params = {"train_dataset": train_dataset,
                     "validation_dataset": validation_dataset,
-                    "optimizer": optim.Adam(model.parameters(), lr=learning_rate),
+                    "optimizer": optim.Adam(model.parameters(),
+                                            lr=learning_rate),
                     "loss": pstsLoss(),
                     "batch_size": batch_size,
                     "docu_per_batch": 1,
@@ -98,7 +99,8 @@ def run_train(model, train_dataset, validation_dataset, batch_size, run_id,
                     }
     nept['params/train_params'] = train_params
 
-    trainer = Trainer(model, unused_parameters, train_params, 100, snapshot_path, dir_best_model,
+    trainer = Trainer(model, unused_parameters, train_params, 100,
+                      snapshot_path, dir_best_model,
                       True, device, nept, tu.run_one_batch_psts)
     trainer.train(40, True)  # todo change the maximal epoch to reach
     print("done")
@@ -116,7 +118,8 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
     use_decoder = True
     torch.manual_seed(seed)
 
-    print(f'expected uniform probability loss: {2 * math.log(batch_size * (num_frames + int(use_end_frame)))}')
+    print(
+        f'expected uniform probability loss: {2 * math.log(batch_size * (num_frames + int(use_end_frame)))}')
     unused_parameters = []
 
     model_params = {'dataset_dir': dataset_dir,
@@ -128,40 +131,59 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
                     'num_heads': 4,
                     'num_layers': 2,
                     'batch_first': True,
-                    'dim_feedforward': 2048,  # equal to dim_resnet_to_transformer
+                    'dim_feedforward': 2048,
+                    # equal to dim_resnet_to_transformer
                     'num_output_features': 512,
                     'dropout': 0.3,
-                    'mask': torch.triu(torch.ones(num_frames + int(use_end_frame),
-                                                  num_frames + int(use_end_frame)), 1).bool(),
+                    'mask': torch.triu(
+                        torch.ones(num_frames + int(use_end_frame),
+                                   num_frames + int(use_end_frame)), 1).bool(),
                     'seed': seed}
     nept['params/model_params'] = model_params
 
     combined_dataset = CombinedDataset(model_params["dataset_dir"],
-                                       du.get_label_path(model_params["dataset_dir"]),
+                                       du.get_label_path(
+                                           model_params["dataset_dir"]),
                                        transforms_dict,
                                        num_frames=num_frames,
                                        test=False,
                                        step_size=1)
 
     video_params = pu.init_Video_decoder_params(num_frames=num_frames,
-                                                dim_resnet_to_transformer=model_params["dim_resnet_to_transformer"],
-                                                num_heads=model_params["num_heads"],
-                                                dim_feedforward=model_params["dim_feedforward"],
-                                                batch_first=model_params["batch_first"],
-                                                num_layers=model_params["num_layers"],
-                                                num_output_features=model_params["num_output_features"],
+                                                dim_resnet_to_transformer=
+                                                model_params[
+                                                    "dim_resnet_to_transformer"],
+                                                num_heads=model_params[
+                                                    "num_heads"],
+                                                dim_feedforward=model_params[
+                                                    "dim_feedforward"],
+                                                batch_first=model_params[
+                                                    "batch_first"],
+                                                num_layers=model_params[
+                                                    "num_layers"],
+                                                num_output_features=
+                                                model_params[
+                                                    "num_output_features"],
                                                 mask=model_params["mask"],
                                                 dropout=model_params["dropout"],
                                                 max_len=100,
                                                 use_decoder=use_decoder,
                                                 use_end_frame=use_end_frame)
     audio_params = pu.init_audio_decoder_params(num_frames=num_frames,
-                                                dim_resnet_to_transformer=model_params["dim_resnet_to_transformer"],
-                                                num_heads=model_params["num_heads"],
-                                                dim_feedforward=model_params["dim_feedforward"],
-                                                batch_first=model_params["batch_first"],
-                                                num_layers=model_params["num_layers"],
-                                                num_output_features=model_params["num_output_features"],
+                                                dim_resnet_to_transformer=
+                                                model_params[
+                                                    "dim_resnet_to_transformer"],
+                                                num_heads=model_params[
+                                                    "num_heads"],
+                                                dim_feedforward=model_params[
+                                                    "dim_feedforward"],
+                                                batch_first=model_params[
+                                                    "batch_first"],
+                                                num_layers=model_params[
+                                                    "num_layers"],
+                                                num_output_features=
+                                                model_params[
+                                                    "num_output_features"],
                                                 mask=model_params["mask"],
                                                 dropout=model_params["dropout"],
                                                 max_len=100,
@@ -181,7 +203,8 @@ def prepare_model_dataset_and_run(run_id, snapshot_path, dir_best_model):
         combined_dataset)  # split to validation
 
     run_train(psts_encoder, train_combined_dataset, validation_combined_dataset,
-              batch_size, run_id, nept, snapshot_path, dir_best_model, unused_parameters)
+              batch_size, run_id, nept, snapshot_path, dir_best_model,
+              unused_parameters)
 
 
 if __name__ == '__main__':

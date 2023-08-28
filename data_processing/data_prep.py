@@ -32,7 +32,7 @@ def create_metadata_file():
 
 
 def data_flattening(video_source_dir, audio_source_dir, destination_dir,
-                     delete_origin=False, sample_limit=10000):
+                    delete_origin=False, sample_limit=10000):
     """ iterate source dir of voxceleb2 dataset
     and create samples directory with audio and video subdirectories.
     the function create xl file saving the sample label - speaker id
@@ -57,11 +57,14 @@ def data_flattening(video_source_dir, audio_source_dir, destination_dir,
         id = path.basename(video_id_directory)
         part = 0
         # Get the next-level subdirectories (number of video/audio)
-        video_subdirectories = natsorted(glob.glob(path.join(video_id_directory, '*')))
-        audio_subdirectories = natsorted(glob.glob(path.join(audio_id_directory, '*')))
+        video_subdirectories = natsorted(
+            glob.glob(path.join(video_id_directory, '*')))
+        audio_subdirectories = natsorted(
+            glob.glob(path.join(audio_id_directory, '*')))
 
         # Iterate over video and audio subdirectories
-        for video_subdir, audio_subdir in zip(video_subdirectories, audio_subdirectories):
+        for video_subdir, audio_subdir in zip(video_subdirectories,
+                                              audio_subdirectories):
             video_id_samples = sorted(
                 glob.glob(path.join(video_subdir, '*.mp4')))
             audio_id_samples = sorted(
@@ -73,8 +76,10 @@ def data_flattening(video_source_dir, audio_source_dir, destination_dir,
                 if not du.checks_same_videos_audios_data(video_id_sample,
                                                          audio_id_sample):
                     return 0
-                du.create_sample_video_audio_dirs(destination_dir, video_id_sample,
-                                                  audio_id_sample, sample_num, delete_origin)
+                du.create_sample_video_audio_dirs(destination_dir,
+                                                  video_id_sample,
+                                                  audio_id_sample, sample_num,
+                                                  delete_origin)
                 sample_indexes.append(sample_num)
                 id_part.append(part)
                 speaker_ids.append(id)
@@ -216,7 +221,8 @@ def split_video_to_frames(sample_index, path_to_video_dir: str,
     return frame_rate, num_frames, num_intervals
 
 
-def split_all_videos(path_to_data: str, frame_interval, delete_video: bool = False):
+def split_all_videos(path_to_data: str, frame_interval,
+                     delete_video: bool = False):
     """ The function iterate all video directories corresponding each
     sample and calls split_video_to_frames function. the function save
     the last metadata dataframe after saving all frames rates for each
@@ -351,29 +357,27 @@ def get_mean_and_std(root_dir):
     mean_std_audio = du.get_mean_std_audio(root_dir)
     du.save_mean_and_std("audio_mean_std.txt", mean_std_audio)
     print("audios: ", mean_std_audio)
-    # print("start cal mean and std video")
-    # mean_std_video = du.get_mean_std_video(root_dir)
-    # du.save_mean_and_std("video_mean_std.txt", mean_std_video)
-    # print("videos: ", mean_std_video)
+    print("start cal mean and std video")
+    mean_std_video = du.get_mean_std_video(root_dir)
+    du.save_mean_and_std("video_mean_std.txt", mean_std_video)
+    print("videos: ", mean_std_video)
 
 
 def filter_dataset_by_label(root_dir, reference_dir):
     reference_md = du.read_metadata(du.get_label_path(reference_dir))
     unique_labels = set(reference_md['speaker_id'].unique())
-    filter_samples_by_label(root_dir, unique_labels)
+    unique_labels = {int(l[2:]) for l in unique_labels}
+    to_delete, keep = [], []
+    test_md = du.read_metadata(du.get_label_path(root_dir))
+    for index, row in test_md.iterrows():
+        if int(row['speaker_id'][2:]) not in unique_labels:
+            print(row['speaker_id'], row['speaker_id'] not in unique_labels, unique_labels)
+            to_delete.append('sample_' + str(row['sample_index']))
+        else:
+            keep.append('sample_' + str(row['sample_index']))
+    print('keep: ', keep)
+    if to_delete:
+        delete_samples(root_dir, to_delete)
 
 
-def filter_samples_by_label(root_dir, labels_to_keep):
-    for sample_dir in du.folder_iterator_by_path(
-            path.join(root_dir, "sample_*")):
-        if du.get_sample_index(sample_dir) not in labels_to_keep:
-            shutil.rmtree(sample_dir)
-    md_path = du.get_label_path(root_dir)
-    data_md = du.read_metadata(md_path)
-    index_to_delete = []
-    for i, row in data_md.iterrows():
-        if 'sample_' + str(row['sample_index']) not in labels_to_keep:
-            index_to_delete.append(i)
-    data_md.drop(index_to_delete, inplace=True)
-    data_md.reset_index(drop=True, inplace=True)
-    du.split_and_save(data_md, md_path)
+
