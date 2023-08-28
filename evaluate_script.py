@@ -1,3 +1,5 @@
+import time
+
 import torch
 from torchmetrics.functional import pairwise_cosine_similarity
 from models.models import PstsDecoder
@@ -17,8 +19,8 @@ def run_and_compare(model, v1, a1, v2, a2, device, i, j):
     videos = videos.to(device)
     audios = audios.to(device)
     encode_videos, encode_audios = model(videos, audios)
-    encode_v1, encode_v2 = encode_videos[0], encode_videos[2]
-    encode_a1, encode_a2 = encode_audios[0], encode_audios[2]
+    encode_v1, encode_v2 = encode_videos[0], encode_videos[1]
+    encode_a1, encode_a2 = encode_audios[0], encode_audios[1]
     if i == j:
         C11 = pairwise_cosine_similarity(encode_v1, encode_a1)
         return C11, None, None
@@ -35,29 +37,77 @@ def collect_comparison(model, doc, dataset, max_samples=None):
     model = model.to(device)
     model.eval()
     for i in tqdm(range(max_samples)):
-        for j in tqdm(range(i + 1, max_samples)):
+        for j in range(i, max_samples):
             v1, a1, l1 = dataset[i]
             v2, a2, l2 = dataset[j]
             C11, C12, C21 = run_and_compare(model, v1, a1, v2, a2, device, i, j)
 
             if i == j:
-                doc["data/same_frame_similarity"].extend(C11.diag().tolist())
+                doc["cosine/same_frame_similarity"].extend(
+                    C11.diag().flatten().tolist())
                 rows, cols = C11.shape
-                sequence_similarity = [C11[a][b] for b in cols for a in rows if
+                sequence_similarity = [C11[a][b] for b in range(cols) for a in
+                                       range(rows) if
                                        a != b]
-                doc["data/sequence_similarity"].extend(sequence_similarity)
+                doc["cosine/sequence_similarity"].extend(sequence_similarity)
             else:
                 if l1 == l2:
-                    category = "data/in_identity_similarity"
+                    category = "cosine/in_identity_similarity"
                 else:
-                    category = "data/between_identities_similarity"
-                doc[category].extend(C12.tolist())
-                doc[category].extedn(C21.tolist())
-    print("data/same_frame_similarity", doc["data/same_frame_similarity"])
-    print("data/sequence_similarity", doc["data/sequence_similarity"])
-    print("data/in_identity_similarity", doc["data/in_identity_similarity"])
-    print("data/between_identities_similarity",
-          doc["data/between_identities_similarity"])
+                    category = "cosine/between_identities_similarity"
+                doc[category].extend(C12.flatten().tolist())
+                doc[category].extend(C21.flatten().tolist())
+    print("cosine/same_frame_similarity", doc["cosine/same_frame_similarity"])
+    print("cosine/sequence_similarity", doc["cosine/sequence_similarity"])
+    print("cosine/in_identity_similarity", doc["cosine/in_identity_similarity"])
+    print("cosine/between_identities_similarity",
+          doc["cosine/between_identities_similarity"])
+
+
+def fast_run_and_compare(model, videos, audios, device):
+    videos = torch.stack([videos])
+    audios = torch.stack([audios])
+    videos = videos.to(device)
+    audios = audios.to(device)
+    encode_videos, encode_audios = model(videos, audios)
+    return encode_videos, encode_audios
+
+
+def fast_collect_comparison(model, doc, dataset, max_samples=None):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    max_samples = len(dataset) if not max_samples else max_samples
+    model = model.to(device)
+    model.eval()
+    outputs = [[None, None, None] for _ in range(max_samples)]
+
+    for i in tqdm(range(max_samples)):
+        v1, a1, l1 = dataset[i]
+        encode_v1, encode_a1 = fast_run_and_compare(model, v1, a1, device)
+        outputs[i] = [encode_v1[0], encode_a1[0], l1]
+
+    for i in tqdm(range(max_samples)):
+        for j in range(i, max_samples):
+            encode_v1, encode_a1, l1 = outputs[i]
+            encode_v2, encode_a2, l2 = outputs[j]
+            if i == j:
+                C11 = pairwise_cosine_similarity(encode_v1, encode_a1)
+                doc["cosine/same_frame_similarity"].extend(
+                    C11.diag().flatten().tolist())
+                rows, cols = C11.shape
+                sequence_similarity = [C11[a][b] for b in range(cols) for a
+                                       in range(rows) if
+                                       a != b]
+                doc["cosine/sequence_similarity"].extend(
+                    sequence_similarity)
+            else:
+                C12 = pairwise_cosine_similarity(encode_v1, encode_a2)
+                C21 = pairwise_cosine_similarity(encode_v2, encode_a1)
+                if l1 == l2:
+                    category = "cosine/in_identity_similarity"
+                else:
+                    category = "cosine/between_identities_similarity"
+                doc[category].extend(C12.flatten().tolist())
+                doc[category].extend(C21.flatten().tolist())
 
 
 def get_model(path_to_load, num_frames=3):
@@ -154,15 +204,15 @@ def run_validation(model, doc, max_samples, batch_size=54):
                                                         shuffle=True)
     Loss = pstsLoss()
     with torch.no_grad():  # Disable gradient computation
-        for i, vdata in enumerate(validation_dataloader):
+        for i, vdata in tqdm(enumerate(validation_dataloader)):
             batch_loss = run_one_batch_psts(Loss, model, vdata, False, None,
                                             device)
             running_vloss += batch_loss
             doc['test/every_batch'].append(batch_loss)
-            if i == max_samples:
+            if i * batch_size >= max_samples:
                 break
     avg_vloss = running_vloss / (i + 1)
-    doc['test/abg_test_loss'].append(avg_vloss)
+    doc['test/avg_test_loss'].append(avg_vloss)
 
 
 if __name__ == '__main__':
@@ -177,6 +227,12 @@ if __name__ == '__main__':
         project="psts-through-unsupervised-learning/psts",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
 
-    collect_comparison(model, neptune, dataset, 10)
+    start = time.time()
+    fast_collect_comparison(model, neptune, dataset, 100)
+    end = time.time()
+    print("compare took: ", end-start)
 
-    run_validation(model, neptune, 10)
+    start = time.time()
+    run_validation(model, neptune, 100)
+    end = time.time()
+    print("run_validation took: ", end-start)

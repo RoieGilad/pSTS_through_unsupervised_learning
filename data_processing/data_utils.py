@@ -35,7 +35,8 @@ train_video_transformer = v_transforms.Compose([
     # v_transforms.ColorJitter(),
     v_transforms.RandomCrop([224, 224])])
 
-val_video_transformer = v_transforms.Compose([])
+val_video_transformer = v_transforms.Compose([v_transforms.RandomCrop([224, 224])])
+
 
 train_a_frame_transformer = v_transforms.Compose([
     # lambda x: change_amplitude(x),

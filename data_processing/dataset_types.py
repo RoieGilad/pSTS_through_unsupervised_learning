@@ -33,7 +33,7 @@ def get_sample_audio_frames_interval(paths_to_audio_sample_frames: List[str], nu
     after making some process on it"""
     du.pick_new_amplitude_gain()
     start_idx = int((len(paths_to_audio_sample_frames) - num_frames * step_size) * rand)
-    # start_idx = 2
+    start_idx = 2   #TODO
     path_to_sample_frames_interval = paths_to_audio_sample_frames[
                                      start_idx: start_idx + num_frames * step_size: step_size]
     frames = [torchaudio.load(p)[0] for p in path_to_sample_frames_interval]
@@ -72,7 +72,7 @@ class VideoDataset(Dataset):
         paths_to_frames = []
         first_interval = int((num_intervals - self.num_frames * self.step_size)
                              * tmp_rand)
-        #first_interval = 2
+        first_interval = 2 # todo
         real_index = du.get_real_index_by_path(self.samples[idx])
         for i in range(self.num_frames):
             interval_frames = natsorted(glob(path.join(self.samples[idx], "video",
@@ -85,6 +85,7 @@ class VideoDataset(Dataset):
         """assume is_available(self, idx) == True when called"""
         num_intervals = self.labels_map.iloc[idx, 4]
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
+        tmp_rand = 2  # TODO
         paths_to_frames = self.choose_frames_from_interval(idx, num_intervals, tmp_rand)
         processed_frames = get_sample_video_frames_interval(paths_to_frames,
                                                             self.frame_transform,
