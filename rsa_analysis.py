@@ -22,6 +22,8 @@ from training.training_utils import run_one_batch_psts
 from Loss.pstsLoss import pstsLoss
 import evaluate_script as es
 from variability_face_recognition.similarity import rdm
+import torchaudio
+from speechbrain.pretrained import SpeakerRecognition
 
 
 def prepare_data_for_preprocessing(src_dir):
@@ -211,6 +213,13 @@ def get_face_model_embeddings(src_dir):
     data_paths_list, names_list = rdm.load_data(src_dir)
 
 
+def get_audio_model_embedding(audio_model, audio_sample):
+    """
+    audio_sample: a wav file load by torchaudio.load (take the first argument)
+    """
+    return audio_model.encode(audio_sample)
+
+
 if __name__ == '__main__':
     #prepare_data_for_preprocessing("stimuli")
     #create_vox_samples_dir_for_rsa("dataset/test/voxceleb_video_test/mp4")
@@ -221,6 +230,9 @@ if __name__ == '__main__':
     best_model_dir = r'models/check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2/best_model'
     dataset = es.get_dataset(data_dir)
     model = get_model(best_model_dir)
+    speaker_verification_model = SpeakerRecognition.from_hparams(
+        source="speechbrain/spkrec-ecapa-voxceleb")
+
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
       #  api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")

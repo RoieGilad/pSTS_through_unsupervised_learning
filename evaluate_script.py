@@ -1,6 +1,9 @@
 import time
 
+import numpy as np
+import pandas as pd
 import torch
+from matplotlib import pyplot as plt
 from torchmetrics.functional import pairwise_cosine_similarity
 from models.models import PstsDecoder
 import data_processing.data_utils as du
@@ -11,6 +14,7 @@ from tqdm import tqdm
 from models import params_utils as pu
 from training.training_utils import run_one_batch_psts
 from Loss.pstsLoss import pstsLoss
+import seaborn as sns
 
 
 def run_and_compare(model, v1, a1, v2, a2, device, i, j):
@@ -136,7 +140,7 @@ def get_model(path_to_load, num_frames=3):
                     'mask': torch.triu(
                         torch.ones(num_frames + int(use_end_frame),
                                    num_frames + int(use_end_frame)), 1).bool(),
-                    'seed': seed}
+                    }
     video_params = pu.init_Video_decoder_params(num_frames=num_frames,
                                                 dim_resnet_to_transformer=
                                                 model_params[
@@ -200,7 +204,7 @@ def get_dataset(path_to_dataset_dir, num_frames=3):
     return combined_dataset
 
 
-def run_validation(model, doc, max_samples, batch_size=54):
+def run_validation(model, doc, max_samples, dataset, batch_size=54):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     max_samples = len(dataset) if not max_samples else max_samples
     model = model.to(device)
@@ -220,8 +224,7 @@ def run_validation(model, doc, max_samples, batch_size=54):
     avg_vloss = running_vloss / (i + 1)
     doc['test/avg_test_loss'].append(avg_vloss)
 
-
-if __name__ == '__main__':
+def run_gpu_test():
     seed = 42
     torch.manual_seed(seed)
     test_dir = r'dataset/test/160k_test_500ms'
@@ -242,3 +245,46 @@ if __name__ == '__main__':
     run_validation(model, neptune, 100)
     end = time.time()
     print("run_validation took: ", end-start)
+
+
+def make_distribution_plot(points, title):
+    if np.isnan(points).any():
+        points = points[~np.isnan(points)]
+    mean_value = np.mean(points)
+    std_value = np.std(points)
+    print(title, f'mean: {mean_value}', f'std: {std_value}')
+    sns.kdeplot(points, shade=True, common_norm=True)
+    if title != "loss on 54 batch size on 5000 test samples":
+        plt.xlim(-1, 1)
+    # plt.hist(points, bins=min(100000, len(points)), density=True, alpha=0.75,
+    #          histtype='barstacked', color='b')
+    plt.title(f'Distribution of {title}')
+    plt.xlabel('Value')
+    plt.ylabel('Frequency')
+    plt.text(0.1, 0.9, f'Mean: {mean_value:.2f}', transform=plt.gca().transAxes)
+    plt.text(0.1, 0.85, f'Std Dev: {std_value:.2f}',
+             transform=plt.gca().transAxes)
+    plt.show()
+
+def create_distribution_plots(dir_to_csv, concatenate=False):
+    data = pd.read_excel(dir_to_csv)
+    if not concatenate:
+        for column_name in data.columns:
+            make_distribution_plot(data[column_name].to_numpy(), column_name)
+    else:
+        points, title = None, ""
+        first = True
+        for column_name in data.columns:
+            if first:
+                first = False
+                title = column_name
+                points = data[column_name].to_numpy()
+            else:
+                points = np.concatenate([points, data[column_name].to_numpy()])
+        make_distribution_plot(points, title)
+
+
+
+if __name__ == '__main__':
+    create_distribution_plots(r'cosine similarity within identity.xlsx', True)
+    create_distribution_plots(r'three metrics.xls', False)
