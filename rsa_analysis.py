@@ -23,7 +23,7 @@ from Loss.pstsLoss import pstsLoss
 import evaluate_script as es
 from variability_face_recognition.similarity import rdm
 import torchaudio
-from speechbrain.pretrained import SpeakerRecognition
+from speechbrain.pretrained import EncoderClassifier
 
 
 def prepare_data_for_preprocessing(src_dir):
@@ -217,7 +217,7 @@ def get_audio_model_embedding(audio_model, audio_sample):
     """
     audio_sample: a wav file load by torchaudio.load (take the first argument)
     """
-    return audio_model.encode(audio_sample)
+    return audio_model.encode_batch(audio_sample)
 
 
 if __name__ == '__main__':
@@ -228,10 +228,11 @@ if __name__ == '__main__':
     torch.manual_seed(seed)
     data_dir = r'vox_samples_rsa_30'
     best_model_dir = r'models/check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2/best_model'
-    dataset = es.get_dataset(data_dir)
-    model = get_model(best_model_dir)
-    speaker_verification_model = SpeakerRecognition.from_hparams(
+    #dataset = es.get_dataset(data_dir)
+    #model = get_model(best_model_dir)
+    speaker_verification_model = EncoderClassifier.from_hparams(
         source="speechbrain/spkrec-ecapa-voxceleb")
+    #print(get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0]))
 
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
