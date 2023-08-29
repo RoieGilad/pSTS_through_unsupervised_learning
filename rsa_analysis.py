@@ -21,7 +21,7 @@ from models import params_utils as pu
 from training.training_utils import run_one_batch_psts
 from Loss.pstsLoss import pstsLoss
 import evaluate_script as es
-
+from variability_face_recognition.similarity import rdm
 
 
 def prepare_data_for_preprocessing(src_dir):
@@ -207,6 +207,9 @@ def get_psts_representation(model, dataset):
         outputs[i] = [encode_v1, encode_a1, l1]
     return outputs
 
+def get_face_model_embeddings(src_dir):
+    data_paths_list, names_list = load_data(face_model_data)
+
 
 if __name__ == '__main__':
     #prepare_data_for_preprocessing("stimuli")
@@ -221,4 +224,4 @@ if __name__ == '__main__':
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
       #  api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
-    print(get_psts_representation(model, dataset))
+    #print(get_psts_representation(model, dataset))

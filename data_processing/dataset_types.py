@@ -85,7 +85,7 @@ class VideoDataset(Dataset):
             #paths_to_frames.append(random.choice(interval_frames))
             paths_to_frames.append(interval_frames[len(interval_frames)//2])
             # TODO only for face model
-            frame_path = path.join(face_path, path.basename(interval_frames[len(interval_frames)//2]))
+            frame_path = path.join(face_path, path.split(interval_frames[len(interval_frames)//2])[1])
             shutil.copyfile(interval_frames[len(interval_frames)//2], frame_path)
 
         return paths_to_frames
@@ -100,7 +100,7 @@ class VideoDataset(Dataset):
 
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
         tmp_rand = 2  # TODO
-        paths_to_frames = self.choose_frames_from_interval(idx, num_intervals, tmp_rand, path)
+        paths_to_frames = self.choose_frames_from_interval(idx, num_intervals, tmp_rand, face_path)
         processed_frames = get_sample_video_frames_interval(paths_to_frames,
                                                             self.frame_transform,
                                                             self.video_transform)
