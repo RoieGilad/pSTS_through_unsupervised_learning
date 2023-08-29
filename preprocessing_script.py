@@ -216,9 +216,30 @@ def prepare_data(test=False):
     print("start_cal_mean_and_std")
     dp.get_mean_and_std(destination_dir)
 
+def prepare_test_data():
+    dp.windows = True
+    dp.cuda = True
+    time_interval = 500
+    sample_limit = 160000
+    reference_dir = os.path.join(r'dataset', f'160k_train_{str(time_interval)}ms')
+    test_destination_dir = os.path.join(r'dataset', 'test', f'160k_test_{str(time_interval)}ms')
+    video_source_dir = r'dataset/test/voxceleb_video_test/mp4'
+    audio_source_dir = r'dataset/test/voxceleb_audio_test/aac'
+    dp.data_flattening(video_source_dir, audio_source_dir, test_destination_dir,
+                       False, sample_limit)
+    print("start filtering")
+    dp.filter_dataset_by_label(test_destination_dir, reference_dir)
+    print("start split videos")
+    dp.split_all_videos(test_destination_dir, time_interval, True)
+    # print("start center images")
+    # dp.center_all_faces(test_destination_dir, True)
+    print("start split audio")
+    dp.split_all_audio(test_destination_dir, time_interval, True)
+    print('done!')
+
 
 if __name__ == '__main__':
     dp.windows = True
     dp.cuda = True
-    dp.filter_dataset_by_label(r'demo_data/demo_after_flattening', r'demo_data/demo_after_flattening')
+    prepare_test_data()
     # prepare_data()
