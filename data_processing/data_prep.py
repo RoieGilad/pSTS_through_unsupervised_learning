@@ -68,7 +68,7 @@ def data_flattening(video_source_dir, audio_source_dir, destination_dir,
             video_id_samples = sorted(
                 glob.glob(path.join(video_subdir, '*.mp4')))
             audio_id_samples = sorted(
-                glob.glob(path.join(audio_subdir, '*.m4a')))
+                glob.glob(path.join(audio_subdir, '*.wav')))
 
             for video_id_sample, audio_id_sample in zip(video_id_samples,
                                                         audio_id_samples):
@@ -319,7 +319,7 @@ def split_all_audio(path_to_data: str, interval: int, delete_input=False):
         video_frame_rate = du.get_video_frame_rate(data_md, sample_index)
         if video_frame_rate > 0:
             for path_to_audio_file in du.file_iterator_by_type(
-                    path_to_audio_folder, "m4a"):
+                    path_to_audio_folder, "wav"):
                 index_to_num[sample_index] = split_audio(
                     path_to_audio_file, interval,
                     delete_input)
