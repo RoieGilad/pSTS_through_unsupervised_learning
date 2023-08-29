@@ -208,7 +208,7 @@ def get_psts_representation(model, dataset):
     return outputs
 
 def get_face_model_embeddings(src_dir):
-    data_paths_list, names_list = load_data(face_model_data)
+    data_paths_list, names_list = rdm.load_data(src_dir)
 
 
 if __name__ == '__main__':
