@@ -1,4 +1,6 @@
+import os
 import random
+import shutil
 from glob import glob
 from os import path, getcwd
 from natsort import natsorted
@@ -33,7 +35,7 @@ def get_sample_audio_frames_interval(paths_to_audio_sample_frames: List[str], nu
     after making some process on it"""
     du.pick_new_amplitude_gain()
     start_idx = int((len(paths_to_audio_sample_frames) - num_frames * step_size) * rand)
-    start_idx = 2   #TODO
+    start_idx = 1   #TODO
     path_to_sample_frames_interval = paths_to_audio_sample_frames[
                                      start_idx: start_idx + num_frames * step_size: step_size]
     frames = [torchaudio.load(p)[0] for p in path_to_sample_frames_interval]
@@ -58,6 +60,9 @@ class VideoDataset(Dataset):
         self.num_frames = num_frames
         self.step_size = step_size
         self.tmp_rand = -1
+        # TODO only for face model
+        os.makedirs(f"face_model_data", exist_ok=True)
+
 
     def __len__(self):
         return len(self.samples)
@@ -68,30 +73,38 @@ class VideoDataset(Dataset):
     def is_available(self, idx):
         return self.labels_map.iloc[idx, 4] >= (self.step_size * self.num_frames)
 
-    def choose_frames_from_interval(self, idx, num_intervals, tmp_rand):
+    def choose_frames_from_interval(self, idx, num_intervals, tmp_rand, face_path):
         paths_to_frames = []
         first_interval = int((num_intervals - self.num_frames * self.step_size)
                              * tmp_rand)
-        first_interval = 2 # todo
+        first_interval = 1 # todo
         real_index = du.get_real_index_by_path(self.samples[idx])
         for i in range(self.num_frames):
             interval_frames = natsorted(glob(path.join(self.samples[idx], "video",
                                                        f"sample_{real_index}_v_{first_interval + i}_*")))
-            paths_to_frames.append(random.choice(interval_frames))
-            #paths_to_frames.append(interval_frames[len(interval_frames)//2])
+            #paths_to_frames.append(random.choice(interval_frames))
+            paths_to_frames.append(interval_frames[len(interval_frames)//2])
+            # TODO only for face model
+            frame_path = path.join(face_path, path.split(interval_frames[len(interval_frames)//2])[1])
+            shutil.copyfile(interval_frames[len(interval_frames)//2], frame_path)
+
         return paths_to_frames
 
     def __getitem__(self, idx):
         """assume is_available(self, idx) == True when called"""
         num_intervals = self.labels_map.iloc[idx, 4]
+        label = self.get_label(idx)
+        # TODO only for face model
+        face_path = path.join("face_model_data", label)
+        os.makedirs(face_path, exist_ok=True)
+
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
         tmp_rand = 2  # TODO
-        paths_to_frames = self.choose_frames_from_interval(idx, num_intervals, tmp_rand)
+        paths_to_frames = self.choose_frames_from_interval(idx, num_intervals, tmp_rand, face_path)
         processed_frames = get_sample_video_frames_interval(paths_to_frames,
                                                             self.frame_transform,
                                                             self.video_transform)
         self.tmp_rand = -1
-        label = self.get_label(idx)
         return processed_frames, label
 
 

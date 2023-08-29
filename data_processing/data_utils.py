@@ -22,17 +22,22 @@ amplitude_gain = 0
 train_v_frame_transformer = v_transforms.Compose([
     v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
     # v_transforms.Normalize([0.4595, 0.3483, 0.3344], [0.5337, 0.4163, 0.4099])])#mean and std of 160k sample and 100ms audio
+    #v_transforms.Normalize([0.4367, 0.3042, 0.3014], [0.5196, 0.3819, 0.3915])])#mean and std of stimuli
     # v_transforms.Normalize([0.4642, 0.3595, 0.3521], [0.5421, 0.4302, 0.4297])])#mean and std of 10k sample and 500ms audio
     v_transforms.Normalize([0.4595, 0.3483, 0.3345], [0.5337, 0.4163, 0.4100])])#mean and std of 160k sample and 500ms audio
 
 val_v_frame_transformer = v_transforms.Compose([
     v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
-    v_transforms.Normalize([0.4595, 0.3483, 0.3345], [0.5337, 0.4163,
-                                                      0.4100])])  # mean and std of 160k sample and 500ms audio
+    #v_transforms.Normalize([0.4595, 0.3483, 0.3345], [0.5337, 0.4163,
+                                                  #    0.4100])])  # mean and std of 160k sample and 500ms audio
+    #v_transforms.Normalize([0.4367, 0.3042, 0.3014], [0.5196, 0.3819, 0.3915])])  # mean and std of stimuli
+    #v_transforms.Normalize([0.4364, 0.3170, 0.2990], [0.5036, 0.3784, 0.3675])])  # mean and std of 60 test
+    v_transforms.Normalize([0.4329, 0.3098, 0.2948], [0.5014, 0.3727, 0.3664])])  # mean and std of 30 test
+
 
 train_video_transformer = v_transforms.Compose([
     v_transforms.RandomHorizontalFlip(p=0.5),
-    # v_transforms.ColorJitter(),
+    #v_transforms.ColorJitter(),
     v_transforms.RandomCrop([224, 224])])
 
 val_video_transformer = v_transforms.Compose([v_transforms.RandomCrop([224, 224])])
@@ -51,14 +56,17 @@ train_a_frame_transformer = v_transforms.Compose([
     # v_transforms.Normalize([0.6911, 0.6911, 0.6911], [12.7088, 12.7088, 12.7088]) # mean and std of 10k and 1s audio
     # v_transforms.Normalize([0.6906, 0.6906, 0.6906], [12.6992, 12.6992, 12.6992]) # mean and std of 10k and 1s audio
     # v_transforms.Normalize([0.6157, 0.6157, 0.6157], [11.2199, 11.2199, 11.2199]) #mean and std of 160k sample and 500ms audio
+    #v_transforms.Normalize([0.2830, 0.2830, 0.2830], [3.1991, 3.1991, 3.1991]) #mean and std of stimuli
     v_transforms.Normalize([0.6151, 0.6151, 0.6151], [11.1725, 11.1725, 11.1725]) #mean and std of 160k sample and 500ms audio without interpolation
 ])
 
 val_a_frame_transformer = v_transforms.Compose([
     a_transforms.Spectrogram(n_fft=256, hop_length=16),
     lambda x: x.expand(3, -1, -1),
-    v_transforms.Normalize([0.6151, 0.6151, 0.6151], [11.1725, 11.1725, 11.1725]) #mean and std of 160k sample and 500ms audio without interpolation
-])
+    #v_transforms.Normalize([0.6151, 0.6151, 0.6151], [11.1725, 11.1725, 11.1725]) #mean and std of 160k sample and 500ms audio without interpolation
+    #v_transforms.Normalize([0.2830, 0.2830, 0.2830], [3.1991, 3.1991, 3.1991])  # mean and std of stimuli
+    # v_transforms.Normalize([0.3954, 0.3954, 0.3954], [7.7405, 7.7405, 7.7405])  # mean and std of 60 test
+    v_transforms.Normalize([0.3143, 0.3143, 0.3143], [5.1594, 5.1594, 5.1594])])  # mean and std of 30 test
 
 train_audio_transformer = v_transforms.Compose([])
 
@@ -205,7 +213,7 @@ def create_sample_video_audio_dirs(destination_dir, video_id_sample,
     shutil.copy(video_id_sample, path.join(destination_video_sample_path,
                                            f'sample_{sample_num}.mp4'))
     shutil.copy(audio_id_sample, path.join(destination_audio_sample_path,
-                                           f'sample_{sample_num}.m4a'))
+                                           f'sample_{sample_num}.wav'))
     os.chmod(destination_video_sample_path, 0o0777)
     os.chmod(destination_audio_sample_path, 0o0777)
     if delete_origin:

@@ -237,9 +237,30 @@ def prepare_test_data():
     dp.split_all_audio(test_destination_dir, time_interval, True)
     print('done!')
 
+def prepare_data_stimuli(test=False):
+    dp.windows = True
+    dp.cuda = False
+    time_interval = 500
+
+    destination_dir = "stimuli_processed"
+    video_source_dir = "stimuli_video_data"
+    audio_source_dir = 'stimuli_audio_data'
+    print(destination_dir, video_source_dir, audio_source_dir)
+    print("welcome to preprocessing")
+    dp.data_flattening(video_source_dir, audio_source_dir, destination_dir,
+                       False)
+    print("start split videos")
+    dp.split_all_videos(destination_dir, time_interval, True)
+    # print("start center images")
+    # dp.center_all_faces(destination_dir, True)
+    print("start split audio")
+    dp.split_all_audio(destination_dir, time_interval, True)
+    print("start_cal_mean_and_std")
+    dp.get_mean_and_std(destination_dir)
 
 if __name__ == '__main__':
     dp.windows = True
-    dp.cuda = True
-    prepare_test_data()
+    dp.cuda = False
+    # prepare_test_data()
     # prepare_data()
+    prepare_data_stimuli()
