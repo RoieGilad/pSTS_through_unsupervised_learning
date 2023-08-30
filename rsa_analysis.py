@@ -1,4 +1,3 @@
-import csv
 import glob
 import math
 import os
@@ -9,7 +8,6 @@ import random
 
 import numpy as np
 from natsort import natsorted
-from torchmetrics.functional import pairwise_cosine_similarity
 from data_processing import data_prep as dp
 import pandas as pd
 from models.models import PstsDecoder
@@ -25,7 +23,6 @@ import neptune
 from tqdm import tqdm
 from models import params_utils as pu
 from training.training_utils import run_one_batch_psts
-from Loss.pstsLoss import pstsLoss
 import evaluate_script as es
 import torchaudio
 from speechbrain.pretrained import EncoderClassifier
@@ -247,36 +244,41 @@ def get_audio_model_representations(src_dir):
         representations.append(sample_representations)
     return representations
 
-def create_and_save_rdm(embeddings, labels,  dest_path):
+def create_and_save_rdm(embeddings, labels, dest_path):
     rdm = np.zeros((len(embeddings), len(embeddings)))
     for i, first_em in enumerate(embeddings):
         for j, second_em in enumerate(embeddings):
             rdm[i, j] = pairwise_cosine_similarity(first_em, second_em)
 
     n = len(labels)
-    assert rdm.shape == (n, n)
-    with open(dest_path, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
+    rdm_df = pd.DataFrame(data=rdm, columns=labels, index=labels)
+    rdm_df.to_excel(dest_path)
 
-        # Write the header row with the names
-        writer.writerow([''] + labels)
-
-        # Write the distances matrix with names
-        for i in range(n):
-            row = [labels[i]] + rdm[i].tolist()
-            writer.writerow(row)
     print("rdm saved successfuly")
 
 def create_audio_model_rdms(save_dir, audio_model_dir): #TODO continue
     # Create whole audio (audio model) rdm
     whole_audio_embeddings = []
     whole_labels = []
-    save_path = path.join(save_dir, "audio_model_all_audio_rsa")
+    audio_frames_embeddings = []
+    audio_frames_labels = []
+    save_whole_audio_rdm_path = path.join(save_dir, "audio_model_whole_audio_rdm.xlsx")
+    save_audio_frames_rdm_path = path.join(save_dir, "audio_model_audio_frames_rdm.xlsx")
     audio_model_representations = get_audio_model_representations(audio_model_dir)
     for representation in audio_model_representations:
-        whole_audio_embeddings.append(representation[-2])
+        whole_audio_embeddings.append(representation[-2][0])
+        audio_frames_embeddings.append(representation[0][0])
+        audio_frames_embeddings.append(representation[1][0])
+        audio_frames_embeddings.append(representation[2][0])
         whole_labels.append(representation[-1])
-    create_and_save_rdm(whole_audio_embeddings, whole_labels, save_path)
+        audio_frames_labels.append(representation[-1])
+        audio_frames_labels.append(representation[-1])
+        audio_frames_labels.append(representation[-1])
+    print("creating whole audio rdm")
+    create_and_save_rdm(whole_audio_embeddings, whole_labels, save_whole_audio_rdm_path)
+    print("creating audio frame rdm")
+    create_and_save_rdm(audio_frames_embeddings, audio_frames_labels, save_audio_frames_rdm_path)
+
 
 
 
@@ -291,7 +293,11 @@ if __name__ == '__main__':
     #dataset = es.get_dataset(data_dir)
     #model = get_model(best_model_dir)
     create_audio_model_rdms("rsa_results", data_dir)
-    #print(get_audio_model_representations(data_dir))
+    #speaker_verification_model = EncoderClassifier.from_hparams(
+     #   source="speechbrain/spkrec-ecapa-voxceleb")
+    #audio_rep = get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0])
+    #print(audio_rep[-1][0])
+
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
       #  api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
