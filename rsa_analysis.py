@@ -4,6 +4,10 @@ import shutil
 import time
 from os import path, remove
 import random
+
+import numpy as np
+from natsort import natsorted
+
 from data_processing import data_prep as dp
 import pandas as pd
 from models.models import PstsDecoder
@@ -21,7 +25,6 @@ from models import params_utils as pu
 from training.training_utils import run_one_batch_psts
 from Loss.pstsLoss import pstsLoss
 import evaluate_script as es
-from variability_face_recognition.similarity import rdm
 import torchaudio
 from speechbrain.pretrained import EncoderClassifier
 
@@ -219,6 +222,31 @@ def get_audio_model_embedding(audio_model, audio_sample):
     """
     return audio_model.encode_batch(audio_sample)
 
+def get_audio_model_representations(src_dir):
+    xlsx_path = path.join(src_dir, "data_md.xlsx")
+    md_df = pd.read_excel(xlsx_path)
+    representations = []
+    speaker_verification_model = EncoderClassifier.from_hparams(
+        source="speechbrain/spkrec-ecapa-voxceleb")
+
+    samples_directories = natsorted(glob.glob(path.join(src_dir, "sample*")))
+    for sample_directory in samples_directories:
+        sample_representations = []
+        sample_wav_files = natsorted(glob.glob(path.join(sample_directory, 'audio', '*.wav')))
+        wav_files_for_embedding = sample_wav_files[1:4]
+        sample_index = int(sample_directory.split("sample_")[-1])
+        row = md_df[md_df['sample_index'] == sample_index]
+        speaker_id = row.iloc[0]['speaker_id']
+        for wav_file in wav_files_for_embedding:
+            sample_representations.append(get_audio_model_embedding(speaker_verification_model,
+                                                                    torchaudio.load(wav_file)[0]))
+        # End frame
+        sample_representations.append(np.mean(sample_representations))
+        sample_representations.append(speaker_id)
+        representations.append(sample_representations)
+    return representations
+
+
 
 if __name__ == '__main__':
     #prepare_data_for_preprocessing("stimuli")
@@ -230,10 +258,8 @@ if __name__ == '__main__':
     best_model_dir = r'models/check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2/best_model'
     #dataset = es.get_dataset(data_dir)
     #model = get_model(best_model_dir)
-    speaker_verification_model = EncoderClassifier.from_hparams(
-        source="speechbrain/spkrec-ecapa-voxceleb")
-    #print(get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0]))
 
+    print(get_audio_model_representations(data_dir))
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
       #  api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
