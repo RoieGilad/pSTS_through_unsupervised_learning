@@ -256,7 +256,7 @@ def create_and_save_rdm(embeddings, labels, dest_path):
 
     print("rdm saved successfuly")
 
-def create_audio_model_rdms(save_dir, audio_model_dir): #TODO continue
+def create_audio_model_rdms(save_dir, audio_model_dir):
     # Create whole audio (audio model) rdm
     whole_audio_embeddings = []
     whole_labels = []
@@ -271,15 +271,45 @@ def create_audio_model_rdms(save_dir, audio_model_dir): #TODO continue
         audio_frames_embeddings.append(representation[1][0])
         audio_frames_embeddings.append(representation[2][0])
         whole_labels.append(representation[-1])
-        audio_frames_labels.append(representation[-1])
-        audio_frames_labels.append(representation[-1])
-        audio_frames_labels.append(representation[-1])
-    print("creating whole audio rdm")
+        audio_frames_labels.extend([representation[-1]] * 3)
+    print("creating whole audio - audio model - rdm")
     create_and_save_rdm(whole_audio_embeddings, whole_labels, save_whole_audio_rdm_path)
-    print("creating audio frame rdm")
+    print("creating audio frames - audio model - rdm")
     create_and_save_rdm(audio_frames_embeddings, audio_frames_labels, save_audio_frames_rdm_path)
 
 
+def create_psts_rdms(model, data_dir, save_dir):
+    dataset = es.get_dataset(data_dir)
+    representations = get_psts_representation(model, dataset)
+    video_end_frames_embeddings = []
+    audio_end_frames_embeddings = []
+    end_frames_labels = []
+    audio_frames_embeddings = []
+    video_frames_embeddings = []
+    frames_labels = []
+    save_whole_audio_rdm_path = path.join(save_dir, "psts_model_whole_audio_rdm.xlsx")
+    save_audio_frames_rdm_path = path.join(save_dir, "psts_model_audio_frames_rdm.xlsx")
+    save_whole_video_rdm_path = path.join(save_dir, "psts_model_whole_video_rdm.xlsx")
+    save_video_frames_rdm_path = path.join(save_dir, "psts_model_video_frames_rdm.xlsx")
+    for representation in representations:
+        video_frames_embeddings.append(representation[0][0][0].unsqueeze(0))
+        video_frames_embeddings.append(representation[0][0][1].unsqueeze(0))
+        video_frames_embeddings.append(representation[0][0][2].unsqueeze(0))
+        video_end_frames_embeddings.append(representation[0][0][3].unsqueeze(0))
+        audio_frames_embeddings.append(representation[1][0][0].unsqueeze(0))
+        audio_frames_embeddings.append(representation[1][0][1].unsqueeze(0))
+        audio_frames_embeddings.append(representation[1][0][2].unsqueeze(0))
+        audio_end_frames_embeddings.append(representation[1][0][3].unsqueeze(0))
+        end_frames_labels.append(representation[-1])
+        frames_labels.extend([representation[-1]] * 3)
+    print("creating whole audio psts rdm")
+    create_and_save_rdm(audio_end_frames_embeddings, end_frames_labels, save_whole_audio_rdm_path)
+    print("creating audio frames psts rdm")
+    create_and_save_rdm(audio_frames_embeddings, frames_labels, save_audio_frames_rdm_path)
+    print("creating whole video psts rdm")
+    create_and_save_rdm(video_end_frames_embeddings, end_frames_labels, save_whole_video_rdm_path)
+    print("creating video frames psts rdm")
+    create_and_save_rdm(video_frames_embeddings, frames_labels, save_video_frames_rdm_path)
 
 
 if __name__ == '__main__':
@@ -290,13 +320,13 @@ if __name__ == '__main__':
     torch.manual_seed(seed)
     data_dir = r'vox_samples_rsa_30'
     best_model_dir = r'models/check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2/best_model'
-    #dataset = es.get_dataset(data_dir)
     #model = get_model(best_model_dir)
-    create_audio_model_rdms("rsa_results", data_dir)
-    #speaker_verification_model = EncoderClassifier.from_hparams(
-     #   source="speechbrain/spkrec-ecapa-voxceleb")
-    #audio_rep = get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0])
-    #print(audio_rep[-1][0])
+    #create_audio_model_rdms("rsa_results", data_dir)
+    #create_psts_rdms(model, data_dir, "rsa_results")
+    speaker_verification_model = EncoderClassifier.from_hparams(
+       source="speechbrain/spkrec-ecapa-voxceleb")
+    audio_rep = get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0])
+    print(audio_rep[-1][0].size())
 
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
