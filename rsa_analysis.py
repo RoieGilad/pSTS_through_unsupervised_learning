@@ -1,4 +1,6 @@
+import csv
 import glob
+import math
 import os
 import shutil
 import time
@@ -7,7 +9,7 @@ import random
 
 import numpy as np
 from natsort import natsorted
-
+from torchmetrics.functional import pairwise_cosine_similarity
 from data_processing import data_prep as dp
 import pandas as pd
 from models.models import PstsDecoder
@@ -213,8 +215,7 @@ def get_psts_representation(model, dataset):
     return outputs
 
 def get_face_model_embeddings(src_dir):
-    data_paths_list, names_list = rdm.load_data(src_dir)
-
+    pass
 
 def get_audio_model_embedding(audio_model, audio_sample):
     """
@@ -241,10 +242,41 @@ def get_audio_model_representations(src_dir):
             sample_representations.append(get_audio_model_embedding(speaker_verification_model,
                                                                     torchaudio.load(wav_file)[0]))
         # End frame
-        sample_representations.append(np.mean(sample_representations))
+        sample_representations.append(sum(sample_representations)/3)
         sample_representations.append(speaker_id)
         representations.append(sample_representations)
     return representations
+
+def create_and_save_rdm(embeddings, labels,  dest_path):
+    rdm = np.zeros((len(embeddings), len(embeddings)))
+    for i, first_em in enumerate(embeddings):
+        for j, second_em in enumerate(embeddings):
+            rdm[i, j] = pairwise_cosine_similarity(first_em, second_em)
+
+    n = len(labels)
+    assert rdm.shape == (n, n)
+    with open(dest_path, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+
+        # Write the header row with the names
+        writer.writerow([''] + labels)
+
+        # Write the distances matrix with names
+        for i in range(n):
+            row = [labels[i]] + rdm[i].tolist()
+            writer.writerow(row)
+    print("rdm saved successfuly")
+
+def create_audio_model_rdms(save_dir, audio_model_dir): #TODO continue
+    # Create whole audio (audio model) rdm
+    whole_audio_embeddings = []
+    whole_labels = []
+    save_path = path.join(save_dir, "audio_model_all_audio_rsa")
+    audio_model_representations = get_audio_model_representations(audio_model_dir)
+    for representation in audio_model_representations:
+        whole_audio_embeddings.append(representation[-2])
+        whole_labels.append(representation[-1])
+    create_and_save_rdm(whole_audio_embeddings, whole_labels, save_path)
 
 
 
@@ -258,8 +290,8 @@ if __name__ == '__main__':
     best_model_dir = r'models/check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2/best_model'
     #dataset = es.get_dataset(data_dir)
     #model = get_model(best_model_dir)
-
-    print(get_audio_model_representations(data_dir))
+    create_audio_model_rdms("rsa_results", data_dir)
+    #print(get_audio_model_representations(data_dir))
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
       #  api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
