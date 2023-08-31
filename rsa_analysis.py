@@ -280,19 +280,28 @@ def create_audio_model_rdms(save_dir, audio_model_dir):
     create_and_save_rdm(audio_frames_embeddings, audio_frames_labels, save_audio_frames_rdm_path)
 
 
-def create_psts_rdms(model, data_dir, save_dir):
-    dataset = es.get_dataset(data_dir)
-    representations = get_psts_representation(model, dataset)
+def create_psts_rdms(model, data_dir, save_dir, fmri=False, fmri_representations=None, type_fmri=None):
+    if not fmri:
+        dataset = es.get_dataset(data_dir)
+        representations = get_psts_representation(model, dataset)
+        save_whole_audio_rdm_path = path.join(save_dir, "psts_model_whole_audio_rdm.xlsx")
+        save_audio_frames_rdm_path = path.join(save_dir, "psts_model_audio_frames_rdm.xlsx")
+        save_whole_video_rdm_path = path.join(save_dir, "psts_model_whole_video_rdm.xlsx")
+        save_video_frames_rdm_path = path.join(save_dir, "psts_model_video_frames_rdm.xlsx")
+    else:
+        representations = fmri_representations
+        save_whole_audio_rdm_path = path.join(save_dir, f"fmri_{type_fmri}_whole_audio_rdm.xlsx")
+        save_audio_frames_rdm_path = path.join(save_dir, f"fmri_{type_fmri}_audio_frames_rdm.xlsx")
+        save_whole_video_rdm_path = path.join(save_dir, f"fmri_{type_fmri}_whole_video_rdm.xlsx")
+        save_video_frames_rdm_path = path.join(save_dir, f"fmri_{type_fmri}_video_frames_rdm.xlsx")
+
     video_end_frames_embeddings = []
     audio_end_frames_embeddings = []
     end_frames_labels = []
     audio_frames_embeddings = []
     video_frames_embeddings = []
     frames_labels = []
-    save_whole_audio_rdm_path = path.join(save_dir, "psts_model_whole_audio_rdm.xlsx")
-    save_audio_frames_rdm_path = path.join(save_dir, "psts_model_audio_frames_rdm.xlsx")
-    save_whole_video_rdm_path = path.join(save_dir, "psts_model_whole_video_rdm.xlsx")
-    save_video_frames_rdm_path = path.join(save_dir, "psts_model_video_frames_rdm.xlsx")
+
     for representation in representations:
         video_frames_embeddings.append(representation[0][0][0].unsqueeze(0))
         video_frames_embeddings.append(representation[0][0][1].unsqueeze(0))
@@ -304,14 +313,37 @@ def create_psts_rdms(model, data_dir, save_dir):
         audio_end_frames_embeddings.append(representation[1][0][3].unsqueeze(0))
         end_frames_labels.append(representation[-1])
         frames_labels.extend([representation[-1]] * 3)
-    print("creating whole audio psts rdm")
+    print("creating whole audio rdm")
     create_and_save_rdm(audio_end_frames_embeddings, end_frames_labels, save_whole_audio_rdm_path)
-    print("creating audio frames psts rdm")
+    print("creating audio frames rdm")
     create_and_save_rdm(audio_frames_embeddings, frames_labels, save_audio_frames_rdm_path)
-    print("creating whole video psts rdm")
+    print("creating whole video rdm")
     create_and_save_rdm(video_end_frames_embeddings, end_frames_labels, save_whole_video_rdm_path)
-    print("creating video frames psts rdm")
+    print("creating video frames rdm")
     create_and_save_rdm(video_frames_embeddings, frames_labels, save_video_frames_rdm_path)
+
+def create_fmri_rdms(fmri_dir, model, save_dir, type_fmri):
+
+    dataset = es.get_dataset(fmri_dir)
+    representations = get_psts_representation(model, dataset)
+    mean_representations = []
+    for i in range(0, len(representations), 3):
+        video_element1_tensors = representations[i][0]
+        video_element2_tensors = representations[i+1][0]
+        video_element3_tensors = representations[i+2][0]
+        audio_element1_tensors = representations[i][1]
+        audio_element2_tensors = representations[i+1][1]
+        audio_element3_tensors = representations[i+2][1]
+        label = representations[i][2]
+
+        mean_video_element = (video_element1_tensors + video_element2_tensors + video_element3_tensors) / 3
+        mean_audio_element = (audio_element1_tensors + audio_element2_tensors + audio_element3_tensors) / 3
+
+        mean_representations.append([mean_video_element, mean_audio_element, label])
+    create_psts_rdms(model, fmri_dir, save_dir, fmri=True, fmri_representations=mean_representations,
+                     type_fmri=type_fmri)
+
+
 
 def create_rsa_from_two_rdms(path_to_first_rdm, first_rdm_type, path_to_second_rdm,
                              second_rdm_type, dir_to_save_rsa):
@@ -359,6 +391,36 @@ def plot_rsa(rsa_path):
     plt.tight_layout()
     plt.show()
 
+def split_stimuli_processed(data_dir):
+    dest_dir1 = "stimuli_first"
+    dest_dir2 = "stimuli_second"
+    samples_directories = natsorted(glob.glob(path.join(data_dir, "sample*")))
+    md_file = path.join(data_dir, "data_md_0.xlsx")
+
+    os.makedirs(dest_dir1, exist_ok=True)
+    os.makedirs(dest_dir2, exist_ok=True)
+
+    counter = 0
+    id = 0
+    for sample_directory in samples_directories:
+        dir_name = f"sample_{counter + id}"
+        if counter <= 2:
+            destination_path = os.path.join(dest_dir1, dir_name)
+            shutil.copytree(sample_directory, destination_path)
+        else:
+            destination_path = os.path.join(dest_dir2, dir_name)
+            shutil.copytree(sample_directory, destination_path)
+        counter += 1
+        if counter > 5:
+            counter = 0
+            id += 6
+    dest_file1 = path.join(dest_dir1, "data_md_0.xlsx")
+    dest_file2 = path.join(dest_dir2, "data_md_0.xlsx")
+    shutil.copyfile(md_file, dest_file1)
+    shutil.copyfile(md_file, dest_file2)
+
+
+
 
 
 if __name__ == '__main__':
@@ -369,17 +431,20 @@ if __name__ == '__main__':
     torch.manual_seed(seed)
     data_dir = r'vox_samples_rsa_30'
     best_model_dir = r'models/check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2/best_model'
-    #model = get_model(best_model_dir)
+    model = get_model(best_model_dir)
     #create_audio_model_rdms("rsa_results", data_dir)
     #create_psts_rdms(model, data_dir, "rsa_results")
     #speaker_verification_model = EncoderClassifier.from_hparams(
       # source="speechbrain/spkrec-ecapa-voxceleb")
     #audio_rep = get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0])
     #print(audio_rep[-1][0].size())
-    create_rsa_from_two_rdms("psts_model_audio_frames_rdm.xlsx", "psts",
-                       "audio_model_audio_frames_rdm.xlsx", "audio_model_audio_frames2", "rsa_results")
+    #create_rsa_from_two_rdms("psts_model_audio_frames_rdm.xlsx", "psts",
+     #                  "audio_model_audio_frames_rdm.xlsx", "audio_model_audio_frames2", "rsa_results")
     #plot_rsa("rsa_results/psts_audio_model_audio_frames2_full_corr_rsa.xlsx")
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
       #  api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     #print(get_psts_representation(model, dataset))
+    #split_stimuli_processed("stimuli_processed")
+    create_fmri_rdms("stimuli_second", model, "rsa_results", "second")
+    

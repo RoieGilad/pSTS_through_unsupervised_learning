@@ -23,11 +23,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="57a38676-abf1-4580-b9b4-0cd658ac56da" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pSTS_through_unsupervised_learning.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pSTS_through_unsupervised_learning.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/rsa_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/rsa_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/variability_face_recognition/similarity/rdm.py" beforeDir="false" afterPath="$PROJECT_DIR$/variability_face_recognition/similarity/rdm.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,21 +80,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/AVIV/Roie/Galit_Project/pSTS_through_unsupervised_learning&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;aDefault&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "C:/Users/offir/repos/pSTS_through_unsupervised_learning/audio_dir",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "aDefault",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\offir\repos\pSTS_through_unsupervised_learning\audio_dir" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\AVIV\Roie\Galit_Project\pSTS_through_unsupervised_learning" />
     </key>
@@ -256,6 +256,7 @@
       <workItem from="1691324999421" duration="2260000" />
       <workItem from="1692086254778" duration="1526000" />
       <workItem from="1693343736980" duration="535000" />
+      <workItem from="1693344620387" duration="33523000" />
     </task>
     <servers />
   </component>
@@ -322,7 +323,7 @@
     <SUITE FILE_PATH="coverage/dataset_types_py$runner_for_debug.coverage" NAME="runner_for_debug Coverage Results" MODIFIED="1688575662509" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
     <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$trainning_debug_script__1_.coverage" NAME="trainning_debug_script (1) Coverage Results" MODIFIED="1689142809518" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/dataset_types_py$dataset_types.coverage" NAME="dataset_types Coverage Results" MODIFIED="1687032235349" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data" />
-    <SUITE FILE_PATH="coverage/dataset_types_py$rsa_analysis.coverage" NAME="rsa_analysis Coverage Results" MODIFIED="1693344232663" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/dataset_types_py$rsa_analysis.coverage" NAME="rsa_analysis Coverage Results" MODIFIED="1693488301821" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pSTS_through_unsupervised_learning$runner_for_debug__1_.coverage" NAME="runner_for_debug (1) Coverage Results" MODIFIED="1689098148642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/dataset_types_py$runner_for_debug__1_.coverage" NAME="runner_for_debug (1) Coverage Results" MODIFIED="1690119582677" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/dataset_types_py$audio_trans_research.coverage" NAME="audio_trans_research Coverage Results" MODIFIED="1690380037066" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
