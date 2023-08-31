@@ -350,12 +350,13 @@ def create_fmri_rdms(fmri_dir, model, save_dir, type_fmri):
     create_psts_rdms(model, fmri_dir, save_dir, fmri=True, fmri_representations=mean_representations,
                      type_fmri=type_fmri)
 
-def get_video_model_embedding(video_imgs_dir: str, mtcnn, model):
-    output = []
+def get_video_embedding(video_imgs_dir: str, mtcnn, model, id):
     normalize_imagenet = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                               std=[0.229, 0.224, 0.225])
-    for im_path in natsorted(glob.glob(path.join(video_imgs_dir, '*.jpg'))):
-        print(im_path)
+    im_paths =[ip for ip in natsorted(glob.glob(path.join(video_imgs_dir,
+                                                     '*.jpg')))]
+    output, outputs = [], []
+    for im_path in im_paths:
         img = Image.open(im_path)
         if img.mode != 'RGB':  # PNG imgs are RGBA
             img = img.convert('RGB')
@@ -363,34 +364,37 @@ def get_video_model_embedding(video_imgs_dir: str, mtcnn, model):
         if img is not None:
             img = img.cuda()
             img = img / 255.0
-            img = normalize_imagenet(img).to(device('cuda:0')).unsqueeze(
+            img = normalize_imagenet(img).to(device('cuda:1')).unsqueeze(
                 0).float()
             output.append(model(img).cpu())
         else:
-            print(f'failed mtcnn in {im_path}')
+                print(f'failed mtcnn in {im_path}')
 
-    #add mean frame
-    stacked_frames_embedding = torch.stack(output)
-    output.append(torch.mean(stacked_frames_embedding, dim=0))
-    return output
+        if len(output) == 3: #add mean frame
+            stacked_frames_embedding = torch.stack(output)
+            output.append(torch.mean(stacked_frames_embedding, dim=0))
+            output.append(id)
+            outputs.append(output)
+            output = []
+    return outputs
 
 
-def get_all_video_model_embeddings(videos_dir:str, mtcnn, model):
+def get_all_video_embeddings(videos_dir:str, mtcnn, model):
     all_video_embeddings = []
     video_dirs = [subdir for subdir in glob.glob(os.path.join(videos_dir, '*'))
                   if os.path.isdir(subdir)]
     for video_dir in tqdm(video_dirs):
-        embeddings = get_video_model_embedding(video_dir, mtcnn, model)
-        embeddings.append(os.path.basename(video_dir))
-        all_video_embeddings.append(embeddings)
+        id = os.path.basename(video_dir)
+        embeddings = get_video_embedding(video_dir, mtcnn, model, id)
+        all_video_embeddings.extend(embeddings)
     return all_video_embeddings
 
 
 def get_face_recognition_embeddings(videos_dir: str):
     mtcnn = MTCNN(image_size=160, post_process=False,
                   device='cuda:0')  # .cuda()
-    model = InceptionResnetV1(pretrained='vggface2', device='cuda:0').eval()
-    return get_all_video_model_embeddings(videos_dir, mtcnn, model)
+    model = InceptionResnetV1(pretrained='vggface2', device='cuda:1').eval()
+    return get_all_video_embeddings(videos_dir, mtcnn, model)
 
 def create_video_model_rdms(save_dir, video_model_dir):
     whole_video_embeddings = []
