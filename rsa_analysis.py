@@ -5,6 +5,7 @@ import shutil
 import time
 from os import path, remove
 import random
+import matplotlib.pyplot as plt
 
 import numpy as np
 from natsort import natsorted
@@ -26,6 +27,7 @@ from training.training_utils import run_one_batch_psts
 import evaluate_script as es
 import torchaudio
 from speechbrain.pretrained import EncoderClassifier
+import pingouin as pg
 
 
 def prepare_data_for_preprocessing(src_dir):
@@ -311,6 +313,53 @@ def create_psts_rdms(model, data_dir, save_dir):
     print("creating video frames psts rdm")
     create_and_save_rdm(video_frames_embeddings, frames_labels, save_video_frames_rdm_path)
 
+def create_rsa_from_two_rdms(path_to_first_rdm, first_rdm_type, path_to_second_rdm,
+                             second_rdm_type, dir_to_save_rsa):
+    rdm1 = pd.read_excel(path_to_first_rdm, index_col=0).values
+    rdm2 = pd.read_excel(path_to_second_rdm, index_col=0).values
+    labels = list(pd.read_excel(path_to_first_rdm, index_col=0).index)
+    full_corr_file_name = f"{first_rdm_type}_{second_rdm_type}_full_corr_rsa.xlsx"
+    partial_corr_file_name = f"{first_rdm_type}_{second_rdm_type}_partial_corr_rsa.xlsx"
+    n = rdm1.shape[0]
+    indices = np.tril_indices(n, k=-1)  # Exclude main diagonal
+    lower_triangle_first_rdm = rdm1[indices]
+    lower_triangle_second_rdm = rdm2[indices]
+
+    #full_correlation_matrix = np.corrcoef(rdm1, rdm2)
+    full_correlation_df = pd.DataFrame({'Vector1': lower_triangle_first_rdm, 'Vector2': lower_triangle_second_rdm})
+    correlation_results = pg.pairwise_corr(full_correlation_df, columns=labels, method='pearson')
+    print(correlation_results)
+    #full_correlation_df = pd.DataFrame(full_correlation_matrix, index=labels,
+       #                                columns=labels)
+    #full_correlation_matrix = full_correlation_result['r'].values
+    #print(full_correlation_matrix)
+
+    #partial_correlation_result = pg.partial_corr(data=pd.DataFrame({'first_rdm': rdm1.flatten(),
+     #                                                        'second_rdm': rdm2.flatten()}),
+      #                                    x='first_rdm', y='second_rdm', method='pearson')
+    #partial_correlation_matrix = partial_correlation_result['r'].values
+
+    #full_corr_df = pd.DataFrame(full_correlation_result, index=labels, columns=labels)
+    #full_correlation_df.to_excel(path.join(dir_to_save_rsa, full_corr_file_name))
+    #print(f"saved {full_corr_file_name}")
+    #partial_corr_df = pd.DataFrame(partial_correlation_result, index=labels, columns=labels)
+    #partial_corr_df.to_excel(path.join(dir_to_save_rsa, partial_corr_file_name))
+    #print(f"saved {partial_corr_file_name}")
+
+def plot_rsa(rsa_path):
+    correlation_df = pd.read_excel(rsa_path, index_col=0)
+    # Create a heatmap of the correlation matrix
+    plt.figure(figsize=(8, 6))
+    plt.title("Correlation Matrix")
+    plt.imshow(correlation_df.values, cmap='coolwarm', vmin=-1, vmax=1)
+    plt.colorbar()
+    # Set tick labels
+    plt.xticks(range(len(correlation_df.columns)), correlation_df.columns, rotation='vertical')
+    plt.yticks(range(len(correlation_df.index)), correlation_df.index)
+    plt.tight_layout()
+    plt.show()
+
+
 
 if __name__ == '__main__':
     #prepare_data_for_preprocessing("stimuli")
@@ -323,11 +372,13 @@ if __name__ == '__main__':
     #model = get_model(best_model_dir)
     #create_audio_model_rdms("rsa_results", data_dir)
     #create_psts_rdms(model, data_dir, "rsa_results")
-    speaker_verification_model = EncoderClassifier.from_hparams(
-       source="speechbrain/spkrec-ecapa-voxceleb")
-    audio_rep = get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0])
-    print(audio_rep[-1][0].size())
-
+    #speaker_verification_model = EncoderClassifier.from_hparams(
+      # source="speechbrain/spkrec-ecapa-voxceleb")
+    #audio_rep = get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0])
+    #print(audio_rep[-1][0].size())
+    create_rsa_from_two_rdms("psts_model_audio_frames_rdm.xlsx", "psts",
+                       "audio_model_audio_frames_rdm.xlsx", "audio_model_audio_frames2", "rsa_results")
+    #plot_rsa("rsa_results/psts_audio_model_audio_frames2_full_corr_rsa.xlsx")
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
       #  api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
