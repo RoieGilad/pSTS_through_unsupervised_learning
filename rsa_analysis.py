@@ -29,6 +29,13 @@ import torchaudio
 from speechbrain.pretrained import EncoderClassifier
 import pingouin as pg
 
+from PIL import Image
+from facenet_pytorch import InceptionResnetV1, MTCNN
+from natsort import natsorted
+from torch import Tensor, zeros, device
+from torchvision import transforms
+from tqdm.notebook import tqdm
+
 
 def prepare_data_for_preprocessing(src_dir):
     video_dest = "stimuli_video_data"
@@ -264,8 +271,8 @@ def create_audio_model_rdms(save_dir, audio_model_dir):
     whole_labels = []
     audio_frames_embeddings = []
     audio_frames_labels = []
-    save_whole_audio_rdm_path = path.join(save_dir, "audio_model_whole_audio_rdm.xlsx")
-    save_audio_frames_rdm_path = path.join(save_dir, "audio_model_audio_frames_rdm.xlsx")
+    save_whole_audio_rdm_path = path.join(save_dir, "audio_model_whole_audio_rdm_30.xlsx")
+    save_audio_frames_rdm_path = path.join(save_dir, "audio_model_audio_frames_rdm_30.xlsx")
     audio_model_representations = get_audio_model_representations(audio_model_dir)
     for representation in audio_model_representations:
         whole_audio_embeddings.append(representation[-2][0])
@@ -284,10 +291,10 @@ def create_psts_rdms(model, data_dir, save_dir, fmri=False, fmri_representations
     if not fmri:
         dataset = es.get_dataset(data_dir)
         representations = get_psts_representation(model, dataset)
-        save_whole_audio_rdm_path = path.join(save_dir, "psts_model_whole_audio_rdm.xlsx")
-        save_audio_frames_rdm_path = path.join(save_dir, "psts_model_audio_frames_rdm.xlsx")
-        save_whole_video_rdm_path = path.join(save_dir, "psts_model_whole_video_rdm.xlsx")
-        save_video_frames_rdm_path = path.join(save_dir, "psts_model_video_frames_rdm.xlsx")
+        save_whole_audio_rdm_path = path.join(save_dir, "psts_model_whole_audio_rdm_60.xlsx")
+        save_audio_frames_rdm_path = path.join(save_dir, "psts_model_audio_frames_rdm_60.xlsx")
+        save_whole_video_rdm_path = path.join(save_dir, "psts_model_whole_video_rdm_60.xlsx")
+        save_video_frames_rdm_path = path.join(save_dir, "psts_model_video_frames_rdm_60.xlsx")
     else:
         representations = fmri_representations
         save_whole_audio_rdm_path = path.join(save_dir, f"fmri_{type_fmri}_whole_audio_rdm.xlsx")
@@ -343,7 +350,67 @@ def create_fmri_rdms(fmri_dir, model, save_dir, type_fmri):
     create_psts_rdms(model, fmri_dir, save_dir, fmri=True, fmri_representations=mean_representations,
                      type_fmri=type_fmri)
 
+def get_video_model_embedding(video_imgs_dir: str, mtcnn, model):
+    output = []
+    normalize_imagenet = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                              std=[0.229, 0.224, 0.225])
+    for im_path in natsorted(glob.glob(path.join(video_imgs_dir, '*.jpg'))):
+        print(im_path)
+        img = Image.open(im_path)
+        if img.mode != 'RGB':  # PNG imgs are RGBA
+            img = img.convert('RGB')
+        img = mtcnn(img)
+        if img is not None:
+            img = img.cuda()
+            img = img / 255.0
+            img = normalize_imagenet(img).to(device('cuda:0')).unsqueeze(
+                0).float()
+            output.append(model(img).cpu())
+        else:
+            print(f'failed mtcnn in {im_path}')
 
+    #add mean frame
+    stacked_frames_embedding = torch.stack(output)
+    output.append(torch.mean(stacked_frames_embedding, dim=0))
+    return output
+
+
+def get_all_video_model_embeddings(videos_dir:str, mtcnn, model):
+    all_video_embeddings = []
+    video_dirs = [subdir for subdir in glob.glob(os.path.join(videos_dir, '*'))
+                  if os.path.isdir(subdir)]
+    for video_dir in tqdm(video_dirs):
+        embeddings = get_video_model_embedding(video_dir, mtcnn, model)
+        embeddings.append(os.path.basename(video_dir))
+        all_video_embeddings.append(embeddings)
+    return all_video_embeddings
+
+
+def get_face_recognition_embeddings(videos_dir: str):
+    mtcnn = MTCNN(image_size=160, post_process=False,
+                  device='cuda:0')  # .cuda()
+    model = InceptionResnetV1(pretrained='vggface2', device='cuda:0').eval()
+    return get_all_video_model_embeddings(videos_dir, mtcnn, model)
+
+def create_video_model_rdms(save_dir, video_model_dir):
+    whole_video_embeddings = []
+    whole_labels = []
+    video_frames_embeddings = []
+    video_frames_labels = []
+    save_whole_video_rdm_path = path.join(save_dir, "video_model_whole_video_rdm_60.xlsx")
+    save_video_frames_rdm_path = path.join(save_dir, "video_model_video_frames_rdm_60.xlsx")
+    video_model_representations = get_face_recognition_embeddings(video_model_dir)
+    for representation in video_model_representations:
+        whole_video_embeddings.append(representation[-2])
+        video_frames_embeddings.append(representation[0])
+        video_frames_embeddings.append(representation[1])
+        video_frames_embeddings.append(representation[2])
+        whole_labels.append(representation[-1])
+        video_frames_labels.extend([representation[-1]] * 3)
+    print("creating whole video - video model - rdm")
+    create_and_save_rdm(whole_video_embeddings, whole_labels, save_whole_video_rdm_path)
+    print("creating video frames - video model - rdm")
+    create_and_save_rdm(video_frames_embeddings, video_frames_labels, save_video_frames_rdm_path)
 
 def create_rsa_from_two_rdms(path_to_first_rdm, first_rdm_type, path_to_second_rdm,
                              second_rdm_type, dir_to_save_rsa):
@@ -429,7 +496,7 @@ if __name__ == '__main__':
 
     seed = 42
     torch.manual_seed(seed)
-    data_dir = r'vox_samples_rsa_30'
+    data_dir = r'vox_samples_rsa_60'
     best_model_dir = r'models/check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2/best_model'
     model = get_model(best_model_dir)
     #create_audio_model_rdms("rsa_results", data_dir)
@@ -446,5 +513,6 @@ if __name__ == '__main__':
       #  api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
     #print(get_psts_representation(model, dataset))
     #split_stimuli_processed("stimuli_processed")
-    create_fmri_rdms("stimuli_second", model, "rsa_results", "second")
-    
+    #create_fmri_rdms("stimuli_second", model, "rsa_results", "second")
+    #print(get_face_recognition_embeddings("face_model_data"))
+    create_video_model_rdms("rsa_results", "face_model_data_60")
