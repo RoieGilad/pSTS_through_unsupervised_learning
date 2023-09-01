@@ -702,4 +702,3 @@ if __name__ == '__main__':
     #create_fmri_psts_rdms("stimuli_first", "stimuli_second", model, "rsa_results")
     #create_audio_model_fmri_rdms("rsa_results", "stimuli_first", "stimuli_second")
     create_video_model_fmri_rdms("rsa_results", "stimuli_first_face_model", "stimuli_second_face_model")
-    
