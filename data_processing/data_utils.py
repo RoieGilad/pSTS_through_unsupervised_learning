@@ -14,6 +14,8 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
+from facenet_pytorch import InceptionResnetV1, MTCNN
+
 
 mode = 'nearest'
 align_corners = None
@@ -27,12 +29,16 @@ train_v_frame_transformer = v_transforms.Compose([
     v_transforms.Normalize([0.4595, 0.3483, 0.3345], [0.5337, 0.4163, 0.4100])])#mean and std of 160k sample and 500ms audio
 
 val_v_frame_transformer = v_transforms.Compose([
-    v_transforms.Resize((256, 256)), v_transforms.ToTensor(),
+    # for fmri samples uncomment "convert", "mtcnn", and comment "to_tensor"
+    lambda x: x.convert('RGB'),
+    lambda x: MTCNN(image_size=256, post_process=False, device='cpu')(x),
+    v_transforms.Resize((256, 256)),
+    #v_transforms.ToTensor(),
     #v_transforms.Normalize([0.4595, 0.3483, 0.3345], [0.5337, 0.4163,
                                                   #    0.4100])])  # mean and std of 160k sample and 500ms audio
-    #v_transforms.Normalize([0.4367, 0.3042, 0.3014], [0.5196, 0.3819, 0.3915])])  # mean and std of stimuli
+    v_transforms.Normalize([0.4367, 0.3042, 0.3014], [0.5196, 0.3819, 0.3915])])  # mean and std of stimuli
     #v_transforms.Normalize([0.4364, 0.3170, 0.2990], [0.5036, 0.3784, 0.3675])])  # mean and std of 60 test
-    v_transforms.Normalize([0.4329, 0.3098, 0.2948], [0.5014, 0.3727, 0.3664])])  # mean and std of 30 test
+    #v_transforms.Normalize([0.4329, 0.3098, 0.2948], [0.5014, 0.3727, 0.3664])])  # mean and std of 30 test
 
 
 train_video_transformer = v_transforms.Compose([
@@ -61,12 +67,14 @@ train_a_frame_transformer = v_transforms.Compose([
 ])
 
 val_a_frame_transformer = v_transforms.Compose([
-    a_transforms.Spectrogram(n_fft=256, hop_length=16),
+    # for the face model hop = 44 and uncomment first lambda
+    a_transforms.Spectrogram(n_fft=256, hop_length=44),
+    lambda x: x[:, :, :-1],
     lambda x: x.expand(3, -1, -1),
     #v_transforms.Normalize([0.6151, 0.6151, 0.6151], [11.1725, 11.1725, 11.1725]) #mean and std of 160k sample and 500ms audio without interpolation
-    #v_transforms.Normalize([0.2830, 0.2830, 0.2830], [3.1991, 3.1991, 3.1991])  # mean and std of stimuli
+    v_transforms.Normalize([0.2830, 0.2830, 0.2830], [3.1991, 3.1991, 3.1991])])  # mean and std of stimuli
     # v_transforms.Normalize([0.3954, 0.3954, 0.3954], [7.7405, 7.7405, 7.7405])  # mean and std of 60 test
-    v_transforms.Normalize([0.3143, 0.3143, 0.3143], [5.1594, 5.1594, 5.1594])])  # mean and std of 30 test
+    #v_transforms.Normalize([0.3143, 0.3143, 0.3143], [5.1594, 5.1594, 5.1594])])  # mean and std of 30 test
 
 train_audio_transformer = v_transforms.Compose([])
 

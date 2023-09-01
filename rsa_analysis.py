@@ -230,7 +230,8 @@ def get_audio_model_embedding(audio_model, audio_sample):
     return audio_model.encode_batch(audio_sample)
 
 def get_audio_model_representations(src_dir):
-    xlsx_path = path.join(src_dir, "data_md.xlsx")
+    # for fmri - data_md_0, else - data_md
+    xlsx_path = path.join(src_dir, "data_md_0.xlsx")
     md_df = pd.read_excel(xlsx_path)
     representations = []
     speaker_verification_model = EncoderClassifier.from_hparams(
@@ -329,26 +330,138 @@ def create_psts_rdms(model, data_dir, save_dir, fmri=False, fmri_representations
     print("creating video frames rdm")
     create_and_save_rdm(video_frames_embeddings, frames_labels, save_video_frames_rdm_path)
 
-def create_fmri_rdms(fmri_dir, model, save_dir, type_fmri):
+def create_fmri_psts_rdms(fmri_first_dir, fmri_second_dir, model, save_dir):
 
-    dataset = es.get_dataset(fmri_dir)
-    representations = get_psts_representation(model, dataset)
-    mean_representations = []
-    for i in range(0, len(representations), 3):
-        video_element1_tensors = representations[i][0]
-        video_element2_tensors = representations[i+1][0]
-        video_element3_tensors = representations[i+2][0]
-        audio_element1_tensors = representations[i][1]
-        audio_element2_tensors = representations[i+1][1]
-        audio_element3_tensors = representations[i+2][1]
-        label = representations[i][2]
+    dataset_first = es.get_dataset(fmri_first_dir)
+    representations_first = get_psts_representation(model, dataset_first)
+    dataset_second = es.get_dataset(fmri_second_dir)
+    representations_second = get_psts_representation(model, dataset_second)
+    mean_representations_video_first = []
+    mean_representations_video_second = []
+    mean_representations_audio_first = []
+    mean_representations_audio_second = []
+    for i in range(0, len(representations_first), 3):
+        video_element1_tensors_first = representations_first[i][0]
+        video_element2_tensors_first = representations_first[i+1][0]
+        video_element3_tensors_first = representations_first[i+2][0]
+        audio_element1_tensors_first = representations_first[i][1]
+        audio_element2_tensors_first = representations_first[i+1][1]
+        audio_element3_tensors_first = representations_first[i+2][1]
+        label_first = representations_first[i][2]
+        video_element1_tensors_second = representations_second[i][0]
+        video_element2_tensors_second = representations_second[i + 1][0]
+        video_element3_tensors_second = representations_second[i + 2][0]
+        audio_element1_tensors_second = representations_second[i][1]
+        audio_element2_tensors_second = representations_second[i + 1][1]
+        audio_element3_tensors_second = representations_second[i + 2][1]
+        label_second = representations_second[i][2]
 
-        mean_video_element = (video_element1_tensors + video_element2_tensors + video_element3_tensors) / 3
-        mean_audio_element = (audio_element1_tensors + audio_element2_tensors + audio_element3_tensors) / 3
+        mean_video_element_first = (video_element1_tensors_first + video_element2_tensors_first
+                                    + video_element3_tensors_first) / 3
+        mean_audio_element_first = (audio_element1_tensors_first + audio_element2_tensors_first
+                                    + audio_element3_tensors_first) / 3
 
-        mean_representations.append([mean_video_element, mean_audio_element, label])
-    create_psts_rdms(model, fmri_dir, save_dir, fmri=True, fmri_representations=mean_representations,
-                     type_fmri=type_fmri)
+        mean_video_element_second = (video_element1_tensors_second + video_element2_tensors_second
+                                    + video_element3_tensors_second) / 3
+        mean_audio_element_second = (audio_element1_tensors_second + audio_element2_tensors_second
+                                    + audio_element3_tensors_second) / 3
+
+        mean_representations_video_first.append(
+            [mean_video_element_first[0][3], label_first])
+
+        mean_representations_video_second.append(
+            [mean_video_element_second[0][3], label_second])
+
+        mean_representations_audio_first.append(
+            [mean_audio_element_first[0][3], label_first])
+
+        mean_representations_audio_second.append(
+            [mean_audio_element_second[0][3], label_second])
+
+    create_fmri_rdms(save_dir, mean_representations_video_first, mean_representations_video_second, "psts_video")
+    create_fmri_rdms(save_dir, mean_representations_audio_first, mean_representations_audio_second, "psts_audio")
+
+
+def create_fmri_rdms(save_dir, first_representations, second_representations, model_type):
+    save_rdm_path = path.join(save_dir, f"fmri_{model_type}_rdm.xlsx")
+
+    first_embeddings = []
+    second_embeddings = []
+    first_labels = []
+    second_labels = []
+
+    for representation in first_representations:
+        first_embeddings.append(representation[0].unsqueeze(0))
+        first_labels.append(representation[1])
+    for representation in second_representations:
+        second_embeddings.append(representation[0].unsqueeze(0))
+        second_labels.append(representation[1])
+
+    print(f"creating {model_type} fmri rdm")
+    create_and_save_fmri_rdm(first_embeddings, second_embeddings, first_labels, second_labels, save_rdm_path)
+
+def create_and_save_fmri_rdm(first_embeddings, second_embeddings, first_labels, second_labels, dest_path):
+    rdm = np.zeros((len(first_embeddings), len(second_embeddings)))
+    for i, first_em in enumerate(first_embeddings):
+        for j, second_em in enumerate(second_embeddings):
+            rdm[i, j] = pairwise_cosine_similarity(first_em, second_em)
+
+    n = len(first_labels)
+    rdm_df = pd.DataFrame(data=rdm, columns=first_labels, index=second_labels)
+    rdm_df.to_excel(dest_path)
+    print("rdm saved successfuly")
+
+def create_audio_model_fmri_rdms(save_dir, fmri_first_dir, fmri_second_dir):
+    first_audios_embeddings = []
+    first_labels = []
+    second_audios_embeddings = []
+    second_labels = []
+    save_audio_fmri_rdm_path = path.join(save_dir, "audio_model_fmri_rdm.xlsx")
+    first_audios_representations = get_audio_model_representations(fmri_first_dir)
+    print(first_audios_representations)
+    second_audios_representations = get_audio_model_representations(fmri_second_dir)
+
+    for i in range(0, len(first_audios_representations), 3):
+        first_audios_embeddings.append((first_audios_representations[i][-2][0] +
+                                        first_audios_representations[i+1][-2][0] +
+                                        first_audios_representations[i+2][-2][0]) / 3)
+        first_labels.append(first_audios_representations[i][-1])
+    for i in range(0, len(second_audios_representations), 3):
+        second_audios_embeddings.append((second_audios_representations[i][-2][0] +
+                                        second_audios_representations[i+1][-2][0] +
+                                        second_audios_representations[i+2][-2][0]) / 3)
+        second_labels.append(second_audios_representations[i][-1])
+
+    print("creating audio model fmri rdm")
+    create_and_save_fmri_rdm(first_audios_embeddings, second_audios_embeddings, first_labels, second_labels,
+                             save_audio_fmri_rdm_path)
+
+
+def create_video_model_fmri_rdms(save_dir, fmri_first_dir, fmri_second_dir):
+    first_videos_embeddings = []
+    first_labels = []
+    second_videos_embeddings = []
+    second_labels = []
+    save_videos_fmri_rdm_path = path.join(save_dir, "video_model_fmri_rdm.xlsx")
+    first_videos_representations = get_face_recognition_embeddings(fmri_first_dir)
+    print(first_videos_representations)
+    second_videos_representations = get_face_recognition_embeddings(fmri_second_dir)
+
+    for i in range(0, len(first_videos_representations), 3):
+        first_videos_embeddings.append((first_videos_representations[i][-2] +
+                                        first_videos_representations[i+1][-2] +
+                                        first_videos_representations[i+2][-2]) / 3)
+        first_labels.append(first_videos_representations[i][-1])
+    for i in range(0, len(second_videos_representations), 3):
+        second_videos_embeddings.append((second_videos_representations[i][-2] +
+                                        second_videos_representations[i+1][-2] +
+                                        second_videos_representations[i+2][-2]) / 3)
+        second_labels.append(second_videos_representations[i][-1])
+
+    print("creating video model fmri rdm")
+    create_and_save_fmri_rdm(first_videos_embeddings, second_videos_embeddings, first_labels, second_labels,
+                             save_videos_fmri_rdm_path)
+
 
 def get_video_embedding(video_imgs_dir: str, mtcnn, model, id):
     normalize_imagenet = transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -416,40 +529,45 @@ def create_video_model_rdms(save_dir, video_model_dir):
     print("creating video frames - video model - rdm")
     create_and_save_rdm(video_frames_embeddings, video_frames_labels, save_video_frames_rdm_path)
 
-def create_rsa_from_two_rdms(path_to_first_rdm, first_rdm_type, path_to_second_rdm,
-                             second_rdm_type, dir_to_save_rsa):
+def create_rsa_from_two_rdms(path_to_first_rdm, path_to_second_rdm
+                             ,first_rdm_type, second_rdm_type, rsa_type,
+                             file_to_save_full_corr_rsa, file_to_save_partial_corr_rsa):
     rdm1 = pd.read_excel(path_to_first_rdm, index_col=0).values
     rdm2 = pd.read_excel(path_to_second_rdm, index_col=0).values
-    labels = list(pd.read_excel(path_to_first_rdm, index_col=0).index)
-    full_corr_file_name = f"{first_rdm_type}_{second_rdm_type}_full_corr_rsa.xlsx"
-    partial_corr_file_name = f"{first_rdm_type}_{second_rdm_type}_partial_corr_rsa.xlsx"
     n = rdm1.shape[0]
     indices = np.tril_indices(n, k=-1)  # Exclude main diagonal
     lower_triangle_first_rdm = rdm1[indices]
     lower_triangle_second_rdm = rdm2[indices]
 
-    #full_correlation_matrix = np.corrcoef(rdm1, rdm2)
-    full_correlation_df = pd.DataFrame({'Vector1': lower_triangle_first_rdm, 'Vector2': lower_triangle_second_rdm})
-    correlation_results = pg.pairwise_corr(full_correlation_df, columns=labels, method='pearson')
-    print(correlation_results)
-    #full_correlation_df = pd.DataFrame(full_correlation_matrix, index=labels,
-       #                                columns=labels)
-    #full_correlation_matrix = full_correlation_result['r'].values
-    #print(full_correlation_matrix)
+    full_df = pd.DataFrame({first_rdm_type: lower_triangle_first_rdm, second_rdm_type: lower_triangle_second_rdm})
 
-    #partial_correlation_result = pg.partial_corr(data=pd.DataFrame({'first_rdm': rdm1.flatten(),
-     #                                                        'second_rdm': rdm2.flatten()}),
-      #                                    x='first_rdm', y='second_rdm', method='pearson')
-    #partial_correlation_matrix = partial_correlation_result['r'].values
+    full_corr_results = pg.corr(lower_triangle_first_rdm, lower_triangle_second_rdm, method='pearson')
+    full_corr_results.insert(0, 'Label', rsa_type)
+    print(full_corr_results)
+    partial_corr_result = pg.partial_corr(data=full_df, x=first_rdm_type, y=second_rdm_type)
+    partial_corr_result.insert(0, 'Label', rsa_type)
+    print(partial_corr_result)
 
-    #full_corr_df = pd.DataFrame(full_correlation_result, index=labels, columns=labels)
-    #full_correlation_df.to_excel(path.join(dir_to_save_rsa, full_corr_file_name))
-    #print(f"saved {full_corr_file_name}")
-    #partial_corr_df = pd.DataFrame(partial_correlation_result, index=labels, columns=labels)
-    #partial_corr_df.to_excel(path.join(dir_to_save_rsa, partial_corr_file_name))
-    #print(f"saved {partial_corr_file_name}")
+    try:
+        # Read the existing Excel file into a DataFrame
+        full_corr_data = pd.read_excel(file_to_save_full_corr_rsa)
+        partial_corr_data = pd.read_excel(file_to_save_partial_corr_rsa)
 
-def plot_rsa(rsa_path):
+    except FileNotFoundError:
+        # Create a new DataFrame if the file doesn't exist
+        full_corr_data = pd.DataFrame()
+        partial_corr_data = pd.DataFrame()
+
+    # Concatenate the existing data and new results
+    combined_full_corr_data = pd.concat([full_corr_data, full_corr_results], ignore_index=True)
+    combined_partial_corr_data = pd.concat([partial_corr_data, partial_corr_result], ignore_index=True)
+
+    # Save the combined data to a new sheet in the Excel file
+    combined_full_corr_data.to_excel(file_to_save_full_corr_rsa, index=False)
+    combined_partial_corr_data.to_excel(file_to_save_partial_corr_rsa, index=False)
+
+
+def plot_rdm(rsa_path):
     correlation_df = pd.read_excel(rsa_path, index_col=0)
     # Create a heatmap of the correlation matrix
     plt.figure(figsize=(8, 6))
@@ -490,7 +608,66 @@ def split_stimuli_processed(data_dir):
     shutil.copyfile(md_file, dest_file1)
     shutil.copyfile(md_file, dest_file2)
 
+def script_for_all_rsas():
+    create_rsa_from_two_rdms("rsa_results/psts_model_audio_frames_rdm_30.xlsx",
+                             "rsa_results/audio_model_audio_frames_rdm_30.xlsx",
+                             "psts_audio_frames_30", "audio_model_frames_30", "psts_audio_model_frames_30_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
 
+    create_rsa_from_two_rdms("rsa_results/psts_model_audio_frames_rdm_60.xlsx",
+                             "rsa_results/audio_model_audio_frames_rdm_60.xlsx",
+                             "psts_audio_frames_60", "audio_model_frames_60", "psts_audio_model_frames_60_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+
+    create_rsa_from_two_rdms("rsa_results/psts_model_whole_audio_rdm_30.xlsx",
+                             "rsa_results/audio_model_whole_audio_rdm_30.xlsx",
+                             "psts_whole_audio_30", "audio_model_whole_audio_30", "psts_audio_model_whole_audio_30_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+
+    create_rsa_from_two_rdms("rsa_results/psts_model_whole_audio_rdm_60.xlsx",
+                             "rsa_results/audio_model_whole_audio_rdm_60.xlsx",
+                             "psts_whole_audio_60", "audio_model_whole_audio_60", "psts_audio_model_whole_audio_60_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+
+    create_rsa_from_two_rdms("rsa_results/psts_model_video_frames_rdm_30.xlsx",
+                             "rsa_results/video_model_video_frames_rdm_30.xlsx",
+                             "psts_video_frames_30", "video_model_frames_30", "psts_video_model_frames_30_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+
+    create_rsa_from_two_rdms("rsa_results/psts_model_video_frames_rdm_60.xlsx",
+                             "rsa_results/video_model_video_frames_rdm_60.xlsx",
+                             "psts_video_frames_60", "video_model_frames_60", "psts_video_model_frames_60_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+
+    create_rsa_from_two_rdms("rsa_results/psts_model_whole_video_rdm_30.xlsx",
+                             "rsa_results/video_model_whole_video_rdm_30.xlsx",
+                             "psts_whole_video_30", "video_model_whole_video_30", "psts_video_model_whole_video_30_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+
+    create_rsa_from_two_rdms("rsa_results/psts_model_whole_video_rdm_60.xlsx",
+                             "rsa_results/video_model_whole_video_rdm_60.xlsx",
+                             "psts_whole_video_60", "video_model_whole_video_60", "psts_video_model_whole_video_60_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+    #fmri
+    create_rsa_from_two_rdms("rsa_results/fmri_first_audio_frames_rdm.xlsx",
+                             "rsa_results/fmri_second_audio_frames_rdm.xlsx",
+                             "psts_first_fmri_audio_frames", "psts_second_fmri_audio_frames", "psts_fmri_audio_frames_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+
+    create_rsa_from_two_rdms("rsa_results/fmri_first_whole_audio_rdm.xlsx",
+                             "rsa_results/fmri_second_whole_audio_rdm.xlsx",
+                             "psts_first_fmri_whole_audio", "psts_second_fmri_whole_audio", "psts_fmri_whole_audio_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+
+    create_rsa_from_two_rdms("rsa_results/fmri_first_video_frames_rdm.xlsx",
+                             "rsa_results/fmri_second_video_frames_rdm.xlsx",
+                             "psts_first_fmri_video_frames", "psts_second_fmri_video_frames", "psts_fmri_video_frames_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+
+    create_rsa_from_two_rdms("rsa_results/fmri_first_whole_video_rdm.xlsx",
+                             "rsa_results/fmri_second_whole_video_rdm.xlsx",
+                             "psts_first_fmri_whole_video", "psts_second_fmri_whole_video", "psts_fmri_whole_video_rsa",
+                             "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
 
 
 
@@ -500,7 +677,7 @@ if __name__ == '__main__':
 
     seed = 42
     torch.manual_seed(seed)
-    data_dir = r'vox_samples_rsa_60'
+    #data_dir = r'vox_samples_rsa_60'
     best_model_dir = r'models/check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2/best_model'
     model = get_model(best_model_dir)
     #create_audio_model_rdms("rsa_results", data_dir)
@@ -509,9 +686,10 @@ if __name__ == '__main__':
       # source="speechbrain/spkrec-ecapa-voxceleb")
     #audio_rep = get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0])
     #print(audio_rep[-1][0].size())
-    #create_rsa_from_two_rdms("psts_model_audio_frames_rdm.xlsx", "psts",
-     #                  "audio_model_audio_frames_rdm.xlsx", "audio_model_audio_frames2", "rsa_results")
-    #plot_rsa("rsa_results/psts_audio_model_audio_frames2_full_corr_rsa.xlsx")
+    #create_rsa_from_two_rdms("psts_model_audio_frames_rdm.xlsx", "audio_model_audio_frames_rdm.xlsx",
+     #                       "psts_audio_frames", "audio_model_audio_frames", "psts_audio_model_frames_rsa",
+      #                   "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+    #plot_rdm("fmri_first_video_frames_rdm.xlsx")
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
       #  api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzODRhM2YzNi03Nzk4LTRkZDctOTJiZS1mYjMzY2EzMDMzOTMifQ==")
@@ -519,4 +697,9 @@ if __name__ == '__main__':
     #split_stimuli_processed("stimuli_processed")
     #create_fmri_rdms("stimuli_second", model, "rsa_results", "second")
     #print(get_face_recognition_embeddings("face_model_data"))
-    create_video_model_rdms("rsa_results", "face_model_data_60")
+    #create_video_model_rdms("rsa_results", "face_model_data_60")
+    #script_for_all_rsas()
+    #create_fmri_psts_rdms("stimuli_first", "stimuli_second", model, "rsa_results")
+    #create_audio_model_fmri_rdms("rsa_results", "stimuli_first", "stimuli_second")
+    create_video_model_fmri_rdms("rsa_results", "stimuli_first_face_model", "stimuli_second_face_model")
+    

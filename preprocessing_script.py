@@ -39,6 +39,7 @@ def plot_processed_frame(image_tensor):
 
 
 def plot_spectrogram(spectrogram, title=""):
+    print(spectrogram)
     if spectrogram.shape[0] != 1:
         spectrogram = spectrogram[0:1, :, :]
     spectrogram = spectrogram.squeeze(dim=0)

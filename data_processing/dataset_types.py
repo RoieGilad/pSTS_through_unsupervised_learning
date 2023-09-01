@@ -61,7 +61,7 @@ class VideoDataset(Dataset):
         self.step_size = step_size
         self.tmp_rand = -1
         # TODO only for face model
-        os.makedirs(f"face_model_data", exist_ok=True)
+        os.makedirs(ds_root_dir + "_face_model", exist_ok=True)
 
 
     def __len__(self):
@@ -95,7 +95,7 @@ class VideoDataset(Dataset):
         num_intervals = self.labels_map.iloc[idx, 4]
         label = self.get_label(idx)
         # TODO only for face model
-        face_path = path.join("face_model_data", label)
+        face_path = path.join(self.ds_path + "_face_model", label)
         os.makedirs(face_path, exist_ok=True)
 
         tmp_rand = self.tmp_rand if self.tmp_rand != -1 else np.random.uniform()
