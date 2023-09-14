@@ -535,11 +535,11 @@ def create_rsa_from_two_rdms(path_to_first_rdm, path_to_second_rdm
     rdm1 = pd.read_excel(path_to_first_rdm, index_col=0).values
     rdm2 = pd.read_excel(path_to_second_rdm, index_col=0).values
     n = rdm1.shape[0]
-    indices = np.tril_indices(n, k=-1)  # Exclude main diagonal
+    indices = np.triu_indices(n, k=-1)  # Exclude main diagonal
     lower_triangle_first_rdm = rdm1[indices]
     lower_triangle_second_rdm = rdm2[indices]
 
-    full_df = pd.DataFrame({first_rdm_type: lower_triangle_first_rdm, second_rdm_type: lower_triangle_second_rdm})
+    full_df = pd.DataFrame({first_rdm_type: lower_triangle_first_rdm, second_rdm_type: 1-lower_triangle_second_rdm})
 
     full_corr_results = pg.corr(lower_triangle_first_rdm, lower_triangle_second_rdm, method='pearson')
     full_corr_results.insert(0, 'Label', rsa_type)
@@ -679,16 +679,16 @@ if __name__ == '__main__':
     torch.manual_seed(seed)
     #data_dir = r'vox_samples_rsa_60'
     best_model_dir = r'models/check transformer whole DS, no gradient BS= 54, num frames=3, end_frame=True, LR= 0.0000001, drop=0.3, dim_feedforward=2048, num_outputfeature=512, train=0.9, num_heads=4, num_layers=2/best_model'
-    model = get_model(best_model_dir)
+    #model = get_model(best_model_dir)
     #create_audio_model_rdms("rsa_results", data_dir)
     #create_psts_rdms(model, data_dir, "rsa_results")
     #speaker_verification_model = EncoderClassifier.from_hparams(
       # source="speechbrain/spkrec-ecapa-voxceleb")
     #audio_rep = get_audio_model_embedding(speaker_verification_model, torchaudio.load("sample_13877_a_11.wav")[0])
     #print(audio_rep[-1][0].size())
-    #create_rsa_from_two_rdms("psts_model_audio_frames_rdm.xlsx", "audio_model_audio_frames_rdm.xlsx",
-     #                       "psts_audio_frames", "audio_model_audio_frames", "psts_audio_model_frames_rsa",
-      #                   "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
+    create_rsa_from_two_rdms("rpSTS_Faces_mean.xlsx", "fmri_psts_audio_rdm.xlsx",
+                           "psts_audio_fmri", "psts_video_fmri", "psts_video_fmri_real_rsa",
+                       "rsa_results/rsa_full_corr_values.xlsx", "rsa_results/rsa_partial_corr_values.xlsx")
     #plot_rdm("fmri_first_video_frames_rdm.xlsx")
     #neptune = neptune.init_run(
      #   project="psts-through-unsupervised-learning/psts",
@@ -701,4 +701,4 @@ if __name__ == '__main__':
     #script_for_all_rsas()
     #create_fmri_psts_rdms("stimuli_first", "stimuli_second", model, "rsa_results")
     #create_audio_model_fmri_rdms("rsa_results", "stimuli_first", "stimuli_second")
-    create_video_model_fmri_rdms("rsa_results", "stimuli_first_face_model", "stimuli_second_face_model")
+    #create_video_model_fmri_rdms("rsa_results", "stimuli_first_face_model", "stimuli_second_face_model")
